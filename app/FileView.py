@@ -1,14 +1,13 @@
 __author__ = 'jakerose27'
 
 from app import app
-import os, json
+import os
 from flask import render_template, request
 from hurry.filesize import size, alternative
 
-json_test = []
-
 info = []
 root = '/Users/jakerose27/PycharmProjects/FileView/app/tree'
+
 
 def walk(root):
     dirs_holder = []
@@ -37,39 +36,6 @@ def walk(root):
         appender['path'] = os.path.join(root, f).split('tree/')[1]
         appender['size'] = os.path.getsize(os.path.join(root, f))
         info.append(appender)
-
-
-# def paths_dict():
-#     counter = 1
-#     for i in info:
-#         adder = i['path'].split('/')
-#         adder = adder[len(adder)-1]
-#
-#         if i['type'] is 'folder':
-#             paths[adder] = dict.fromkeys()
-#         else:
-#             paths[adder] =counter
-#         counter+=1
-#
-
-# def get_directory_structure(rootdir):
-#     """
-#     Creates a nested dictionary that represents the folder structure of rootdir
-#     """
-#     dir = {}
-#     rootdir = rootdir.rstrip(os.sep)
-#     start = rootdir.rfind(os.sep) + 1
-#     print start
-#     for path, dirs, files in os.walk(rootdir):
-#         folders = path[start:].split(os.sep)
-#         subdir = dict.fromkeys(files)
-#         parent = reduce(dict.get, folders[:-1], dir)
-#         parent[folders[-1]] = subdir
-#
-#
-#     return dir
-
-# print get_directory_structure(root)
 
 
 def table_gen():
@@ -139,5 +105,6 @@ def index():
 
 @app.route('/post', methods=['GET', 'POST'])
 def post():
-    print 'Moving from %s to %s' % (request.form['src'], request.form['dest'])
-    return 'Success'
+    ans = 'Moving %s to %s' % (request.form['src'], request.form['dest'])
+    print ans
+    return ans

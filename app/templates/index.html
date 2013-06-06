@@ -484,6 +484,7 @@
 
 <table id="example">
 {{ inserter | safe }}
+</table>
 
 <script src="/static/js/jquery.js"></script>
 <script src="/static/js/jquery-ui.js"></script>
@@ -513,7 +514,6 @@
             drop: function(e, ui) {
                 var droppedEl = ui.draggable.parents("tr");
                 $("#example-advanced").treetable("move", droppedEl.data("ttId"), $(this).data("ttId"));
-                console.log("moving from", droppedEl.attr("data-jake"), "to", $(this).attr("data-jake"));
             },
             hoverClass: "accept",
             over: function(e, ui) {
@@ -548,8 +548,11 @@
             accept: ".file, .folder",
             drop: function(e, ui) {
                 var droppedEl = ui.draggable.parents("tr");
+                var mover = new Array()
                 $("#example").treetable("move", droppedEl.data("ttId"), $(this).data("ttId"));
-                console.log("moving from", droppedEl.attr("data-jake"), "to", $(this).attr("data-jake"));
+                $.post('/post', {src: droppedEl.attr("data-path"), dest: $(this).attr("data-path")}, function(response){
+                    console.log(response);
+                });
             },
             hoverClass: "accept",
             over: function(e, ui) {

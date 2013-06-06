@@ -1,8 +1,8 @@
 __author__ = 'jakerose27'
 
 from app import app
-import os
-from flask import render_template
+import os, json
+from flask import render_template, request
 from hurry.filesize import size, alternative
 
 json_test = []
@@ -78,7 +78,6 @@ def table_gen():
     html = '<thead>\n<tr>\n<th>Name</th>\n<th>Kind</th>\n<th>Size</th>\n</tr>\n</thead>\n<tbody>'
 
     for info_dict in info:
-        # relative_root = root[len(abs_root)+1:]
         relative_root = info_dict['path']
         tmp = fs
         parts = relative_root.split(os.sep)
@@ -103,13 +102,6 @@ def table_gen():
             tmp = tmp['paths'][part]
 
 
-            # if not part in tmp['paths']:
-            #     tmp['paths'][part] = {'index':1, 'paths':{}}
-            # else:
-            #     tmp['paths'][part]['index']+=1
-            #counter.append(str(tmp['paths'][part]['index']))
-            #tmp = tmp['paths'][part]
-            #print 'Part:%s|tmp:%s' % (part, tmp)
         if tmp['paths'] is None:
             img_type = '<span class="file">'
             file_type = '<td>File</td>'
@@ -126,25 +118,26 @@ def table_gen():
             del par_count[len(par_count)-1]
             par_id = '-'.join(par_count)
             id = '-'.join(counter)
-            html += '<tr data-tt-id="{id}" data-tt-parent-id="{par_id}" data-path="{path}"><td>{img_type}{name}</span></td>{file_type}{size}</tr>\n'.format(id=id, par_id=par_id, path=relative_root, img_type=img_type, name=part, file_type=file_type, size = f_size)
+            html += '<tr data-tt-id="{id}" data-tt-parent-id="{par_id}" data-path="{path}"><td>{img_type}{name}' \
+                    '</span></td>{file_type}{size}</tr>\n'.format(id=id, par_id=par_id, path=relative_root,
+                                                                  img_type=img_type, name=part, file_type=file_type, size = f_size)
         else:
             id = '-'.join(counter)
-            html += '<tr data-tt-id="{id}" data-path="{path}"><td>{img_type}{name}</span></td>{file_type}{size}</tr>\n'.format(id=id, path=relative_root, img_type=img_type, name=part, file_type=file_type, size = f_size)
-    html += '</tbody>\n</table>\n'
+            html += '<tr data-tt-id="{id}" data-path="{path}"><td>{img_type}{name}</span></td>{file_type}{size}' \
+                    '</tr>\n'.format(id=id, path=relative_root, img_type=img_type, name=part, file_type=file_type, size = f_size)
+    html += '</tbody>\n'
     return html
 
 
-#<tr data-tt-id='5'><td><span class='folder'>Name</span></td><td>Type</td><td>--</td></tr>
-#<tr data-tt-id='9'><td><span class='file'>Xcode Tools License.rtf</span></td><td>File</td><td>18.79 KB</td></tr>
-#<tr data-tt-id='5-1-1' data-tt-parent-id='5-1'><td><span class='file'>INSTALL.pod</span></td><td>File</td></tr>
-
-@app.route('/')
+@app.route('/', methods=['GET', 'POST'])
 def index():
     walk(root)
-    for i in info:
-     print i
     html = table_gen()
-    print info
     del info[:]
     return render_template("index.html",
                            inserter = html)
+
+@app.route('/post', methods=['GET', 'POST'])
+def post():
+    print 'Moving from %s to %s' % (request.form['src'], request.form['dest'])
+    return 'Success'

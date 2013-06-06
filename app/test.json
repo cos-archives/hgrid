@@ -1,0 +1,37 @@
+[
+{type:file, path:test.txt, size:30},
+{type:folder, path:testfolder},
+{type:file, path:example/whatever/testfolder/file.txt},
+{type:file, path:test2.txt}]
+
+inc =2
+os.path.split()
+(example, whatever, testfolder, file.txt)
+paths = {}
+paths = {'test.txt':(1,,)}
+paths = {'test.txt':(1,,), 'testfolder':{id:2,inc:0,paths:{}}}
+paths = {'test.txt':(1,,), 'testfolder':{id:2,inc:1,paths:{file.txt:{id:1}}}}
+
+html = ''
+for each entry in file_list:
+    # update paths dict
+    current_id = []
+    current_id.append(2)
+    current_id.append(1)
+    current_id.join('-')
+    html += <tr id=current_id></tr>
+
+
+paths['/'] = (1, 1, {})
+
+{'test.txt':(1,1,{},30), 'testfolder':(3,1,{}}
+
+
+
+/ = 1
+/, test.txt = 2
+/, testfolder, file.txt = 3
+for i in [/, testfolder, file.txt]:
+    id = []]
+    if i in paths:
+        id.append((1,1,{})

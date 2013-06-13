@@ -6,7 +6,7 @@ from flask import render_template, request
 from hurry.filesize import size, alternative
 
 info = []
-root = '/Users/jakerose27/PycharmProjects/FileView/app/tree'
+root = os.path.abspath('tree')
 
 
 def walk(root):

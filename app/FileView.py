@@ -7,6 +7,7 @@ from hurry.filesize import size, alternative
 
 info = []
 root = os.path.abspath('tree')
+dirroot = os.path.abspath('tree')
 
 
 def walk(root):
@@ -25,7 +26,7 @@ def walk(root):
     for d in dirs_holder:
         appender = {}
         appender['type'] ='folder'
-        appender['path'] = os.path.join(root, d).split('tree/')[1]
+        appender['path'] = os.path.join(root, d).split(dirroot + os.sep)[1]
         appender['size'] = '--'
         info.append(appender)
         walk(os.path.join(root, d))
@@ -33,7 +34,7 @@ def walk(root):
     for f in files_holder:
         appender = {}
         appender['type'] = 'file'
-        appender['path'] = os.path.join(root, f).split('tree/')[1]
+        appender['path'] = os.path.join(root, f).split(dirroot + os.sep)[1]
         appender['size'] = os.path.getsize(os.path.join(root, f))
         info.append(appender)
 

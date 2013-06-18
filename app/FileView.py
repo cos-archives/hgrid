@@ -2,6 +2,7 @@ __author__ = 'jakerose27'
 
 from app import app
 import os
+import json
 from flask import render_template, request
 from hurry.filesize import size, alternative
 
@@ -27,10 +28,11 @@ def walk(root):
         appender = {}
         appender['type'] ='folder'
         appender['path'] = os.path.join(root, d).split(dirroot + os.sep)[1]
-        parent = appender['path'].split(os.sep)
-        if len(parent)>1:
-            parent.pop()
-            appender['parent']= os.sep.join(parent)
+        parent = os.path.dirname(appender['path'])#appender['path'].split()
+        if (parent):
+        #if len(parent)>1:
+        #    parent.pop()
+            appender['parent']= parent
         appender['size'] = '--'
         info.append(appender)
         walk(os.path.join(root, d))
@@ -39,13 +41,13 @@ def walk(root):
         appender = {}
         appender['type'] = 'file'
         appender['path'] = os.path.join(root, f).split(dirroot + os.sep)[1]
-        parent = appender['path'].split(os.sep)
-        if len(parent)>1:
-            parent.pop()
-            appender['parent']= os.sep.join(parent)
+        parent = os.path.dirname(appender['path'])#appender['path'].split(os.sep)
+        if (parent):
+        #if len(parent)>1:
+        #    parent.pop()
+            appender['parent']= parent #os.sep.join(parent)
         appender['size'] = os.path.getsize(os.path.join(root, f))
         info.append(appender)
-
 
 def table_gen():
     fs = {'paths':{}}
@@ -53,14 +55,18 @@ def table_gen():
     html = '<thead>\n<tr>\n<th>Name</th>\n<th>Kind</th>\n<th>Size</th>\n</tr>\n</thead>\n<tbody>'
 
     for info_dict in info:
+        print "begin info dict"
         relative_root = info_dict['path']
+        print relative_root
         tmp = fs
         parts = relative_root.split(os.sep)
         #print parts
         counter = []
 
+
         for part in parts:
             # Path has already been encountered
+            print "begin part"
             if part in tmp['paths']:
                 # append this level's count to our part's counter
                 counter.append(str(len(tmp['paths'])))
@@ -103,18 +109,23 @@ def table_gen():
     html += '</tbody>\n'
     return html
 
-
 @app.route('/', methods=['GET', 'POST'])
 def index():
-    del info[:]
+#    del info[:]
+    walk(root)
+    print info
+    return render_template("example5-collapsing.html",
+#                           info = info)
+                           info = json.dumps(info))
+
+@app.route('/treetable', methods=['GET', 'POST'])
+def treetable():
     walk(root)
     html = table_gen()
-    for i in info:
-        print i
-    print len(info)
-    return render_template("example5-collapsing.html",
-                           info = info)
-                           #inserter = html)
+    print info
+    print html
+    return render_template("index.html",
+                           inserter = html)
 
 @app.route('/post', methods=['GET', 'POST'])
 def post():

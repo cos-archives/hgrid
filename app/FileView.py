@@ -27,6 +27,10 @@ def walk(root):
         appender = {}
         appender['type'] ='folder'
         appender['path'] = os.path.join(root, d).split(dirroot + os.sep)[1]
+        parent = appender['path'].split(os.sep)
+        if len(parent)>1:
+            parent.pop()
+            appender['parent']= os.sep.join(parent)
         appender['size'] = '--'
         info.append(appender)
         walk(os.path.join(root, d))
@@ -35,6 +39,10 @@ def walk(root):
         appender = {}
         appender['type'] = 'file'
         appender['path'] = os.path.join(root, f).split(dirroot + os.sep)[1]
+        parent = appender['path'].split(os.sep)
+        if len(parent)>1:
+            parent.pop()
+            appender['parent']= os.sep.join(parent)
         appender['size'] = os.path.getsize(os.path.join(root, f))
         info.append(appender)
 
@@ -98,11 +106,15 @@ def table_gen():
 
 @app.route('/', methods=['GET', 'POST'])
 def index():
+    del info[:]
     walk(root)
     html = table_gen()
-    del info[:]
-    return render_template("index.html",
-                           inserter = html)
+    for i in info:
+        print i
+    print len(info)
+    return render_template("example5-collapsing.html",
+                           info = info)
+                           #inserter = html)
 
 @app.route('/post', methods=['GET', 'POST'])
 def post():

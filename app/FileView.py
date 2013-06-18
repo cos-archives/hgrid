@@ -109,12 +109,9 @@ def index():
     del info[:]
     walk(root)
     html = table_gen()
-    for i in info:
-        print i
-    print len(info)
+    print info
     return render_template("example5-collapsing.html",
                            info = info)
-                           #inserter = html)
 
 @app.route('/post', methods=['GET', 'POST'])
 def post():

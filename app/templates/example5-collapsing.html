@@ -22,7 +22,7 @@
         }
 
         .toggle.collapse {
-            background: url("/static/SlickGrid-master/images/collapse.gif") no-repeat center center;
+            background: url(/static/SlickGrid-master/images/collapse.gif) no-repeat center center;
         }
 
     </style>
@@ -164,10 +164,11 @@ $(function () {
         }
 
         if (info[i]['parent_path']){
-            d["parent_path"]=info[i]['parent'];
+            d["parent_path"]=info[i]['parent_path'];
             for(var j=0; j<data.length; j++){
-                if (data[j]['title']==d["parent_path"]){
-                    d["parent"]= data[j]['id'];
+                if (data[j]['path']==d["parent_path"]){
+                    d["parent"]= data[j]['unique'];
+                    console.log(info[i]['name'] + "s PARENT:"+ d["parent_path"]+ " PARENT'S TITLE:" + data[j]['title']);
                 }
             }
             checker[info[i]['parent_path']]=indent;
@@ -179,11 +180,12 @@ $(function () {
         d["indent"] = indent;
         d["title"] = info[i]['name'];
         d["size"] = info[i]['size'];
+        d["path"] = info[i]['path'];
         d["percentComplete"] = Math.round(Math.random() * 100);
         d["start"] = "01/01/2009";
         d["finish"] = "01/05/2009";
     }
-
+    console.log(data);
     // initialize the model
     dataView = new Slick.Data.DataView({ inlineFilters: true });
     dataView.beginUpdate();
@@ -231,6 +233,7 @@ $(function () {
 
     grid.onSort.subscribe(function (e, args) {
         var cols = args.sortCols;
+        var count = 0;
         console.log(cols);
         dataView.sort(function (dataRow1, dataRow2) {
               console.log(dataRow1);
@@ -252,6 +255,8 @@ $(function () {
 {#                    return result;#}
 {#                }#}
 {#            }#}
+            count++;
+            console.log(count);
             return 0;
         });
         grid.invalidate();

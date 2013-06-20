@@ -123,10 +123,17 @@ def table_gen():
 
 @app.route('/', methods=['GET', 'POST'])
 def index():
+    del info[:]
+    counter = 0
     walk(root)
-    print info
-    return render_template("example5-collapsing.html",
-                           info = json.dumps(info))
+    for i in info:
+        i['unique']=counter
+        counter+=1
+
+    print json.dumps(info)
+    return render_template("collapsesort.html", info = json.dumps(info))
+    #return render_template("example5-collapsing.html",
+     #                      info = json.dumps(info))
 
 @app.route('/dropzonify', methods=['GET', 'POST'])
 def dropzonify():

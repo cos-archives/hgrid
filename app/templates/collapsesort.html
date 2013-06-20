@@ -3,9 +3,9 @@
 <head>
   <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
   <title>SlickGrid example 5: Collapsing</title>
-  <link rel="stylesheet" href="http://mleibman.github.com/SlickGrid/slick.grid.css" type="text/css"/>
-  <link rel="stylesheet" href="http://mleibman.github.com/SlickGrid/css/smoothness/jquery-ui-1.8.16.custom.css" type="text/css"/>
-    <link rel="stylesheet" href="http://mleibman.github.com/SlickGrid/examples/examples.css" type="text/css"/>
+    <link rel="stylesheet" href="/static/SlickGrid-master/slick.grid.css" type="text/css"/>
+    <link rel="stylesheet" href="/static/SlickGrid-master/css/smoothness/jquery-ui-1.8.16.custom.css" type="text/css"/>
+    <link rel="stylesheet" href="/static/SlickGrid-master/examples/examples.css" type="text/css"/>
   <style>
     .cell-title {
       font-weight: bold;
@@ -22,11 +22,11 @@
     }
 
     .toggle.expand {
-      background: url(http://mleibman.github.com/SlickGrid/images/expand.gif) no-repeat center center;
+      background: url(/static/SlickGrid-master/images/expand.gif) no-repeat center center;
     }
 
     .toggle.collapse {
-      background: url(http://mleibman.github.com/SlickGrid/images/collapse.gif) no-repeat center center;
+      background: url(/static/SlickGrid-master/images/collapse.gif) no-repeat center center;
     }
 
   </style>
@@ -58,17 +58,17 @@
   </tr>
 </table>
 
-<script src="http://mleibman.github.com/SlickGrid/lib/firebugx.js"></script>
+<script src="/static/SlickGrid-master/lib/firebugx.js"></script>
 
-<script src="http://mleibman.github.com/SlickGrid/lib/jquery-1.7.min.js"></script>
-<script src="http://mleibman.github.com/SlickGrid/lib/jquery-ui-1.8.16.custom.min.js"></script>
-<script src="http://mleibman.github.com/SlickGrid/lib/jquery.event.drag-2.0.min.js"></script>
+<script src="/static/SlickGrid-master/lib/jquery-1.7.min.js"></script>
+<script src="/static/SlickGrid-master/lib/jquery-ui-1.8.16.custom.min.js"></script>
+<script src="/static/SlickGrid-master/lib/jquery.event.drag-2.2.js"></script>
 
-<script src="http://mleibman.github.com/SlickGrid/slick.core.js"></script>
-<script src="http://mleibman.github.com/SlickGrid/slick.formatters.js"></script>
-<script src="http://mleibman.github.com/SlickGrid/slick.editors.js"></script>
-<script src="http://mleibman.github.com/SlickGrid/slick.grid.js"></script>
-<script src="http://mleibman.github.com/SlickGrid/slick.dataview.js"></script>
+<script src="/static/SlickGrid-master/slick.core.js"></script>
+<script src="/static/SlickGrid-master/slick.formatters.js"></script>
+<script src="/static/SlickGrid-master/slick.editors.js"></script>
+<script src="/static/SlickGrid-master/slick.grid.js"></script>
+<script src="/static/SlickGrid-master/slick.dataview.js"></script>
 
 <script>
 function requiredFieldValidator(value) {
@@ -108,11 +108,10 @@ var columns = [
 ];
 
 var options = {
-  editable: true,
+  editable: false,
   enableAddRow: true,
   enableCellNavigation: true,
   asyncEditorLoading: false
-  multiColumnSort: true
 };
 
 var percentCompleteThreshold = 0;
@@ -174,11 +173,16 @@ $(function () {
             indent=0;
         }
 
+        d["path"] = info[i]['path'];
+
         if (info[i]['parent_path']){
-            d["parent_path"]=info[i]['parent'];
+            d["parent_path"]=info[i]['parent_path'];
             for(var j=0; j<data.length; j++){
-                if (data[j]['title']==d["parent_path"]){
-                    d["parent"]= data[j]['id'];
+                console.log("Data's path: "+data[j]['path']+"  Parent path: " + d["parent_path"]);
+                if (data[j]['path']==d["parent_path"]){
+                    console.log(data[j]);
+                    d["parent"]= data[j]['unique'];
+                    console.log('foo');
                 }
             }
             checker[info[i]['parent_path']]=indent;
@@ -190,10 +194,12 @@ $(function () {
         d["indent"] = indent;
         d["title"] = info[i]['name'];
         d["size"] = info[i]['size'];
+        d["unique"] = info[i]['unique'];
         d["percentComplete"] = Math.round(Math.random() * 100);
         d["start"] = "01/01/2009";
         d["finish"] = "01/05/2009";
     }
+console.log(data);
 
   // initialize the model
   dataView = new Slick.Data.DataView({ inlineFilters: true });
@@ -252,11 +258,12 @@ $(function () {
   });
   
     grid.onSort.subscribe(function (e, args) {
-       //onSort(e, args);
+       onSort(e, args);
     });
 
 function onSort(e, args){
     console.log(data);
+    console.log('here');
     sortAsc = !sortAsc;
     sortcol = args.sortCol.field;
     
@@ -271,11 +278,11 @@ function rebuild(sortedData){
   data = sortedData;
   grid.destroy();
  // initialize the model
-  var dataView2 = new Slick.Data.DataView({ inlineFilters: true });
-  dataView2.beginUpdate();
-  dataView2.setItems(data);
-  dataView2.setFilter(myFilter);
-  dataView2.endUpdate();
+  //var dataView2 = new Slick.Data.DataView({ inlineFilters: true });
+  dataView.beginUpdate();
+  dataView.setItems(data);
+  dataView.setFilter(myFilter);
+  dataView.endUpdate();
 
   var columns = [
     {id: "title", name: "Title", field: "title", width: 220, cssClass: "cell-title", formatter: TaskNameFormatter, editor: Slick.Editors.Text, validator: requiredFieldValidator, sortable: true, defaultSortAsc: true},
@@ -286,12 +293,11 @@ function rebuild(sortedData){
 ];
   
   // initialize the grid
-  grid = new Slick.Grid("#myGrid", dataView2, columns, options);
-  grid.render();
+  grid = new Slick.Grid("#myGrid", dataView, columns, options);
   
     grid.onClick.subscribe(function (e, args) {
     if ($(e.target).hasClass("toggle")) {
-      var item = dataView2.getItem(args.row);
+      var item = dataView.getItem(args.row);
       if (item) {
         if (!item._collapsed) {
           item._collapsed = true;
@@ -299,7 +305,7 @@ function rebuild(sortedData){
           item._collapsed = false;
         }
 
-        dataView2.updateItem(item.id, item);
+        dataView.updateItem(item.id, item);
       }
       e.stopImmediatePropagation();
     }
@@ -369,7 +375,7 @@ function comparer(a, b) {
 
       if (percentCompleteThreshold != ui.value) {
         window.clearTimeout(h_runfilters);
-        h_runfilters = window.setTimeout(dataView2.refresh, 10);
+        h_runfilters = window.setTimeout(dataView.refresh, 10);
         percentCompleteThreshold = ui.value;
       }
     }
@@ -386,7 +392,7 @@ function comparer(a, b) {
     }
 
     searchString = this.value;
-    dataView2.refresh();
+    dataView.refresh();
   })
 })
 </script>

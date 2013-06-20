@@ -3,6 +3,7 @@ __author__ = 'jakerose27'
 from app import app
 import os
 import json
+import cgi
 from flask import render_template, request
 from hurry.filesize import size, alternative
 
@@ -117,6 +118,26 @@ def index():
     return render_template("example5-collapsing.html",
 #                           info = info)
                            info = json.dumps(info))
+
+@app.route('/dropzonify', methods=['GET', 'POST'])
+def dropzonify():
+#    del info[:]
+    walk(root)
+    print info
+    return render_template("dropzonify.html",
+#                           info = info)
+                           info = json.dumps(info))
+
+@app.route('/fileuploader', methods=['GET', 'POST'])
+def fileuploader():
+    form = cgi.FieldStorage()
+    if (not form):
+        print "foo"
+    else:
+    #    item = form["file"]
+    #    if (item.file):
+    #        itemName = os.path.basename(item.filename)
+        print form
 
 @app.route('/treetable', methods=['GET', 'POST'])
 def treetable():

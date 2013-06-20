@@ -18,11 +18,11 @@
         }
 
         .toggle.expand {
-            background: url(/static/SlickGrid-master/images/expand.gif) no-repeat center center;
+            background: url('/static/SlickGrid-master/images/expand.gif') no-repeat center center;
         }
 
         .toggle.collapse {
-            background: url("/static/SlickGrid-master/images/collapse.gif") no-repeat center center;
+            background: url('/static/SlickGrid-master/images/collapse.gif') no-repeat center center;
         }
 
     </style>
@@ -55,10 +55,18 @@
 </table>
 
 <script src="/static/SlickGrid-master/lib/firebugx.js"></script>
-
 <script src="/static/SlickGrid-master/lib/jquery-1.7.min.js"></script>
 <script src="/static/SlickGrid-master/lib/jquery-ui-1.8.16.custom.min.js"></script>
 <script src="/static/SlickGrid-master/lib/jquery.event.drag-2.2.js"></script>
+
+<script src="/static/js/dropzone.js"></script>
+<script>
+//    $(document).ready(function() {
+        var myDropzone = new Dropzone("div#myGrid", { url: "/fileuploader"});
+//    });
+</script>
+
+<!--
 
 <script src="/static/SlickGrid-master/slick.core.js"></script>
 <script src="/static/SlickGrid-master/slick.formatters.js"></script>
@@ -242,24 +250,15 @@ $(function () {
     grid.onSort.subscribe(function (e, args) {
         var cols = args.sortCols;
         dataView.sort(function (dataRow1, dataRow2) {
-//            for (var i = 0, l = cols.length; i < l; i++) {
-                var field = cols[0].sortCol.field;
-                var sign = cols[0].sortAsc ? 1 : -1;
+            for (var i = 0, l = cols.length; i < l; i++) {
+                var field = cols[i].sortCol.field;
+                var sign = cols[i].sortAsc ? 1 : -1;
                 var value1 = dataRow1[field], value2 = dataRow2[field];
                 var result = (value1 == value2 ? 0 : (value1 > value2 ? 1 : -1)) * sign;
                 if (result != 0) {
                     return result;
                 }
-//            }
-{#            for (var i = 0, l = cols.length; i < l; i++) {#}
-{#                var field = cols[i].sortCol.field;#}
-{#                var sign = cols[i].sortAsc ? 1 : -1;#}
-{#                var value1 = dataRow1[field], value2 = dataRow2[field];#}
-{#                var result = (value1 == value2 ? 0 : (value1 > value2 ? 1 : -1)) * sign;#}
-{#                if (result != 0) {#}
-{#                    return result;#}
-{#                }#}
-{#            }#}
+            }
             return 0;
         });
         grid.invalidate();
@@ -309,6 +308,6 @@ $(function () {
         dataView.refresh();
     })
 })
-</script>
+</script> -->
 </body>
 </html>

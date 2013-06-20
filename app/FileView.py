@@ -2,6 +2,7 @@ __author__ = 'jakerose27'
 
 from app import app
 import os
+import json
 from flask import render_template, request
 from hurry.filesize import size, alternative
 
@@ -121,12 +122,20 @@ def table_gen():
 
 @app.route('/', methods=['GET', 'POST'])
 def index():
+    walk(root)
+    print info
+    return render_template("example5-collapsing.html",
+                           info = json.dumps(info))
+
+@app.route('/treetable', methods=['GET', 'POST'])
+def treetable():
     del info[:]
     walk(root)
     html = table_gen()
-    #return render_template("collapsesort.html")
-    return render_template("example5-collapsing.html",
-                           info = info)
+    print info
+    print html
+    return render_template("index.html",
+                           inserter = html)
 
 @app.route('/post', methods=['GET', 'POST'])
 def post():

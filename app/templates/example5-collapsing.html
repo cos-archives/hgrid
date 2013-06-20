@@ -234,7 +234,7 @@ $(function () {
         console.log(cols);
         dataView.sort(function (dataRow1, dataRow2) {
               console.log(dataRow1);
-            //for (var i = 0; i < cols.length; i++) {
+            for (var i = 0; i < cols.length; i++) {
                 var field = cols[0].sortCol.field;
                 var sign = cols[0].sortAsc ? 1 : -1;
                 var value1 = dataRow1[field], value2 = dataRow2[field];
@@ -242,7 +242,7 @@ $(function () {
                 if (result != 0) {
                     return result;
                 }
-//            }
+            }
 {#            for (var i = 0, l = cols.length; i < l; i++) {#}
 {#                var field = cols[i].sortCol.field;#}
 {#                var sign = cols[i].sortAsc ? 1 : -1;#}

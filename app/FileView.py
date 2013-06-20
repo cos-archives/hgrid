@@ -12,6 +12,16 @@ root = os.path.abspath('tree')
 dirroot = os.path.abspath('tree')
 
 
+def folder_size(dir):
+    total_size = 0
+    for item in os.listdir(dir):
+        item_path = os.path.join(dir, item)
+        if os.path.isfile(item_path):
+            total_size += os.path.getsize(item_path)
+        elif os.path.isdir(item_path):
+            total_size += folder_size(item_path)
+    return total_size
+
 def walk(root):
     dirs_holder = []
     files_holder = []
@@ -21,7 +31,6 @@ def walk(root):
             dirs_holder.append(i)
         elif os.path.isfile(os.path.join(root, i)):
             files_holder.append(i)
-            os.path.getsize(os.path.join(root, i))
         else:
             continue
 
@@ -29,12 +38,14 @@ def walk(root):
         appender = {}
         appender['type'] ='folder'
         appender['path'] = os.path.join(root, d).split(dirroot + os.sep)[1]
-        parent = os.path.dirname(appender['path'])#appender['path'].split()
-        if (parent):
-        #if len(parent)>1:
-        #    parent.pop()
-            appender['parent']= parent
-        appender['size'] = '--'
+        parent = appender['path'].split(os.sep)
+        if len(parent)>1:
+            appender['name'] = parent.pop()
+            appender['parent_path']= os.sep.join(parent)
+            appender['parent']=parent.pop()
+        else:
+            appender['name']=appender['path']
+        appender['size'] = folder_size(os.path.join(root, d))
         info.append(appender)
         walk(os.path.join(root, d))
 
@@ -42,13 +53,16 @@ def walk(root):
         appender = {}
         appender['type'] = 'file'
         appender['path'] = os.path.join(root, f).split(dirroot + os.sep)[1]
-        parent = os.path.dirname(appender['path'])#appender['path'].split(os.sep)
-        if (parent):
-        #if len(parent)>1:
-        #    parent.pop()
-            appender['parent']= parent #os.sep.join(parent)
+        parent = appender['path'].split(os.sep)
+        if len(parent)>1:
+            appender['name']=parent.pop()
+            appender['parent_path']= os.sep.join(parent)
+            appender['parent']=parent.pop()
+        else:
+            appender['name']=appender['path']
         appender['size'] = os.path.getsize(os.path.join(root, f))
         info.append(appender)
+
 
 def table_gen():
     fs = {'paths':{}}
@@ -56,18 +70,14 @@ def table_gen():
     html = '<thead>\n<tr>\n<th>Name</th>\n<th>Kind</th>\n<th>Size</th>\n</tr>\n</thead>\n<tbody>'
 
     for info_dict in info:
-        print "begin info dict"
         relative_root = info_dict['path']
-        print relative_root
         tmp = fs
         parts = relative_root.split(os.sep)
         #print parts
         counter = []
 
-
         for part in parts:
             # Path has already been encountered
-            print "begin part"
             if part in tmp['paths']:
                 # append this level's count to our part's counter
                 counter.append(str(len(tmp['paths'])))
@@ -110,13 +120,12 @@ def table_gen():
     html += '</tbody>\n'
     return html
 
+
 @app.route('/', methods=['GET', 'POST'])
 def index():
-#    del info[:]
     walk(root)
     print info
     return render_template("example5-collapsing.html",
-#                           info = info)
                            info = json.dumps(info))
 
 @app.route('/dropzonify', methods=['GET', 'POST'])
@@ -141,6 +150,7 @@ def fileuploader():
 
 @app.route('/treetable', methods=['GET', 'POST'])
 def treetable():
+    del info[:]
     walk(root)
     html = table_gen()
     print info

@@ -10,6 +10,16 @@ root = os.path.abspath('tree')
 dirroot = os.path.abspath('tree')
 
 
+def folder_size(dir):
+    total_size = 0
+    for item in os.listdir(dir):
+        item_path = os.path.join(dir, item)
+        if os.path.isfile(item_path):
+            total_size += os.path.getsize(item_path)
+        elif os.path.isdir(item_path):
+            total_size += folder_size(item_path)
+    return total_size
+
 def walk(root):
     dirs_holder = []
     files_holder = []
@@ -19,7 +29,6 @@ def walk(root):
             dirs_holder.append(i)
         elif os.path.isfile(os.path.join(root, i)):
             files_holder.append(i)
-            os.path.getsize(os.path.join(root, i))
         else:
             continue
 
@@ -29,9 +38,12 @@ def walk(root):
         appender['path'] = os.path.join(root, d).split(dirroot + os.sep)[1]
         parent = appender['path'].split(os.sep)
         if len(parent)>1:
-            parent.pop()
-            appender['parent']= os.sep.join(parent)
-        appender['size'] = '--'
+            appender['name'] = parent.pop()
+            appender['parent_path']= os.sep.join(parent)
+            appender['parent']=parent.pop()
+        else:
+            appender['name']=appender['path']
+        appender['size'] = folder_size(os.path.join(root, d))
         info.append(appender)
         walk(os.path.join(root, d))
 
@@ -41,8 +53,11 @@ def walk(root):
         appender['path'] = os.path.join(root, f).split(dirroot + os.sep)[1]
         parent = appender['path'].split(os.sep)
         if len(parent)>1:
-            parent.pop()
-            appender['parent']= os.sep.join(parent)
+            appender['name']=parent.pop()
+            appender['parent_path']= os.sep.join(parent)
+            appender['parent']=parent.pop()
+        else:
+            appender['name']=appender['path']
         appender['size'] = os.path.getsize(os.path.join(root, f))
         info.append(appender)
 
@@ -109,7 +124,7 @@ def index():
     del info[:]
     walk(root)
     html = table_gen()
-    print info
+    #return render_template("collapsesort.html")
     return render_template("example5-collapsing.html",
                            info = info)
 

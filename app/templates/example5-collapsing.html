@@ -103,7 +103,7 @@ var columns = [
 ];
 
 var options = {
-    editable: true,
+    editable: false,
     enableAddRow: true,
     enableCellNavigation: true,
     asyncEditorLoading: false,
@@ -151,48 +151,38 @@ $(function () {
         var d = (data[i] = {});
         var parent;
 
-        {#            if (Math.random() > 0.8 && i > 0) {#}
-        {#              indent++;#}
-        {#              parents.push(i - 1);#}
-        {#            } else if (Math.random() < 0.3 && indent > 0) {#}
-        {#              indent--;#}
-        {#              parents.pop();#}
-        {#            }#}
-
-        if (info[i]['parent']){
-            if (!(info[i]['parent'] in checker)){
+        if (info[i]['parent_path']){
+            if (!(info[i]['parent_path'] in checker)){
                 indent++;
             }
             else {
-                console.log(info[i]['path'] + 's indent:' + indent);
-                indent = checker[info[i]['parent']];
+                indent = checker[info[i]['parent_path']];
             }
-            parents.push(info[i]['parent']);
+            //parents.push(i);
         } else {
             indent=0;
         }
 
-        if (parents.length > 0) {
-            parent = parents[parents.length - 1];
+        if (info[i]['parent_path']){
+            d["parent_path"]=info[i]['parent'];
+            for(var j=0; j<data.length; j++){
+                if (data[j]['title']==d["parent_path"]){
+                    d["parent"]= data[j]['id'];
+                }
+            }
+            checker[info[i]['parent_path']]=indent;
         } else {
-            parent = null;
+            d["parent"]=null;
         }
 
-        if (info[i]['parent']){
-            checker[info[i]['parent']]=indent;
-        }
-
-        d["id"] = "id_" + info[i]['path'];
+        d["id"] = i;
         d["indent"] = indent;
-        d["parent"] = parent;
-        d["title"] = info[i]['path'];
+        d["title"] = info[i]['name'];
         d["size"] = info[i]['size'];
         d["percentComplete"] = Math.round(Math.random() * 100);
         d["start"] = "01/01/2009";
         d["finish"] = "01/05/2009";
-        console.log(checker);
     }
-
 
     // initialize the model
     dataView = new Slick.Data.DataView({ inlineFilters: true });
@@ -241,16 +231,18 @@ $(function () {
 
     grid.onSort.subscribe(function (e, args) {
         var cols = args.sortCols;
+        console.log(cols);
         dataView.sort(function (dataRow1, dataRow2) {
-            for (var i = 0, l = cols.length; i < l; i++) {
-                var field = cols[i].sortCol.field;
-                var sign = cols[i].sortAsc ? 1 : -1;
+              console.log(dataRow1);
+            //for (var i = 0; i < cols.length; i++) {
+                var field = cols[0].sortCol.field;
+                var sign = cols[0].sortAsc ? 1 : -1;
                 var value1 = dataRow1[field], value2 = dataRow2[field];
                 var result = (value1 == value2 ? 0 : (value1 > value2 ? 1 : -1)) * sign;
                 if (result != 0) {
                     return result;
                 }
-            }
+            //}
             return 0;
         });
         grid.invalidate();

@@ -1,61 +1,412 @@
-<!DOCTYPE html>
+<!DOCTYPE HTML>
 <html>
 <head>
-    <title></title>
-    <link rel="stylesheet" href="../static/css/screen.css" media="screen" />
-    <link rel="stylesheet" href="../static/css/jquery.treetable.css" />
-    <link rel="stylesheet" href="../static/css/jquery.treetable.theme.default.css" />
+  <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+  <title>SlickGrid example 5: Collapsing</title>
+    <link rel="stylesheet" href="/static/SlickGrid-master/slick.grid.css" type="text/css"/>
+    <link rel="stylesheet" href="/static/SlickGrid-master/css/smoothness/jquery-ui-1.8.16.custom.css" type="text/css"/>
+    <link rel="stylesheet" href="/static/SlickGrid-master/examples/examples.css" type="text/css"/>
+  <style>
+    .cell-title {
+      font-weight: bold;
+    }
+
+    .cell-effort-driven {
+      text-align: center;
+    }
+
+    .toggle {
+      height: 9px;
+      width: 9px;
+      display: inline-block;
+    }
+
+    .toggle.expand {
+      background: url(/static/SlickGrid-master/images/expand.gif) no-repeat center center;
+    }
+
+    .toggle.collapse {
+      background: url(/static/SlickGrid-master/images/collapse.gif) no-repeat center center;
+    }
+
+  </style>
 </head>
 <body>
-<table id="example">
-<caption>
-    <a href="#" onclick="jQuery('#example').treetable('expandAll'); return false;">Expand all</a>
-    <a href="#" onclick="jQuery('#example').treetable('collapseAll'); return false;">Collapse all</a>
-</caption>
-{{ inserter | safe }}
+<table width="100%">
+  <tr>
+    <td valign="top" width="50%">
+      <div style="border:1px solid gray;background:wheat;padding:6px;">
+        <label>Show tasks with % at least: </label>
+
+        <div style="padding:4px;">
+          <div style="width:100px;" id="pcSlider"></div>
+        </div>
+        <br/>
+        <label>And title including:</label>
+        <input type=text id="txtSearch">
+      </div>
+      <br/>
+
+      <div id="myGrid" style="width:600px;height:500px;"></div>
+    </td>
+    <td valign="top">
+      <h2>Demonstrates:</h2>
+      <ul>
+        <li>implementing expand/collapse as a filter for DataView</li>
+      </ul>
+    </td>
+  </tr>
 </table>
 
-<script src="/static/js/jquery.js"></script>
-<script src="/static/js/jquery-ui.js"></script>
-<script src="/static/js/jquery.treetable.js"></script>
+<script src="/static/SlickGrid-master/lib/firebugx.js"></script>
+
+<script src="/static/SlickGrid-master/lib/jquery-1.7.min.js"></script>
+<script src="/static/SlickGrid-master/lib/jquery-ui-1.8.16.custom.min.js"></script>
+<script src="/static/SlickGrid-master/lib/jquery.event.drag-2.2.js"></script>
+
+<script src="/static/js/dropzone.js"></script>
 <script>
-    $("#example").treetable({ expandable: true });
-
-    // Highlight selected row
-    $("#example tbody tr").mousedown(function() {
-        $("tr.selected").removeClass("selected");
-        $(this).addClass("selected");
-    });
-
-    // Drag & Drop Example Code
-    $("#example .file, #example .folder").draggable({
-        helper: "clone",
-        opacity: .75,
-        refreshPositions: true, // Performance?
-        revert: "invalid",
-        revertDuration: 300,
-        scroll: true
-    });
-
-    $("#example .folder").each(function() {
-        $(this).parents("tr").droppable({
-            accept: ".file, .folder",
-            drop: function(e, ui) {
-                var droppedEl = ui.draggable.parents("tr");
-                $("#example").treetable("move", droppedEl.data("ttId"), $(this).data("ttId"));
-                $.post('/post', {src: droppedEl.attr("data-path"), dest: $(this).attr("data-path")}, function(response){
-                    console.log(response);
-                });
-            },
-            hoverClass: "accept",
-            over: function(e, ui) {
-                var droppedEl = ui.draggable.parents("tr");
-                if(this != droppedEl[0] && !$(this).is(".expanded")) {
-                    $("#example").treetable("expandNode", $(this).data("ttId"));
-                }
-            }
+    $(document).ready(function() {
+        var myDropzone = new Dropzone("div#myGrid", { url: "/uploader"});
+        myDropzone.on("addedfile", function(file) {
+            console.log(grid);
+            grid.invalidate();
+            console.log("everything is invalidated and rendered... where's the file?")
         });
     });
+</script>
+
+<script src="/static/SlickGrid-master/slick.core.js"></script>
+<script src="/static/SlickGrid-master/slick.formatters.js"></script>
+<script src="/static/SlickGrid-master/slick.editors.js"></script>
+<script src="/static/SlickGrid-master/slick.grid.js"></script>
+<script src="/static/SlickGrid-master/slick.dataview.js"></script>
+
+<script>
+function requiredFieldValidator(value) {
+  if (value == null || value == undefined || !value.length) {
+    return {valid: false, msg: "This is a required field"};
+  } else {
+    return {valid: true, msg: null};
+  }
+}
+
+
+var TaskNameFormatter = function (row, cell, value, columnDef, dataContext) {
+  value = value.replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");
+  var spacer = "<span style='display:inline-block;height:1px;width:" + (15 * dataContext["indent"]) + "px'></span>";
+  var idx = dataView.getIdxById(dataContext.id);
+  if (data[idx + 1] && data[idx + 1].indent > data[idx].indent) {
+    if (dataContext._collapsed) {
+      return spacer + " <span class='toggle expand'></span>&nbsp;" + value;
+    } else {
+      return spacer + " <span class='toggle collapse'></span>&nbsp;" + value;
+    }
+  } else {
+    return spacer + " <span class='toggle'></span>&nbsp;" + value;
+  }
+};
+
+var dataView;
+var grid;
+var data = [];
+var sortAsc = true;
+var columns = [
+    {id: "title", name: "Title", field: "title", width: 220, cssClass: "cell-title", formatter: TaskNameFormatter, editor: Slick.Editors.Text, validator: requiredFieldValidator, sortable: true, defaultSortAsc: true},
+    {id: "size", name: "Size", field: "size", editor: Slick.Editors.Text, sortable: true},
+    {id: "%", name: "% Complete", field: "percentComplete", width: 80, resizable: false, formatter: Slick.Formatters.PercentCompleteBar, editor: Slick.Editors.PercentComplete, sortable: true},
+    {id: "start", name: "Start", field: "start", minWidth: 60, editor: Slick.Editors.Date, sortable: true},
+    {id: "finish", name: "Finish", field: "finish", minWidth: 60, editor: Slick.Editors.Date, sortable: true}
+];
+
+var options = {
+  editable: false,
+  enableAddRow: true,
+  enableCellNavigation: true,
+  asyncEditorLoading: false
+};
+
+var percentCompleteThreshold = 0;
+var searchString = "";
+
+function myFilter(item) {
+  if (item["percentComplete"] < percentCompleteThreshold) {
+    return false;
+  }
+
+  if (searchString != "" && item["title"].indexOf(searchString) == -1) {
+    return false;
+  }
+
+  if (item.parent != null) {
+     var parentIdx = dataView.getIdxById(item.parent);
+    var parent = data[parentIdx];
+
+    while (parent) {
+      if (parent._collapsed || (parent["percentComplete"] < percentCompleteThreshold) || (searchString != "" && parent["title"].indexOf(searchString) == -1)) {
+        return false;
+      }
+      
+      var parentParentIdx = dataView.getIdxById(parent.parent);
+      parent = data[parentParentIdx];
+    }
+  }
+
+  return true;
+}
+
+function percentCompleteSort(a, b) {
+  return a["percentComplete"] - b["percentComplete"];
+}
+
+ function renderCell(row, cell, value, columnDef, dataContext) {
+    return "<div> test <b>html</b></div>";
+  }
+
+$(function () {
+    var indent = 0;
+    var checker ={};
+    var info = {{ info | safe }}
+    // prepare the data
+    for (var i = 0; i < info.length; i++) {
+        var parents = [];
+        var d = (data[i] = {});
+        var parent;
+
+        if (info[i]['parent_path']){
+            if (!(info[i]['parent_path'] in checker)){
+                indent++;
+            }
+            else {
+                indent = checker[info[i]['parent_path']];
+            }
+            //parents.push(i);
+        } else {
+            indent=0;
+        }
+
+        d["path"] = info[i]['path'];
+
+        if (info[i]['parent_path']){
+            d["parent_path"]=info[i]['parent_path'];
+            for(var j=0; j<data.length; j++){
+                console.log("Data's path: "+data[j]['path']+"  Parent path: " + d["parent_path"]);
+                if (data[j]['path']==d["parent_path"]){
+                    console.log(data[j]);
+                    d["parent"]= data[j]['unique'];
+                    console.log('foo');
+                }
+            }
+            checker[info[i]['parent_path']]=indent;
+        } else {
+            d["parent"]=null;
+        }
+
+        d["id"] = i;
+        d["indent"] = indent;
+        d["title"] = info[i]['name'];
+        d["size"] = info[i]['size'];
+        d["unique"] = info[i]['unique'];
+        d["percentComplete"] = Math.round(Math.random() * 100);
+        d["start"] = "01/01/2009";
+        d["finish"] = "01/05/2009";
+    }
+console.log(data);
+
+  // initialize the model
+  dataView = new Slick.Data.DataView({ inlineFilters: true });
+  dataView.beginUpdate();
+  dataView.setItems(data);
+  dataView.setFilter(myFilter);
+  dataView.endUpdate();
+
+  // initialize the grid
+  grid = new Slick.Grid("#myGrid", dataView, columns, options);
+
+  grid.onCellChange.subscribe(function (e, args) {
+    dataView.updateItem(args.item.id, args.item);
+  });
+
+  grid.onAddNewRow.subscribe(function (e, args) {
+    var item = {
+      "id": "new_" + (Math.round(Math.random() * 10000)),
+      "indent": 0,
+      "title": "New task",
+      "duration": "1 day",
+      "percentComplete": 0,
+      "start": "01/01/2009",
+      "finish": "01/01/2009",
+      "effortDriven": false};
+    $.extend(item, args.item);
+    dataView.addItem(item);
+  });
+
+  grid.onClick.subscribe(function (e, args) {
+    if ($(e.target).hasClass("toggle")) {
+      var item = dataView.getItem(args.row);
+      if (item) {
+        if (!item._collapsed) {
+          item._collapsed = true;
+        } else {
+          item._collapsed = false;
+        }
+
+        dataView.updateItem(item.id, item);
+      }
+      e.stopImmediatePropagation();
+    }
+  });
+
+
+  // wire up model events to drive the grid
+  dataView.onRowCountChanged.subscribe(function (e, args) {
+    grid.updateRowCount();
+    grid.render();
+  });
+
+  dataView.onRowsChanged.subscribe(function (e, args) {
+    grid.invalidateRows(args.rows);
+    grid.render();
+  });
+  
+    grid.onSort.subscribe(function (e, args) {
+       onSort(e, args);
+    });
+
+function onSort(e, args){
+    console.log(data);
+    console.log('here');
+    sortAsc = !sortAsc;
+    sortcol = args.sortCol.field;
+    
+    var sortedData = sortHierarchy();
+    
+    rebuild(sortedData);
+   
+    console.log(sortedData);
+}
+    
+function rebuild(sortedData){
+  data = sortedData;
+  grid.destroy();
+ // initialize the model
+  //var dataView2 = new Slick.Data.DataView({ inlineFilters: true });
+  dataView.beginUpdate();
+  dataView.setItems(data);
+  dataView.setFilter(myFilter);
+  dataView.endUpdate();
+
+  var columns = [
+    {id: "title", name: "Title", field: "title", width: 220, cssClass: "cell-title", formatter: TaskNameFormatter, editor: Slick.Editors.Text, validator: requiredFieldValidator, sortable: true, defaultSortAsc: true},
+    {id: "size", name: "Size", field: "size", editor: Slick.Editors.Text, sortable: true},
+    {id: "%", name: "% Complete", field: "percentComplete", width: 80, resizable: false, formatter: Slick.Formatters.PercentCompleteBar, editor: Slick.Editors.PercentComplete, sortable: true},
+    {id: "start", name: "Start", field: "start", minWidth: 60, editor: Slick.Editors.Date, sortable: true},
+    {id: "finish", name: "Finish", field: "finish", minWidth: 60, editor: Slick.Editors.Date, sortable: true}
+];
+  
+  // initialize the grid
+  grid = new Slick.Grid("#myGrid", dataView, columns, options);
+  
+    grid.onClick.subscribe(function (e, args) {
+    if ($(e.target).hasClass("toggle")) {
+      var item = dataView.getItem(args.row);
+      if (item) {
+        if (!item._collapsed) {
+          item._collapsed = true;
+        } else {
+          item._collapsed = false;
+        }
+
+        dataView.updateItem(item.id, item);
+      }
+      e.stopImmediatePropagation();
+    }
+  });
+
+  grid.onSort.subscribe(function (e, args) {
+    onSort(e, args);
+  });
+  
+}
+
+ 
+function sortHierarchy(){  
+  console.log(data);
+    var sorted = data.sort(comparer);
+      console.log(data);
+    var hierarchical = [];
+    BuildHierarchy(sorted, hierarchical, undefined);
+
+    function BuildHierarchy(sorted, hierachical, parent)
+    {
+        for(var i=0; i < sorted.length; i++)
+        {
+            var item = sorted[i];
+            var parentId;
+            if(parent){
+                parentId = parent.id;
+            }
+            else{
+                 parentId = undefined;
+            }
+            if(item.parent == parentId)
+            {
+                hierarchical.push(sorted[i]);
+                BuildHierarchy(sorted, hierarchical, sorted[i]);
+                
+                //hierarchical.push(sorted[i]);
+                //BuildHierarchy(sorted, hierarchical, sorted[i]);
+            }
+        }
+    } 
+    
+    return hierarchical;
+ }
+  
+function comparer(a, b) {
+  var x = a[sortcol], y = b[sortcol];
+  
+  if(x == y){
+    return 0;
+  }
+  if(sortAsc){
+    return x > y ? 1 : -1;
+  }
+  else{
+    return x < y ? 1 : -1;
+  }
+}
+
+  var h_runfilters = null;
+
+  // wire up the slider to apply the filter to the model
+  $("#pcSlider").slider({
+    "range": "min",
+    "slide": function (event, ui) {
+      Slick.GlobalEditorLock.cancelCurrentEdit();
+
+      if (percentCompleteThreshold != ui.value) {
+        window.clearTimeout(h_runfilters);
+        h_runfilters = window.setTimeout(dataView.refresh, 10);
+        percentCompleteThreshold = ui.value;
+      }
+    }
+  });
+
+
+  // wire up the search textbox to apply the filter to the model
+  $("#txtSearch").keyup(function (e) {
+    Slick.GlobalEditorLock.cancelCurrentEdit();
+
+    // clear on Esc
+    if (e.which == 27) {
+      this.value = "";
+    }
+
+    searchString = this.value;
+    dataView.refresh();
+  })
+})
 </script>
 </body>
 </html>

@@ -64,6 +64,18 @@
 <script src="/static/SlickGrid-master/lib/jquery-ui-1.8.16.custom.min.js"></script>
 <script src="/static/SlickGrid-master/lib/jquery.event.drag-2.2.js"></script>
 
+<script src="/static/js/dropzone.js"></script>
+<script>
+    $(document).ready(function() {
+        var myDropzone = new Dropzone("div#myGrid", { url: "/uploader"});
+        myDropzone.on("addedfile", function(file) {
+            console.log(grid);
+            grid.invalidate();
+            console.log("everything is invalidated and rendered... where's the file?")
+        });
+    });
+</script>
+
 <script src="/static/SlickGrid-master/slick.core.js"></script>
 <script src="/static/SlickGrid-master/slick.formatters.js"></script>
 <script src="/static/SlickGrid-master/slick.editors.js"></script>

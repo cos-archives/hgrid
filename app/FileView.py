@@ -39,8 +39,6 @@ def walk(dir_path):
         # Assigns all files to files_holder
         elif os.path.isfile(os.path.join(dir_path, i)):
             files_holder.append(i)
-        else:  # Continues when the loop is complete - Is this necessary? Wouldn't it continue anyway?
-            continue  # Are there other possibilities (not file or dir) that may cause this to break the loop early?
 
     # Loops through the folders in the file system
     for d in dirs_holder:
@@ -48,26 +46,15 @@ def walk(dir_path):
         appender['type'] = 'folder'
         # Sets the base path top to dir_root
         appender['path'] = os.path.join(dir_path, d).split(dir_root + os.sep)[1]
-        parent = appender['path'].split(os.sep)
-        # If it has a parent, add the parent information
-        if len(parent) > 1:
-            appender['name'] = parent.pop()
-            appender['parent_path'] = os.sep.join(parent)
-            appender['parent'] = parent.pop()
-        # If it doesn't have a parent, just return the path information
+        parent = os.path.dirname(appender['path'])
+        # If it has a parent, add the parent information.
+        if parent:
+            appender['name'] = os.path.basename(appender['path'])
+            appender['parent_path'] = parent
+            appender['parent'] = os.path.basename(parent)
+        # If it doesn't have a parent, just return the path information.
         else:
             appender['name'] = appender['path']
-        ## Below is my proposed change -- since the os commands exist, I believe it improves readability ##
-        # parent = os.path.dirname(appender['path'])
-        # # If it has a parent, add the parent information.
-        # if parent:
-        #     appender['name'] = os.path.basename(appender['path'])
-        #     appender['parent_path'] = parent
-        #     appender['parent'] = os.path.basename(parent)
-        # # If it doesn't have a parent, just return the path information.
-        # else:
-        #     appender['name'] = appender['path']
-        ## End proposed change ##
         # Calls the function folder_size to get the folder size
         appender['size'] = folder_size(os.path.join(dir_path, d))
         info.append(appender)
@@ -79,26 +66,15 @@ def walk(dir_path):
         appender = {}
         appender['type'] = 'file'
         appender['path'] = os.path.join(dir_path, f).split(dir_root + os.sep)[1]
-        parent = appender['path'].split(os.sep)
+        parent = os.path.dirname(appender['path'])
         # If it has a parent, add the parent information.
-        if len(parent) > 1:
-            appender['name'] = parent.pop()
-            appender['parent_path'] = os.sep.join(parent)
-            appender['parent'] = parent.pop()
+        if parent:
+            appender['name'] = os.path.basename(appender['path'])
+            appender['parent_path'] = parent
+            appender['parent'] = os.path.basename(parent)
         # If it doesn't have a parent, just return the path information.
         else:
             appender['name'] = appender['path']
-        ## Below is my proposed change -- since the os commands exist, I believe it improves readability ##
-        # parent = os.path.dirname(appender['path'])
-        # # If it has a parent, add the parent information.
-        # if parent:
-        #     appender['name'] = os.path.basename(appender['path'])
-        #     appender['parent_path'] = parent
-        #     appender['parent'] = os.path.basename(parent)
-        # # If it doesn't have a parent, just return the path information.
-        # else:
-        #     appender['name'] = appender['path']
-        ## End proposed change ##
         appender['size'] = os.path.getsize(os.path.join(dir_path, f))
         info.append(appender)
 
@@ -114,8 +90,8 @@ def table_gen(info):
         # The folder indent / hierarchy counter
         counter = []
         temp_dir_parts = dir_parts
-        relative_root = info_dict['path']  # Can this be combined with the next line ?
-        parts = relative_root.split(os.sep)  # parts = info_dict['path'].split(os.sep) ?
+        relative_root = info_dict['path']
+        parts = relative_root.split(os.sep)
 
         # Checks if the directory exists in the list
         for part in parts:

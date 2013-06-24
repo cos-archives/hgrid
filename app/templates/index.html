@@ -67,11 +67,35 @@
 <script src="/static/js/dropzone.js"></script>
 <script>
     $(document).ready(function() {
-        var myDropzone = new Dropzone("div#myGrid", { url: "/uploader"});
-        myDropzone.on("addedfile", function(file) {
-            console.log(grid);
+        var myDropzone = new Dropzone("div#myGrid", {url: "/uploader"} );
+        myDropzone.on("success", function(file) {
+            // Collect the JSON Response from the uploader
+            newSlickInfo = JSON.parse(file.xhr.response);
+            slickTitle = newSlickInfo[0].name;
+            slickId = data.length;
+            slickUnique = data.length;
+            slickIndent = 1;
+            slickSize = newSlickInfo[0].size;
+            slickParent = 13;
+            slickParentPath = newSlickInfo[0].uploader_path;
+            slickPath = newSlickInfo[0].path;
+            slickItem = {
+                title: slickTitle,
+                size: slickSize,
+                parent_path: slickParentPath,
+                parent: slickParent,
+                path: slickPath,
+                id: slickId,
+                unique: slickUnique,
+                indent: slickIndent,
+                finish: "01/05/2009",
+                start: "01/01/2009",
+                percentComplete: 45
+            }
+            data.push(slickItem)
+            grid.updateRowCount();
             grid.invalidate();
-            console.log("everything is invalidated and rendered... where's the file?")
+            grid.render()
         });
     });
 </script>
@@ -166,7 +190,7 @@ function percentCompleteSort(a, b) {
 $(function () {
     var indent = 0;
     var checker ={};
-    var info = {{ info | safe }}
+    var info = {{ info | safe }};
     // prepare the data
     for (var i = 0; i < info.length; i++) {
         var parents = [];
@@ -190,11 +214,8 @@ $(function () {
         if (info[i]['parent_path']){
             d["parent_path"]=info[i]['parent_path'];
             for(var j=0; j<data.length; j++){
-                console.log("Data's path: "+data[j]['path']+"  Parent path: " + d["parent_path"]);
                 if (data[j]['path']==d["parent_path"]){
-                    console.log(data[j]);
                     d["parent"]= data[j]['unique'];
-                    console.log('foo');
                 }
             }
             checker[info[i]['parent_path']]=indent;
@@ -211,7 +232,6 @@ $(function () {
         d["start"] = "01/01/2009";
         d["finish"] = "01/05/2009";
     }
-console.log(data);
 
   // initialize the model
   dataView = new Slick.Data.DataView({ inlineFilters: true });
@@ -274,8 +294,6 @@ console.log(data);
     });
 
 function onSort(e, args){
-    console.log(data);
-    console.log('here');
     sortAsc = !sortAsc;
     sortcol = args.sortCol.field;
     
@@ -283,7 +301,6 @@ function onSort(e, args){
     
     rebuild(sortedData);
    
-    console.log(sortedData);
 }
     
 function rebuild(sortedData){
@@ -331,9 +348,7 @@ function rebuild(sortedData){
 
  
 function sortHierarchy(){  
-  console.log(data);
     var sorted = data.sort(comparer);
-      console.log(data);
     var hierarchical = [];
     BuildHierarchy(sorted, hierarchical, undefined);
 

@@ -37,10 +37,8 @@ def walk(dir_path):
         if os.path.isdir(os.path.join(dir_path, i)):
             dirs_holder.append(i)
         # Assigns all files to files_holder
-        elif os.path.isfile(os.path.join(dir_path, i)):
+        if os.path.isfile(os.path.join(dir_path, i)):
             files_holder.append(i)
-        else:  # Continues when the loop is complete - Is this necessary? Wouldn't it continue anyway?
-            continue  # Are there other possibilities (not file or dir) that may cause this to break the loop early?
 
     # Loops through the folders in the file system
     for d in dirs_holder:
@@ -114,8 +112,8 @@ def table_gen(info):
         # The folder indent / hierarchy counter
         counter = []
         temp_dir_parts = dir_parts
-        relative_root = info_dict['path']  # Can this be combined with the next line ?
-        parts = relative_root.split(os.sep)  # parts = info_dict['path'].split(os.sep) ?
+        relative_root = info_dict['path']
+        parts = relative_root.split(os.sep)
 
         # Checks if the directory exists in the list
         for part in parts:

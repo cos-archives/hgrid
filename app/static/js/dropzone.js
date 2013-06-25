@@ -926,7 +926,7 @@ require.register("dropzone/lib/dropzone.js", function(exports, require, module){
       if (this.options.createImageThumbnails && file.type.match(/image.*/) && file.size <= this.options.maxThumbnailFilesize * 1024 * 1024) {
         this.createThumbnail(file);
       }
-      return this.accept(file, function(error) {
+      return this.accept(file, function(error, response) {
         if (error) {
           file.accepted = false;
           return _this.errorProcessing(file, error);

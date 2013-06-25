@@ -6,6 +6,7 @@ import json
 from flask import render_template, request
 from hurry.filesize import size, alternative
 from shutil import move
+from werkzeug import secure_filename
 
 info = []
 # Sets the base file directories for the fileviewer
@@ -179,17 +180,38 @@ def dropzonify():
 # The script to upload files from Dropzone.js
 @app.route('/uploader', methods=['GET', 'POST'])
 def uploader():
+    # Set the folder for all uploads
+    upload_folder = "uploads"
+    # Set the file system path to the upload folder
+    uploader_dir = os.path.join(dir_root, upload_folder) # Make sure that they can't create a separate uploads folder? / rewrite this?
     # Make sure the data is sent by a POST method
     if request.method == 'POST':
         print "The method was a POST"
         # Instantiates the date from the POST request
         requested_file = request.files['file']
         # Verifies that a file was passed to the page
+        new_file_name = secure_filename(requested_file.filename)
         if requested_file:
             print "The file was posted"
-            print requested_file  # A test line to verify that the output is correct / in the correct format.
+            print new_file_name  # A test line to verify that the output is correct / in the correct format.
             # Saves the file to the directory
-            requested_file.save(os.path.join(dir_root, requested_file.filename))
+            new_file_path = os.path.join(uploader_dir, new_file_name)
+            if os.path.exists(new_file_path):
+                return "Repeat"
+            else:
+                requested_file.save(new_file_path)
+                # Create a new item and send it back to SlickGrid to rerender
+                info_append = []
+                new_info_item = {}
+                new_info_item['name'] = requested_file.filename
+                new_info_item['path'] = os.path.join(upload_folder, requested_file.filename)
+                new_info_item['parent'] = upload_folder
+                new_info_item['parent_path'] = upload_folder
+                new_info_item['uploader_path'] = os.path.join(upload_folder, requested_file.filename)
+                new_info_item['size'] = os.path.getsize(os.path.join(uploader_dir, requested_file.filename))
+                new_info_item['type'] = "file"
+                info_append.append(new_info_item)
+                return json.dumps(info_append)
         # No file was passed to the page
         else:
             print "The requested file was not posted - no file sent in the request"

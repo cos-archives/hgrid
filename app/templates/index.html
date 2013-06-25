@@ -330,29 +330,29 @@ $(function start() {
 {#                console.log(response);#}
 {#            });#}
 
-{#            var rows=[];#}
-{##}
-{#            var startRow = args.rows[0];#}
-{#            var destID = data[args.insertBefore]['id'];#}
-{#            var destIndex;#}
-{#            var j = 0;#}
-{#            var stopRow;#}
-{#            do{#}
-{#                rows.push(j);#}
-{#                j+=1;#}
-{#                stopRow = j;#}
-{#            }while(data[j]['indent']>data[args.rows[0]]['indent']);#}
-{##}
-{#            var movingData = data.splice(startRow, stopRow);#}
-{#            for (item in data) {#}
-{#                if (item['id'] == destID) {#}
-{#                    destIndex = data.indexOf(item);#}
-{#                }#}
-{#            }#}
-{#            data.splice(destIndex, 0, movingData);#}
-{#            grid.invalidateAllRows();#}
+            var rows=[];
 
-            var rows=args.rows;
+            var startRow = args.rows[0];
+            var destID = data[args.insertBefore]['id'];
+            var destIndex;
+            var j = 0;
+            var stopRow;
+            do{
+                rows.push(j);
+                j+=1;
+                stopRow = j;
+            }while(data[j]['indent']>data[args.rows[0]]['indent']);
+
+            var movingData = data.splice(startRow, stopRow);
+            for (item in data) {
+                if (item['id'] == destID) {
+                    destIndex = data.indexOf(item);
+                }
+            }
+            data.splice(destIndex, 0, movingData);
+            grid.invalidateAllRows();
+
+
             var extractedRows = [], left, right;
             var insertBefore = args.insertBefore;
             left = data.slice(0, insertBefore);

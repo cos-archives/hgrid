@@ -5,6 +5,7 @@ import os
 import json
 from flask import render_template, request
 from hurry.filesize import size, alternative
+from shutil import move
 
 info = []
 # Sets the base file directories for the fileviewer
@@ -212,8 +213,21 @@ def treetable():
 
 
 # The script to move files in Treetable.js
-@app.route('/post', methods=['GET', 'POST'])
-def post():
+@app.route('/tt_post', methods=['GET', 'POST'])
+def tt_post():
     ans = 'Moving %s to %s' % (request.form['src'], request.form['dest'])
     print ans  # A test line to verify that the output is correct / in the correct format.
+    return ans
+
+@app.route('/sg_post', methods=['POST'])
+def sg_post():
+
+    src = os.path.join(dir_root, request.form['src'])
+    dest = os.path.join(dir_root, request.form['dest'])
+    if request.form['dest']=="null":
+        dest=dir_root
+
+    ans = 'Moving %s to %s' % (src, dest)
+    #print ans  # A test line to verify that the output is correct / in the correct format.
+    move(src, dest)
     return ans

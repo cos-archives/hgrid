@@ -43,7 +43,7 @@
             drop: function(e, ui) {
                 var droppedEl = ui.draggable.parents("tr");
                 $("#example").treetable("move", droppedEl.data("ttId"), $(this).data("ttId"));
-                $.post('/post', {src: droppedEl.attr("data-path"), dest: $(this).attr("data-path")}, function(response){
+                $.post('/tt_post', {src: droppedEl.attr("data-path"), dest: $(this).attr("data-path")}, function(response){
                     console.log(response);
                 });
             },

@@ -5,7 +5,7 @@ import os
 import json
 from flask import render_template, request
 from hurry.filesize import size, alternative
-from shutil import move
+from shutil import move, Error
 from werkzeug import secure_filename
 
 info = []
@@ -40,7 +40,8 @@ def walk(dir_path):
             dirs_holder.append(i)
         # Assigns all files to files_holder
         if os.path.isfile(os.path.join(dir_path, i)):
-            files_holder.append(i)
+            if i!=".DS_Store":
+                files_holder.append(i)
 
     # Loops through the folders in the file system
     for d in dirs_holder:
@@ -251,5 +252,21 @@ def sg_post():
 
     ans = 'Moving %s to %s' % (src, dest)
     #print ans  # A test line to verify that the output is correct / in the correct format.
-    move(src, dest)
-    return ans
+    try:
+        move(src, dest)
+    except Error:
+        return "fail"
+    # Clear old instances of info for a fresh data set
+    del info[:]
+    # Initialize the unique ID counter for all files
+    counter = 0
+    # Walk the directory to collect file information. Returns "info".
+    walk(dir_root)
+    #Set's unique IDs to each item of info
+    for i in info:
+        i['unique'] = counter
+
+        counter += 1
+
+    response = json.dumps(info)
+    return json.dumps(info)

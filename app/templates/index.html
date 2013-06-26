@@ -148,7 +148,7 @@ var TaskNameFormatter = function (row, cell, value, columnDef, dataContext) {
     value = value.replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");
     var spacer = "<span style='display:inline-block;height:1px;width:" + (15 * dataContext["indent"]) + "px'></span>";
     var idx = dataView.getIdxById(dataContext.id);
-    if (data[idx + 1] && data[idx + 1].indent > data[idx].indent) {
+    if (data[idx]['type']=='folder') {
         if (dataContext._collapsed) {
             return spacer + " <span class='toggle expand'></span>&nbsp;" + value;
         } else {
@@ -215,46 +215,52 @@ function renderCell(row, cell, value, columnDef, dataContext) {
 }
 
 $(function start() {
-    var indent = 0;
-    var checker ={};
-    var info = {{ info | safe }}
+
+    var y = {{ info | safe }}
+            prep(y);
     // prepare the data
-    for (var i = 0; i < info.length; i++) {
-        var parents = [];
-        var d = (data[i] = {});
-        var parent;
+    function prep(info){
+        data=[];
+        var indent = 0;
+        var checker ={};
+        for (var i = 0; i < info.length; i++) {
+            var parents = [];
+            var d = (data[i] = {});
+            var parent;
 
-        if (info[i]['parent_path']){
-            if (!(info[i]['parent_path'] in checker)){
-                indent++;
-            }
-            else {
-                indent = checker[info[i]['parent_path']];
-            }
-            //parents.push(i);
-        } else {
-            indent=0;
-        }
-
-        d["path"] = info[i]['path'];
-
-        if (info[i]['parent_path']){
-            d["parent_path"]=info[i]['parent_path'];
-            for(var j=0; j<data.length; j++){
-                if (data[j]['path']==d["parent_path"]){
-                    d["parent"]= data[j]['unique'];
+            if (info[i]['parent_path']){
+                if (!(info[i]['parent_path'] in checker)){
+                    indent++;
                 }
+                else {
+                    indent = checker[info[i]['parent_path']];
+                }
+                //parents.push(i);
+            } else {
+                indent=0;
             }
-            checker[info[i]['parent_path']]=indent;
-        } else {
-            d["parent"]=null;
-        }
 
-        d["id"] = i;
-        d["indent"] = indent;
-        d["title"] = info[i]['name'];
-        d["size"] = info[i]['size'];
-        d["unique"] = info[i]['unique'];
+            d["path"] = info[i]['path'];
+
+            if (info[i]['parent_path']){
+                d["parent_path"]=info[i]['parent_path'];
+                for(var j=0; j<data.length; j++){
+                    if (data[j]['path']==d["parent_path"]){
+                        d["parent"]= j;
+                    }
+                }
+                checker[info[i]['parent_path']]=indent;
+            } else {
+                d["parent"]=null;
+            }
+
+            d["id"] = i;
+            d["indent"] = indent;
+            d["title"] = info[i]['name'];
+            d["size"] = info[i]['size'];
+            d["unique"] = info[i]['unique'];
+            d["type"] = info[i]['type'];
+        }
     }
     // initialize the model
     dataView = new Slick.Data.DataView({ inlineFilters: true });
@@ -262,7 +268,6 @@ $(function start() {
     dataView.setItems(data);
     dataView.setFilter(myFilter);
     dataView.endUpdate();
-
     // initialize the grid
     grid = new Slick.Grid("#myGrid", dataView, columns, options);
     initialize();
@@ -270,7 +275,6 @@ $(function start() {
     function onSort(e, args){
         sortAsc = !sortAsc;
         sortcol = args.sortCol.field;
-        console.log(args);
         var sortedData = sortHierarchy();
 
         rebuild(sortedData);
@@ -312,17 +316,6 @@ $(function start() {
 
         moveRowsPlugin.onBeforeMoveRows.subscribe(function (e, args) {
 
-
-
-            {##}
-            {#            move everything based on indents past the current indentation of item being dragged#}
-
-
-
-
-
-
-
             for (var i = 0; i < args.rows.length; i++) {
                 // no point in moving before or after itself
                 for(var j=0; j<data.length; j++){
@@ -331,7 +324,12 @@ $(function start() {
                     }
                     if(data[j]['id']==args.insertBefore){
                         if (data[j-1]){
-                            dest = data[j]['parent_path'];
+                            if(data[j-1]['type']=='folder') {
+                                dest = data[j-1]['path'];
+                            }
+                            else{
+                                dest = data[j-1]['parent_path'];
+                            }
                         }
                         else {
                             dest = null;
@@ -349,7 +347,7 @@ $(function start() {
                         index = false;
                     }
                 }
-                if (args.rows[i] == args.insertBefore || args.rows[i] == args.insertBefore - 1 || index == false) {
+                if (args.rows[i] == args.insertBefore - 1 || index == false) {
                     e.stopPropagation();
                     return false;
                 }
@@ -360,10 +358,71 @@ $(function start() {
 
         moveRowsPlugin.onMoveRows.subscribe(function (e, args) {
             //console.log(args.sortCol);
+            $.post('/sg_post', {src: src, dest: dest}, function(response){
+                if (response=="fail"){
+                    e.stopImmediatePropagation();
+                }
+                else{
+                    var insert = JSON.parse(response);
+                    console.log(data);
+                    prep(insert);
+                    console.log(data);
+                    var rows=[];
 
-            {#            $.post('/sg_post', {src: src, dest: dest}, function(response){#}
-            {#                console.log(response);#}
-            {#            });#}
+                    var j = args.rows[0];
+                    var destID = data[args.insertBefore]['id'];
+                    var destIndex;
+                    //var j = 0;
+                    var stopRow;
+                    do{
+                        rows.push(j);
+                        j+=1;
+                        stopRow = j;
+                    }while(data[j] && data[j]['indent']>data[args.rows[0]]['indent']);
+
+
+                    var extractedRows = [], left, right;
+
+                    var insertBefore = args.insertBefore;
+                    left = data.slice(0, insertBefore);
+                    right = data.slice(insertBefore, data.length);
+
+                    rows.sort(function(a,b) { return a-b; });
+
+                    for (var i = 0; i < rows.length; i++) {
+                        extractedRows.push(data[rows[i]]);
+                    }
+
+                    rows.reverse();
+
+                    for (var i = 0; i < rows.length; i++) {
+                        var row = rows[i];
+                        if (row < insertBefore) {
+                            left.splice(row, 1);
+                        } else {
+                            right.splice(row - insertBefore, 1);
+                        }
+                    }
+
+                    data = left.concat(extractedRows.concat(right));
+
+                    var selectedRows = [];
+                    for (var i = 0; i < rows.length; i++)
+                        selectedRows.push(left.length + i);
+                    {#                    dataView.beginUpdate();#}
+                    {#                    dataView.setItems(data);#}
+                    {#                    dataView.setFilter(myFilter);#}
+                    {#                    dataView.endUpdate();#}
+                    {#                    grid.resetActiveCell();#}
+                    {#                    grid.setData(dataView);#}
+                    {#                    grid.setSelectedRows(selectedRows);#}
+                    {#                    grid.render();#}
+                    {#                    console.log("HERE");#}
+                    var hierarchical = [];
+                    BuildHierarchy(data, hierarchical, undefined);
+                    rebuild(hierarchical);
+                }
+            });
 
             {#            var rows=[];#}
             {##}
@@ -385,41 +444,60 @@ $(function start() {
             {#                }#}
             {#            }#}
             {#            data.splice(destIndex, 0, movingData);#}
-            {#            grid.invalidateAllRows();#}
-
-            var rows = args.rows;
-            var extractedRows = [], left, right;
-            var insertBefore = args.insertBefore;
-            left = data.slice(0, insertBefore);
-            right = data.slice(insertBefore, data.length);
-
-            rows.sort(function(a,b) { return a-b; });
-
-            for (var i = 0; i < rows.length; i++) {
-                extractedRows.push(data[rows[i]]);
-            }
-
-            rows.reverse();
-
-            for (var i = 0; i < rows.length; i++) {
-                var row = rows[i];
-                if (row < insertBefore) {
-                    left.splice(row, 1);
-                } else {
-                    right.splice(row - insertBefore, 1);
-                }
-            }
-
-            data = left.concat(extractedRows.concat(right));
-
-            var selectedRows = [];
-            for (var i = 0; i < rows.length; i++)
-                selectedRows.push(left.length + i);
-
-            grid.resetActiveCell();
-            grid.setData(data);
-            grid.setSelectedRows(selectedRows);
-            grid.render();
+            {#            var rows=[];#}
+            {##}
+            {#            var j = args.rows[0];#}
+            {#            var destID = data[args.insertBefore]['id'];#}
+            {#            var destIndex;#}
+            {#            //var j = 0;#}
+            {#            var stopRow;#}
+            {#            do{#}
+            {#                rows.push(j);#}
+            {#                j+=1;#}
+            {#                stopRow = j;#}
+            {#            }while(data[j]['indent']>data[args.rows[0]]['indent']);#}
+            {##}
+            {##}
+            {#            var extractedRows = [], left, right;#}
+            {##}
+            {#            var insertBefore = args.insertBefore;#}
+            {#            left = data.slice(0, insertBefore);#}
+            {#            right = data.slice(insertBefore, data.length);#}
+            {##}
+            {#            rows.sort(function(a,b) { return a-b; });#}
+            {##}
+            {#            for (var i = 0; i < rows.length; i++) {#}
+            {#                extractedRows.push(data[rows[i]]);#}
+            {#            }#}
+            {##}
+            {#            rows.reverse();#}
+            {##}
+            {#            for (var i = 0; i < rows.length; i++) {#}
+            {#                var row = rows[i];#}
+            {#                if (row < insertBefore) {#}
+            {#                    left.splice(row, 1);#}
+            {#                } else {#}
+            {#                    right.splice(row - insertBefore, 1);#}
+            {#                }#}
+            {#            }#}
+            {##}
+            {#            data = left.concat(extractedRows.concat(right));#}
+            {##}
+            {#            var selectedRows = [];#}
+            {#            for (var i = 0; i < rows.length; i++)#}
+            {#                selectedRows.push(left.length + i);#}
+            {#            dataView.beginUpdate();#}
+            {#            dataView.setItems(data);#}
+            {#            dataView.setFilter(myFilter);#}
+            {#            dataView.endUpdate();#}
+            {#            grid.resetActiveCell();#}
+            {#            grid.setData(dataView);#}
+            {#            grid.setSelectedRows(selectedRows);#}
+            {#            grid.render();#}
+            {#            console.log("HERE");#}
+            {#            var hierarchical = [];#}
+            {#            BuildHierarchy(data, hierarchical, undefined);#}
+            {#            rebuild(hierarchical);#}
         });
 
         grid.registerPlugin(moveRowsPlugin);
@@ -589,9 +667,6 @@ $(function start() {
             {
                 hierarchical.push(sorted[i]);
                 BuildHierarchy(sorted, hierarchical, sorted[i]);
-
-                //hierarchical.push(sorted[i]);
-                //BuildHierarchy(sorted, hierarchical, sorted[i]);
             }
         }
     }

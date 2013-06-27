@@ -177,7 +177,7 @@ $(function start() {
         var dest = [];
 
         moveRowsPlugin.onBeforeMoveRows.subscribe(function (e, args) {
-
+            console.log(args.rows);
             for (var i = 0; i < args.rows.length; i++) {
                 // no point in moving before or after itself
                 for(var j=0; j<data.length; j++){

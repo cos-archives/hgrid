@@ -244,20 +244,21 @@ def tt_post():
 
 @app.route('/sg_post', methods=['POST'])
 def sg_post():
-    print 'Here'
     src_load = json.loads(request.form['src'])
     dest_load = json.loads(request.form['dest'])
 
     for index in range(len(src_load)):
         src = os.path.join(dir_root, src_load[index])
-        dest = os.path.join(dir_root, dest_load[index])
-        if request.form['dest'] == "null":
-           dest=dir_root
+        print dest_load[index]
+        if dest_load[index] is None:
+            dest=dir_root
+        else:
+            dest = os.path.join(dir_root, dest_load[index])
 
-        ans = 'Moving %s to %s' % (src, dest)
-        #print ans  # A test line to verify that the output is correct / in the correct format.
+        # A test line to verify that the output is correct / in the correct format.
         try:
             move(src, dest)
+            print 'Moving %s to %s' % (src, dest)
         except Error:
             return "fail"
 

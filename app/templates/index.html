@@ -115,6 +115,10 @@
                 }
                 // Splice in the new row after the uploads folder
                 data.splice(uploadsFolder['index'] + 1, 0, slickItem);
+                dataView.beginUpdate();
+                dataView.setItems(data);
+                dataView.setFilter(myFilter);
+                dataView.endUpdate();
             }
             // Re-instantiate the grid
             grid.updateRowCount();
@@ -357,7 +361,7 @@ $(function start() {
         });
 
         moveRowsPlugin.onMoveRows.subscribe(function (e, args) {
-            //console.log(args.sortCol);
+
             $.post('/sg_post', {src: src, dest: dest}, function(response){
                 if (response=="fail"){
                     e.stopImmediatePropagation();

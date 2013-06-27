@@ -6,7 +6,7 @@ import json
 from flask import render_template, request
 from hurry.filesize import size, alternative
 from shutil import move, Error
-from werkzeug import secure_filename
+from werkzeug.utils import secure_filename
 
 info = []
 # Sets the base file directories for the fileviewer

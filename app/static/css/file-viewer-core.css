@@ -1,0 +1,23 @@
+.cell-title {
+    font-weight: bold;
+}
+
+.cell-reorder {
+    cursor: move;
+    background: url("../SlickGrid-master/images/drag-handle.png") no-repeat center center;
+}
+
+
+.toggle {
+    height: 9px;
+    width: 9px;
+    display: inline-block;
+}
+
+.toggle.expand {
+    background: url(../SlickGrid-master/images/expand.gif) no-repeat center center;
+}
+
+.toggle.collapse {
+    background: url(../SlickGrid-master/images/collapse.gif) no-repeat center center;
+}

@@ -242,7 +242,7 @@ def tt_post():
     print ans  # A test line to verify that the output is correct / in the correct format.
     return ans
 
-@app.route('/sg_post', methods=['POST'])
+@app.route('/sg_post', methods=['GET', 'POST'])
 def sg_post():
     src_load = json.loads(request.form['src'])
     dest_load = json.loads(request.form['dest'])

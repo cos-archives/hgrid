@@ -4,7 +4,7 @@
 
 .cell-reorder {
     cursor: move;
-    background: url("../SlickGrid-master/images/drag-handle.png") no-repeat center center;
+    background: url('../images/drag-handle.png') no-repeat center center;
 }
 
 
@@ -15,9 +15,9 @@
 }
 
 .toggle.expand {
-    background: url(../SlickGrid-master/images/expand.gif) no-repeat center center;
+    background: url('../images/expand.gif') no-repeat center center;
 }
 
 .toggle.collapse {
-    background: url(../SlickGrid-master/images/collapse.gif) no-repeat center center;
+    background: url('../images/collapse.gif') no-repeat center center;
 }

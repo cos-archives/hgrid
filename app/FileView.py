@@ -244,18 +244,24 @@ def tt_post():
 
 @app.route('/sg_post', methods=['POST'])
 def sg_post():
+    print 'Here'
+    src_load = json.loads(request.form['src'])
+    dest_load = json.loads(request.form['dest'])
 
-    src = os.path.join(dir_root, request.form['src'])
-    dest = os.path.join(dir_root, request.form['dest'])
-    if request.form['dest']=="null":
-        dest=dir_root
+    for index in range(len(src_load)):
+        src = os.path.join(dir_root, src_load[index])
+        dest = os.path.join(dir_root, dest_load[index])
+        if request.form['dest'] == "null":
+           dest=dir_root
 
-    ans = 'Moving %s to %s' % (src, dest)
-    #print ans  # A test line to verify that the output is correct / in the correct format.
-    try:
-        move(src, dest)
-    except Error:
-        return "fail"
+        ans = 'Moving %s to %s' % (src, dest)
+        #print ans  # A test line to verify that the output is correct / in the correct format.
+        try:
+            move(src, dest)
+        except Error:
+            return "fail"
+
+
     # Clear old instances of info for a fresh data set
     del info[:]
     # Initialize the unique ID counter for all files
@@ -265,7 +271,6 @@ def sg_post():
     #Set's unique IDs to each item of info
     for i in info:
         i['unique'] = counter
-
         counter += 1
 
     response = json.dumps(info)

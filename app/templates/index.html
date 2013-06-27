@@ -315,8 +315,8 @@ $(function start() {
             cancelEditOnDrag: true
         });
 
-        var src;
-        var dest;
+        var src = [];
+        var dest = [];
 
         moveRowsPlugin.onBeforeMoveRows.subscribe(function (e, args) {
 
@@ -324,30 +324,30 @@ $(function start() {
                 // no point in moving before or after itself
                 for(var j=0; j<data.length; j++){
                     if(data[j]['id']==args.rows[i]){
-                        src = data[j]['path'];
+                        src[i] = data[j]['path'];
                     }
                     if(data[j]['id']==args.insertBefore){
                         if (data[j-1]){
                             if(data[j-1]['type']=='folder') {
-                                dest = data[j-1]['path'];
+                                dest[i] = data[j-1]['path'];
                             }
                             else{
-                                dest = data[j-1]['parent_path'];
+                                dest[i] = data[j-1]['parent_path'];
                             }
                         }
                         else {
-                            dest = null;
+                            dest[i] = null;
                         }
                     }
                 }
                 if (!dest){
-                    dest = null;
+                    dest[i] = null;
                 }
 
                 var index = true;
 
-                if (dest!=null){
-                    if (dest.indexOf(src) == 0){
+                if (dest[i]!=null){
+                    if (dest[i].indexOf(src[i]) == 0){
                         index = false;
                     }
                 }
@@ -361,8 +361,9 @@ $(function start() {
         });
 
         moveRowsPlugin.onMoveRows.subscribe(function (e, args) {
-
-            $.post('/sg_post', {src: src, dest: dest}, function(response){
+            console.log(src);
+            console.log(dest);
+            $.post('/sg_post', {src: JSON.stringify(src), dest: JSON.stringify(dest)}, function(response){
                 if (response=="fail"){
                     e.stopImmediatePropagation();
                 }
@@ -374,7 +375,7 @@ $(function start() {
                     var rows=[];
 
                     var j = args.rows[0];
-                    var destID = data[args.insertBefore]['id'];
+                    //var destID = data[args.insertBefore]['id'];
                     var destIndex;
                     //var j = 0;
                     var stopRow;
@@ -413,10 +414,12 @@ $(function start() {
                     var selectedRows = [];
                     for (var i = 0; i < rows.length; i++)
                         selectedRows.push(left.length + i);
-                    {#                    dataView.beginUpdate();#}
-                    {#                    dataView.setItems(data);#}
-                    {#                    dataView.setFilter(myFilter);#}
-                    {#                    dataView.endUpdate();#}
+                    dataView.beginUpdate();
+                    dataView.setItems(data);
+                    dataView.setFilter(myFilter);
+                    dataView.endUpdate();
+                    grid.invalidate();
+                    grid.render();
                     {#                    grid.resetActiveCell();#}
                     {#                    grid.setData(dataView);#}
                     {#                    grid.setSelectedRows(selectedRows);#}

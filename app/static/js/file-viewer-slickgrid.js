@@ -30,6 +30,7 @@ var sortAsc = true;
 //Create columns
 var columns = [
     {id: "#", name: "", width: 40, behavior: "selectAndMove", selectable: false, resizable: false, cssClass: "cell-reorder dnd"},
+    {id: "unique", name: "ID", width: 40, field:"unique", sortable: true},
     {id: "title", name: "Title", field: "title", width: 400, cssClass: "cell-title", formatter: TaskNameFormatter, editor: Slick.Editors.Text, validator: requiredFieldValidator, sortable: true, defaultSortAsc: true},
     {id: "size", name: "Size", field: "size", width: 200, editor: Slick.Editors.Text, sortable: true}
 ];
@@ -37,7 +38,6 @@ var columns = [
 //SlickGrid options
 var options = {
     editable: false,
-    enableAddRow: true,
     enableCellNavigation: true,
     asyncEditorLoading: false,
     enableColumnReorder: true
@@ -176,13 +176,13 @@ $(function (){
 
         //Before rows are moved, make sure their dest is valid, document source and target
         moveRowsPlugin.onBeforeMoveRows.subscribe(function (e, args) {
-
             for (var i = 0; i < args.rows.length; i++) {
                 // no point in moving before or after itself
                 for(var j=0; j<data.length; j++){
                     if(data[j]['id']==args.rows[i]){
                         src[i] = data[j]['path'];
                     }
+                    console.log(args.insertBefore);
                     if(data[j]['id']==args.insertBefore){
                         if (data[j-1]){
                             if(data[j-1]['type']=='folder') {
@@ -196,19 +196,30 @@ $(function (){
                             dest[i] = null;
                         }
                     }
+                    if(args.insertBefore>data.length-1){
+                        var m = args.insertBefore
+                        if (data[m-1]){
+                            if(data[m-1]['type']=='folder') {
+                                dest[i] = data[m-1]['path'];
+                            }
+                            else{
+                                dest[i] = data[m-1]['parent_path'];
+                            }
+                        }
+                    }
                 }
-                if (!dest){
+                if (!dest[i]){
                     dest[i] = null;
                 }
-
+                console.log(dest[i]);
                 var index = true;
 
                 if (dest[i]!=null){
-                    if (dest[i].indexOf(src[i]) == 0){
+                    if (dest[i].indexOf(src[i]) == 0 || dest=="catch"){
                         index = false;
                     }
                 }
-                if (args.rows[i] == args.insertBefore - 1 || index == false) {
+                if (args.rows[i] == args.insertBefore - 1 || index == false || src[i] == "uploads" || dest[i] == "uploads") {
                     e.stopPropagation();
                     return false;
                 }
@@ -219,6 +230,7 @@ $(function (){
 
         //When rows are moved post to server and update data
         moveRowsPlugin.onMoveRows.subscribe(function (e, args) {
+            console.log(dest);
             //Post to server
             $.post('/sg_post', {src: JSON.stringify(src), dest: JSON.stringify(dest)}, function(response){
                 //Make sure move succeeds

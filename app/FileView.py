@@ -246,7 +246,6 @@ def tt_post():
 def sg_post():
     src_load = json.loads(request.form['src'])
     dest_load = json.loads(request.form['dest'])
-
     for index in range(len(src_load)):
         src = os.path.join(dir_root, src_load[index])
         print dest_load[index]

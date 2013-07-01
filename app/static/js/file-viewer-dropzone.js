@@ -1,4 +1,5 @@
-myDropzone.on("success", function(file) {
+$(document).ready(function() {
+    myDropzone.on("success", function(file) {
     // Assign values to the uploads folder, so we can insert the file in the correct spot in the view
     var uploadsFolder = {};
     // Check if the server says that the file exists already
@@ -52,5 +53,6 @@ myDropzone.on("success", function(file) {
     // Re-instantiate the grid
     grid.updateRowCount();
     grid.invalidate();
-    grid.render()
+    grid.render();
+    });
 });

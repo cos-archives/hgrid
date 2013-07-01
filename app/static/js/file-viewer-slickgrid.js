@@ -428,20 +428,31 @@ $(function (){
               return;
             }
             var rowsToDelete = dd.rows.sort().reverse();
-            console.log(data[rowsToDelete]);
-            $.post('/file_deleter', {grid_item: JSON.stringify(data[rowsToDelete])}, function(response) {
-                console.log(response);
-                for (var i = 0; i < rowsToDelete.length; i++) {
-                  data.splice(rowsToDelete[i], 1);
-                }
-                if (response) {
-                    dataView.setItems(data);
-                    grid.invalidate();
-                    grid.setSelectedRows([]);
-                } else {
-                    
-                }
-            });
+            var confirm_delete = confirm("Are you sure you want to delete this file?");
+            if (confirm_delete == true) {
+                $.post('/file_deleter', {grid_item: JSON.stringify(data[rowsToDelete])}, function(response) {
+                    if (response == "fail") {
+                        alert("This file can not be deleted");
+                    } else {
+                        // Delete the File
+                        for (var i = 0; i < rowsToDelete.length; i++) {
+//                          // Count the child files to delete
+//                          files_to_delete_count = 1;
+//                          // pass through the rows to delete and remove the file AND it's children from data
+//                          for (var j = rowsToDelete[i]; j < data.length; j++) {
+//                              if (data[j+1]['indent'] > data[j]['indent']){
+//                                  files_to_delete_count++;
+//                              }
+                              data.splice(rowsToDelete[i], 1);
+//                              data.splice(rowsToDelete[i], files_to_delete_count);
+//                          }
+                        }
+                        dataView.setItems(data);
+                        grid.invalidate();
+                        grid.setSelectedRows([]);
+                    }
+                });
+            }
           });
 
         //Update the item when edited
@@ -488,7 +499,6 @@ $(function (){
 
         //If amount of rows are changed, update and render
         dataView.onRowCountChanged.subscribe(function (e, args) {
-            console.log("HELLO");
             grid.updateRowCount();
             grid.render();
         });

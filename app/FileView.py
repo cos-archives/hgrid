@@ -4,7 +4,7 @@ from app import app
 import os
 import json
 from flask import render_template, request
-from shutil import move, Error
+from shutil import move, Error, rmtree
 from werkzeug.utils import secure_filename
 
 info = []
@@ -181,9 +181,30 @@ def sg_move():
 # Delete Files passed by the grid
 @app.route('/file_deleter', methods=['GET', 'POST'])
 def file_deleter():
-    print json.load(request.form['grid_item'])
-    return "foo"
+    item = json.loads(request.form['grid_item'])
+    file_name = item['title']
+    file_path = os.path.join(dir_root, item['path'])
+    # print file_path
 
+    if item['path']=="uploads":
+        return "fail"
+
+    print file_name
+    print file_path
+    if (file_path.find(dir_root)==0):
+        if item['type'] == "file":
+            try:
+                os.remove(file_path)
+                print 'Deleting %s at %s' % (file_name, file_path)
+            except Error:
+                return "fail"
+        else:
+            try:
+                rmtree(file_path)
+                print 'Deleting %s at %s' % (file_name, file_path)
+            except Error:
+                return "fail"
+    return file_name
 
 # Edit the file name passed from the Grid
 @app.route('/sg_edit', methods=['GET', 'POST'])

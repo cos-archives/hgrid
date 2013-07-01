@@ -37,7 +37,7 @@ def walk(dir_path):
         # Assigns all folders to dirs_holder
         if os.path.isdir(os.path.join(dir_path, i)):
             dirs_holder.append(i)
-        # Assigns all files to files_holder
+            # Assigns all files to files_holder
         if os.path.isfile(os.path.join(dir_path, i)):
             if i!=".DS_Store":
                 files_holder.append(i)
@@ -57,7 +57,7 @@ def walk(dir_path):
         # If it doesn't have a parent, just return the path information.
         else:
             appender['name'] = appender['path']
-        # Calls the function folder_size to get the folder size
+            # Calls the function folder_size to get the folder size
         appender['size'] = folder_size(os.path.join(dir_path, d))
         info.append(appender)
         # Recursively calls the walk function on all child files and folders
@@ -95,7 +95,7 @@ def index():
         i['unique'] = counter
         counter += 1
 
-    print json.dumps(info)  # A test line to verify that the output is correct / in the correct format.
+    #print json.dumps(info)  # A test line to verify that the output is correct / in the correct format.
     return render_template("index.html", info=json.dumps(info))
 
 
@@ -143,8 +143,8 @@ def uploader():
 
 
 # Move the files passed from the Grid
-@app.route('/sg_post', methods=['GET', 'POST'])
-def sg_post():
+@app.route('/sg_move', methods=['GET', 'POST'])
+def sg_move():
     src_load = json.loads(request.form['src'])
     dest_load = json.loads(request.form['dest'])
     for index in range(len(src_load)):
@@ -176,3 +176,28 @@ def sg_post():
 
     response = json.dumps(info)
     return json.dumps(info)
+
+# Edit the file name passed from the Grid
+@app.route('/sg_edit', methods=['GET', 'POST'])
+def sg_edit():
+    item = json.loads(request.form['grid_item'])
+    old_title = os.path.join(dir_root, item['path'])
+
+    if item['path']=="uploads":
+        return "fail"
+
+    if 'parent_path' in item:
+        parent_path = os.path.join(dir_root, item['parent_path'])
+        ans = os.path.join(item['parent_path'], item['title'])
+    else:
+        parent_path = dir_root
+        ans = item['title']
+    new_title = os.path.join(parent_path, item['title'])
+    print old_title
+    print new_title
+    try:
+        move(old_title, new_title)
+        print 'Changing name from %s to %s' % (os.path.basename(old_title), os.path.basename(new_title))
+    except Error:
+        return "fail"
+    return ans

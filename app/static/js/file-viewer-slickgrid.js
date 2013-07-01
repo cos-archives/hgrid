@@ -30,7 +30,6 @@ var sortAsc = true;
 //Create columns
 var columns = [
     {id: "#", name: "", width: 40, behavior: "selectAndMove", selectable: false, resizable: false, cssClass: "cell-reorder dnd"},
-    {id: "unique", name: "ID", width: 40, field:"unique", sortable: true},
     {id: "title", name: "Title", field: "title", width: 400, cssClass: "cell-title", formatter: TaskNameFormatter, editor: Slick.Editors.Text, validator: requiredFieldValidator, sortable: true, defaultSortAsc: true},
     {id: "size", name: "Size", field: "size", width: 200, editor: Slick.Editors.Text, sortable: true}
 ];
@@ -145,7 +144,7 @@ $(function (){
         data = sortedData;
         var reorderedColumns=[];
         var oldColumns=grid.getColumns();
-
+        console.log(sortcol);
         for(i=0; i<oldColumns.length; i++){
             reorderedColumns.push(oldColumns[i]);
         }
@@ -215,7 +214,7 @@ $(function (){
                 var index = true;
 
                 if (dest[i]!=null){
-                    if (dest[i].indexOf(src[i]) == 0 || dest=="catch"){
+                    if (dest[i].indexOf(src[i]) == 0 || dest=="catch" || dest[i].indexOf("uploads") == 0){
                         index = false;
                     }
                 }
@@ -292,6 +291,8 @@ $(function (){
 //                    grid.render();
 
                     //Rebuild hierarchy and destroy/initialize grid
+                    sortcol = "unique";
+                    var data_sorted = data.sort(comparer);
                     var hierarchical = [];
                     BuildHierarchy(data, hierarchical, undefined);
                     rebuild(hierarchical);
@@ -475,8 +476,7 @@ $(function (){
     }
 
     //Rebuilds parent id hierarchy
-    function BuildHierarchy(sorted, hierarchical, parent)
-    {
+    function BuildHierarchy(sorted, hierarchical, parent){
         for(var i=0; i < sorted.length; i++)
         {
             var item = sorted[i];
@@ -487,8 +487,7 @@ $(function (){
             else{
                 parentId = undefined;
             }
-            if(item.parent == parentId)
-            {
+            if(item.parent == parentId){
                 hierarchical.push(sorted[i]);
                 BuildHierarchy(sorted, hierarchical, sorted[i]);
             }

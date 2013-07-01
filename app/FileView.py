@@ -191,16 +191,16 @@ def file_deleter():
 
     print file_name
     print file_path
-    if (file_path.find(dir_root)==0):
+    if file_path.find(dir_root) == 0 :
         if item['type'] == "file":
             try:
-                os.remove(file_path)
+                #os.remove(file_path)
                 print 'Deleting %s at %s' % (file_name, file_path)
             except Error:
                 return "fail"
         else:
             try:
-                rmtree(file_path)
+                #rmtree(file_path)
                 print 'Deleting %s at %s' % (file_name, file_path)
             except Error:
                 return "fail"

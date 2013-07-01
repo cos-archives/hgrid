@@ -422,6 +422,8 @@ $(function (){
             }
             $(dd.available).css("background", "pink");
           })
+
+            //Working, but being called over and over after sort
           .bind("drop", function (e, dd) {
 //          .bind("dragend", function (e, dd) {
             if (dd.mode != "recycle") {
@@ -434,22 +436,35 @@ $(function (){
                     if (response == "fail") {
                         alert("This file can not be deleted");
                     } else {
-                        // Delete the File
-                        for (var i = 0; i < rowsToDelete.length; i++) {
-//                          // Count the child files to delete
-//                          files_to_delete_count = 1;
-//                          // pass through the rows to delete and remove the file AND it's children from data
-//                          for (var j = rowsToDelete[i]; j < data.length; j++) {
-//                              if (data[j+1]['indent'] > data[j]['indent']){
-//                                  files_to_delete_count++;
+                    var rows=[];
+                    var j = rowsToDelete[0];
+                    var stopRow;
+                    do{
+                        rows.push(j);
+                        j+=1;
+                        stopRow = j;
+                    }while(data[j] && data[j]['indent']>data[rowsToDelete[0]]['indent']);
+                     data.splice(rows[0], rows.length);
+//                        // Delete the File
+//                            for (var i = 0; i < rowsToDelete.length; i++) {
+//                              // Count the child files to delete
+//                              files_to_delete_count = 1;
+//                              // pass through the rows to delete and remove the file AND it's children from data
+//                              for (var j = rowsToDelete[i]; j < data.length; j++) {
+//                                  if (data[j+1]['indent'] > data[j]['indent']){
+//                                      files_to_delete_count++;
+//                                  }
+//                                  data.splice(rowsToDelete[i], 1);
+//                                  data.splice(rowsToDelete[i], files_to_delete_count);
 //                              }
-                              data.splice(rowsToDelete[i], 1);
-//                              data.splice(rowsToDelete[i], files_to_delete_count);
-//                          }
-                        }
-                        dataView.setItems(data);
+//                            }
+                        console.log(data);
+                        sortcol="unique";
+                        var sorted = sortHierarchy();
+                        dataView.setItems(sorted);
                         grid.invalidate();
                         grid.setSelectedRows([]);
+                        grid.render();
                     }
                 });
             }
@@ -545,6 +560,7 @@ $(function (){
             if(item.parent == parentId){
                 hierarchical.push(sorted[i]);
                 BuildHierarchy(sorted, hierarchical, sorted[i]);
+
             }
         }
     }

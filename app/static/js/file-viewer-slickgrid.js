@@ -231,7 +231,7 @@ $(function (){
         moveRowsPlugin.onMoveRows.subscribe(function (e, args) {
             console.log(dest);
             //Post to server
-            $.post('/sg_post', {src: JSON.stringify(src), dest: JSON.stringify(dest)}, function(response){
+            $.post('/sg_move', {src: JSON.stringify(src), dest: JSON.stringify(dest)}, function(response){
                 //Make sure move succeeds
                 if (response=="fail"){
                     e.stopImmediatePropagation();
@@ -446,7 +446,18 @@ $(function (){
 
         //Update the item when edited
         grid.onCellChange.subscribe(function (e, args) {
-            dataView.updateItem(args.item.id, args.item);
+            grid.getOptions().editable=false;
+            $.post('/sg_edit', {grid_item: JSON.stringify(args.item)}, function(new_title){
+                if(new_title!="fail"){
+                    args.item['path']=new_title;
+                    dataView.updateItem(args.item.id, args.item);
+                }
+                else{
+                    args.item['title']=args.item['path'];
+                    alert("You can't change the uploads folder!");
+                    dataView.updateItem(args.item.id, args.item);
+                }
+            });
         });
 
         //When expand/collapse clicked, show/hide children
@@ -464,11 +475,20 @@ $(function (){
                 }
                 e.stopImmediatePropagation();
             }
+            grid.getOptions().editable=false;
+        });
+
+        //When a cell is double clicked, make it editable (unless it's uploads)
+        grid.onDblClick.subscribe(function (e, args) {
+            if(data[grid.getActiveCell().row]['path']!="uploads" && grid.getActiveCell().cell==1){
+                grid.getOptions().editable=true;
+            }
         });
 
 
         //If amount of rows are changed, update and render
         dataView.onRowCountChanged.subscribe(function (e, args) {
+            console.log("HELLO");
             grid.updateRowCount();
             grid.render();
         });

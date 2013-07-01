@@ -71,16 +71,11 @@ li {
 }
 
 .options-panel {
-  -moz-border-radius: 6px;
-  -webkit-border-radius: 6px;
   border: 1px solid silver;
   background: #f0f0f0;
-  padding: 4px;
   margin-bottom: 20px;
-  width: 320px;
-  position: absolute;
-  top: 0px;
-  left: 650px;
+  width: 600px;
+  height: 100px;
 }
 
 /* Individual cell styles */

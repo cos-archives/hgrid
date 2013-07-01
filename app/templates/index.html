@@ -10,26 +10,33 @@
 </head>
 <body>
 
+<div class="options-panel">
+    <div class="dz-preview dz-file-preview" style="border-right: 2px solid #11557C; width:388px; height:90px; padding: 5px; float:left;">
+        Upload Preview Box
+      <div class="dz-details">
+        <div class="dz-filename"><span data-dz-name></span></div>
+        <div class="dz-size" data-dz-size></div>
+        <img data-dz-thumbnail />
+      </div>
+      <div class="dz-progress"><span class="dz-upload" data-dz-uploadprogress></span></div>
+      <div class="dz-success-mark"><span></span></div>
+      <div class="dz-error-mark"><span></span></div>
+      <div class="dz-error-message"><span data-dz-errormessage></span></div>
+    </div>
+    <div id="slick-recycle" class="recycle-bin" style="width: 190px; height:90px; padding: 5px; float:right;">Recycle Bin</div>
+</div>
 <div id="myGrid" class="dropzone dz-Clickable" style="width:600px;height:500px;"></div>
 
-<div class="dz-preview dz-file-preview">
-  <div class="dz-details">
-    <div class="dz-filename"><span data-dz-name></span></div>
-    <div class="dz-size" data-dz-size></div>
-    <img data-dz-thumbnail />
-  </div>
-  <div class="dz-progress"><span class="dz-upload" data-dz-uploadprogress></span></div>
-  <div class="dz-success-mark"><span>?</span></div>
-  <div class="dz-error-mark"><span>?</span></div>
-  <div class="dz-error-message"><span data-dz-errormessage></span></div>
-</div>
+
 
 <script src="/static/js/firebugx.js"></script>
 <script src="/static/js/jquery-1.7.min.js"></script>
 <script src="/static/js/jquery-ui-1.8.16.custom.min.js"></script>
 <script src="/static/js/jquery.event.drag-2.2.js"></script>
 <script src="/static/js/dropzone.js"></script>
-
+<script>
+    var myDropzone = new Dropzone("#myGrid", {url: "/uploader"} );
+</script>
 <script src="/static/js/file-viewer-dropzone.js"></script>
 
 <script src="/static/js/slick-grid-dependencies/slick.core.js"></script>

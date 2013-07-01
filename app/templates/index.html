@@ -10,7 +10,19 @@
 </head>
 <body>
 
-<div id="myGrid" style="width:600px;height:500px;"></div>
+<div id="myGrid" class="dropzone dz-Clickable" style="width:600px;height:500px;"></div>
+
+<div class="dz-preview dz-file-preview">
+  <div class="dz-details">
+    <div class="dz-filename"><span data-dz-name></span></div>
+    <div class="dz-size" data-dz-size></div>
+    <img data-dz-thumbnail />
+  </div>
+  <div class="dz-progress"><span class="dz-upload" data-dz-uploadprogress></span></div>
+  <div class="dz-success-mark"><span>?</span></div>
+  <div class="dz-error-mark"><span>?</span></div>
+  <div class="dz-error-message"><span data-dz-errormessage></span></div>
+</div>
 
 <script src="/static/js/firebugx.js"></script>
 <script src="/static/js/jquery-1.7.min.js"></script>

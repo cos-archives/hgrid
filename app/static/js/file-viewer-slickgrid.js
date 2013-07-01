@@ -397,27 +397,52 @@ $(function (){
         });
 
         grid.onDragEnd.subscribe(function (e, dd) {
+            if (dd.mode != "recycle") {
+                return;
+            }
             dd.helper.remove();
             $(dd.available).css("background", "beige");
         });
         //End drag helper functions
 
-        //Create dropzone
-        $("#dropzone")
-            .bind("dropstart", function (e, dd) {
-                $(this).css("background", "yellow");
-            })
-            .bind("dropend", function (e, dd) {
-                $(dd.available).css("background", "pink");
-            })
-            .bind("drop", function (e, dd) {
-                var rowsToDelete = dd.rows.sort().reverse();
+        // Return Mode to normal after drop
+        $.drop({mode: "mouse"});
+        //Create Drop Zone
+        $("#slick-recycle")
+//          .bind("dropstart", function (e, dd) {
+          .bind("dragend", function (e, dd) {
+            if (dd.mode != "recycle") {
+              return;
+            }
+            $(this).css("background", "yellow");
+          })
+          .bind("dropend", function (e, dd) {
+            if (dd.mode != "recycle") {
+              return;
+            }
+            $(dd.available).css("background", "pink");
+          })
+          .bind("drop", function (e, dd) {
+//          .bind("dragend", function (e, dd) {
+            if (dd.mode != "recycle") {
+              return;
+            }
+            var rowsToDelete = dd.rows.sort().reverse();
+            console.log(data[rowsToDelete]);
+            $.post('/file_deleter', {grid_item: JSON.stringify(data[rowsToDelete])}, function(response) {
+                console.log(response);
                 for (var i = 0; i < rowsToDelete.length; i++) {
-                    data.splice(rowsToDelete[i], 1);
+                  data.splice(rowsToDelete[i], 1);
                 }
-                grid.invalidate();
-                grid.setSelectedRows([]);
+                if (response) {
+                    dataView.setItems(data);
+                    grid.invalidate();
+                    grid.setSelectedRows([]);
+                } else {
+                    
+                }
             });
+          });
 
         //Update the item when edited
         grid.onCellChange.subscribe(function (e, args) {

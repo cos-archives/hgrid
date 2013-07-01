@@ -176,3 +176,11 @@ def sg_post():
 
     response = json.dumps(info)
     return json.dumps(info)
+
+
+# Delete Files passed by the grid
+@app.route('/file_deleter', methods=['GET', 'POST'])
+def file_deleter():
+    print json.load(request.form['grid_item'])
+
+    return "foo"

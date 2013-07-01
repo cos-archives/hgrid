@@ -1,4 +1,3 @@
-var myDropzone = new Dropzone("div#myGrid", {url: "/uploader"} );
 myDropzone.on("success", function(file) {
     // Assign values to the uploads folder, so we can insert the file in the correct spot in the view
     var uploadsFolder = {};

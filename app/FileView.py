@@ -4,7 +4,6 @@ from app import app
 import os
 import json
 from flask import render_template, request
-from hurry.filesize import size, alternative
 from shutil import move, Error
 from werkzeug.utils import secure_filename
 
@@ -82,72 +81,6 @@ def walk(dir_path):
         info.append(appender)
 
 
-# Generates an HTML table for Treetable.js - Returns html #
-def table_gen(info):
-    info = info
-    dir_parts = {'paths': {}}
-    html = '<thead>\n<tr>\n<th>Name</th>\n<th>Kind</th>\n<th>Size</th>\n</tr>\n</thead>\n<tbody>'
-
-    # Loops through info to create a hierarchy for Treetable.js
-    for info_dict in info:
-        # The folder indent / hierarchy counter
-        counter = []
-        temp_dir_parts = dir_parts
-        relative_root = info_dict['path']
-        parts = relative_root.split(os.sep)
-
-        # Checks if the directory exists in the list
-        for part in parts:
-            # Path has already been encountered
-            if part in temp_dir_parts['paths']:
-                # Append this level's count to our part's counter
-                counter.append(str(len(temp_dir_parts['paths'])))
-
-            # New path segment
-            else:
-                counter.append(str(len(temp_dir_parts['paths'])+1))
-                # Create this new part, with a value of 1.
-                if info_dict['type'] is 'folder':
-                    temp_dir_parts['paths'][part] = {'paths': {}}
-                else:
-                    temp_dir_parts['paths'][part] = {'paths': None}
-
-            temp_dir_parts = temp_dir_parts['paths'][part]
-
-        # Checking if this is a file
-        if temp_dir_parts['paths'] is None:
-            img_type = '<span class="file">'
-            file_type = '<td>File</td>'
-            file_size = '<td>{sizer}</td>'.format(sizer=size(info_dict['size'], system=alternative))
-        # This is a folder
-        else:
-            img_type = '<span class="folder">'
-            file_type = '<td>Folder</td>'
-            file_size = '<td>{sizer}</td>'.format(sizer='--')
-
-        # If the folder depth is below the top level
-        if len(counter) > 1:
-            parent_count = counter[:]
-            del parent_count[len(parent_count)-1]
-            # Creates a number value for the parent folder
-            parent_id = '-'.join(parent_count)
-            # Creates a number value for the current folder
-            current_id = '-'.join(counter)
-            html += '<tr data-tt-id="{current_id}" data-tt-parent-id="{parent_id}" data-path="{path}">' \
-                    '<td>{img_type}{name}' \
-                    '</span></td>{file_type}{size}</tr>\n'.format(current_id=current_id, parent_id=parent_id,
-                                                                  path=relative_root, img_type=img_type,
-                                                                  name=part, file_type=file_type, size=file_size)
-        else:
-            current_id = '-'.join(counter)
-            html += '<tr data-tt-id="{current_id}" data-path="{path}"><td>{img_type}{name}</span>' \
-                    '</td>{file_type}{size}' \
-                    '</tr>\n'.format(current_id=current_id, path=relative_root, img_type=img_type,
-                                     name=part, file_type=file_type, size=file_size)
-    html += '</tbody>\n'
-    return html
-
-
 # Main osf-fileviewer page, integrating SlickGrid.js
 @app.route('/', methods=['GET', 'POST'])
 def index():
@@ -164,18 +97,6 @@ def index():
 
     print json.dumps(info)  # A test line to verify that the output is correct / in the correct format.
     return render_template("index.html", info=json.dumps(info))
-
-
-# A test page to integrate Dropzone.js with SlickGrid.js
-@app.route('/dropzonify', methods=['GET', 'POST'])
-def dropzonify():
-    # Clear old instances of info for a fresh data set
-    del info[:]
-    # Walk the directory to collect file information. Returns "info"
-    walk(dir_root)
-    print json.dumps(info)  # A test line to verify that the output is correct / in the correct format.
-    return render_template("dropzonify.html",
-                           info=json.dumps(info))
 
 
 # The script to upload files from Dropzone.js
@@ -221,27 +142,7 @@ def uploader():
         print "The file must be sent by POST"
 
 
-# A test page for displaying the files with Treetable.js
-@app.route('/treetable', methods=['GET', 'POST'])
-def treetable():
-    del info[:]
-    # Walk the directory to collect file information. Returns "info"
-    walk(dir_root)
-    print info  # A test line to verify that the output is correct / in the correct format.
-    # Generates the HTML output for treetable
-    html = table_gen(info)
-    print html  # A test line to verify that the output is correct / in the correct format.
-    return render_template("treetable.html",
-                           inserter=html)
-
-
-# The script to move files in Treetable.js
-@app.route('/tt_post', methods=['GET', 'POST'])
-def tt_post():
-    ans = 'Moving %s to %s' % (request.form['src'], request.form['dest'])
-    print ans  # A test line to verify that the output is correct / in the correct format.
-    return ans
-
+# Move the files passed from the Grid
 @app.route('/sg_post', methods=['GET', 'POST'])
 def sg_post():
     src_load = json.loads(request.form['src'])

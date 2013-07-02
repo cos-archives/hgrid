@@ -136,12 +136,20 @@ $(function (){
     function onSort(e, args){
         sortAsc = !sortAsc;
         sortcol = args.sortCol.field;
-        var sortedData = grid.sortHierarchy();
+        var new_data = grid.sortHierarchy();
+        prep_java(new_data);
+        dataView.setItems(data);
+        grid.invalidate();
+        grid.setSelectedRows([]);
+        grid.render();
+    }
+
+    function prep_java(sortedData){
         var checker = {};
         var indent = 0;
         for (var i = 0; i < sortedData.length; i++) {
             var parents = [];
-            var d = (data[i] = {});
+            var d = {};
             var parent;
 
             //Check if item has a parent
@@ -182,11 +190,8 @@ $(function (){
             d["size_read"] = sortedData[i]['size_read']
             d["unique"] = sortedData[i]['unique'];
             d["type"] = sortedData[i]['type'];
+            data[i]=d;
         }
-        dataView.setItems(data);
-        grid.invalidate();
-        grid.setSelectedRows([]);
-        grid.render();
     }
 
     //Sets functions for moving rows, sorting, etc.
@@ -306,9 +311,12 @@ $(function (){
                     var selectedRows = [];
                     for (var i = 0; i < rows.length; i++)
                         selectedRows.push(left.length + i);
+
                     sortcol="unique";
                     var sorted = grid.sortHierarchy();
-                    dataView.setItems(sorted);
+
+                    prep_java(sorted);
+                    dataView.setItems(data);
                     grid.invalidate();
                     grid.setSelectedRows([]);
                     grid.render();

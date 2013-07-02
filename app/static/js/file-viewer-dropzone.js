@@ -37,10 +37,7 @@ $(document).ready(function() {
             path: slickPath,
             id: slickId,
             unique: slickUnique,
-            indent: slickIndent,
-            finish: "01/05/2009",
-            start: "01/01/2009",
-            percentComplete: 45
+            indent: slickIndent
         }
         // Splice in the new row after the uploads folder
         data.splice(uploadsFolder['index'] + 1, 0, slickItem);

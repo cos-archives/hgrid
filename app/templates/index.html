@@ -11,17 +11,8 @@
 <body>
 
 <div class="options-panel">
-    <div class="dz-preview dz-file-preview" style="border-right: 2px solid #11557C; width:388px; height:90px; padding: 5px; float:left;">
-        Upload Preview Box
-      <div class="dz-details">
-        <div class="dz-filename"><span data-dz-name></span></div>
-        <div class="dz-size" data-dz-size></div>
-        <img data-dz-thumbnail />
-      </div>
-      <div class="dz-progress"><span class="dz-upload" data-dz-uploadprogress></span></div>
-      <div class="dz-success-mark"><span></span></div>
-      <div class="dz-error-mark"><span></span></div>
-      <div class="dz-error-message"><span data-dz-errormessage></span></div>
+    <div id="drop-preview-panel" class="dropzone-previews" style="border-right: 2px solid #11557C; width:388px; min-height:90px; padding: 5px; float:left;">
+        <h2>Upload Progress</h2>
     </div>
     <div id="slick-recycle" class="recycle-bin" style="width: 190px; height:90px; padding: 5px; float:right;">Recycle Bin</div>
 </div>
@@ -36,7 +27,10 @@
 <script src="/static/js/jquery.event.drop-2.2.js"></script>
 <script src="/static/js/dropzone.js"></script>
 <script>
-    var myDropzone = new Dropzone("#myGrid", {url: "/uploader"} );
+    var myDropzone = new Dropzone("#myGrid", {
+        url: "/uploader",
+        previewsContainer: "#drop-preview-panel"
+    } );
 </script>
 <script src="/static/js/file-viewer-dropzone.js"></script>
 

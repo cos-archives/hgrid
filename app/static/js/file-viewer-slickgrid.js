@@ -30,6 +30,7 @@ var sortAsc = true;
 //Create columns
 var columns = [
     {id: "#", name: "", width: 40, behavior: "selectAndMove", selectable: false, resizable: false, cssClass: "cell-reorder dnd"},
+    {id: "unique", name: "ID", field: "id", width: 40, sortable: true},
     {id: "title", name: "Title", field: "title", width: 400, cssClass: "cell-title", formatter: TaskNameFormatter, editor: Slick.Editors.Text, validator: requiredFieldValidator, sortable: true, defaultSortAsc: true},
     {id: "size", name: "Size", field: "size", width: 200, editor: Slick.Editors.Text, sortable: true}
 ];
@@ -134,7 +135,7 @@ $(function (){
     function onSort(e, args){
         sortAsc = !sortAsc;
         sortcol = args.sortCol.field;
-        var sortedData = sortHierarchy();
+        var sortedData = grid.sortHierarchy();
 
         rebuild(sortedData);
     }
@@ -291,11 +292,18 @@ $(function (){
 //                    grid.render();
 
                     //Rebuild hierarchy and destroy/initialize grid
-                    sortcol = "unique";
-                    var data_sorted = data.sort(comparer);
-                    var hierarchical = [];
-                    BuildHierarchy(data, hierarchical, undefined);
-                    rebuild(hierarchical);
+//                    sortcol = "unique";
+//                    var data_sorted = data.sort(comparer);
+//                    var hierarchical = [];
+//                    BuildHierarchy(data, hierarchical, undefined);
+//                    rebuild(hierarchical);
+                    console.log(data);
+                    sortcol="unique";
+                    var sorted = grid.sortHierarchy();
+                    dataView.setItems(sorted);
+                    grid.invalidate();
+                    grid.setSelectedRows([]);
+                    grid.render();
                 }
             });
 
@@ -405,71 +413,6 @@ $(function (){
         });
         //End drag helper functions
 
-        // Return Mode to normal after drop
-        $.drop({mode: "mouse"});
-        //Create Drop Zone
-        $("#slick-recycle")
-//          .bind("dropstart", function (e, dd) {
-          .bind("dragend", function (e, dd) {
-            if (dd.mode != "recycle") {
-              return;
-            }
-            $(this).css("background", "yellow");
-          })
-          .bind("dropend", function (e, dd) {
-            if (dd.mode != "recycle") {
-              return;
-            }
-            $(dd.available).css("background", "pink");
-          })
-
-            //Working, but being called over and over after sort
-          .bind("drop", function (e, dd) {
-//          .bind("dragend", function (e, dd) {
-            if (dd.mode != "recycle") {
-              return;
-            }
-            var rowsToDelete = dd.rows.sort().reverse();
-            var confirm_delete = confirm("Are you sure you want to delete this file?");
-            if (confirm_delete == true) {
-                $.post('/file_deleter', {grid_item: JSON.stringify(data[rowsToDelete])}, function(response) {
-                    if (response == "fail") {
-                        alert("This file can not be deleted");
-                    } else {
-                    var rows=[];
-                    var j = rowsToDelete[0];
-                    var stopRow;
-                    do{
-                        rows.push(j);
-                        j+=1;
-                        stopRow = j;
-                    }while(data[j] && data[j]['indent']>data[rowsToDelete[0]]['indent']);
-                     data.splice(rows[0], rows.length);
-//                        // Delete the File
-//                            for (var i = 0; i < rowsToDelete.length; i++) {
-//                              // Count the child files to delete
-//                              files_to_delete_count = 1;
-//                              // pass through the rows to delete and remove the file AND it's children from data
-//                              for (var j = rowsToDelete[i]; j < data.length; j++) {
-//                                  if (data[j+1]['indent'] > data[j]['indent']){
-//                                      files_to_delete_count++;
-//                                  }
-//                                  data.splice(rowsToDelete[i], 1);
-//                                  data.splice(rowsToDelete[i], files_to_delete_count);
-//                              }
-//                            }
-                        console.log(data);
-                        sortcol="unique";
-                        var sorted = sortHierarchy();
-                        dataView.setItems(sorted);
-                        grid.invalidate();
-                        grid.setSelectedRows([]);
-                        grid.render();
-                    }
-                });
-            }
-          });
-
         //Update the item when edited
         grid.onCellChange.subscribe(function (e, args) {
             grid.getOptions().editable=false;
@@ -535,18 +478,97 @@ $(function (){
         grid.onSort.subscribe(function (e, args) {
             onSort(e, args);
         });
+
     }
 
+
+    // Return Mode to normal after drop
+    $.drop({mode: "mouse"});
+    //Create Drop Zone
+    $("#slick-recycle")
+//          .bind("dropstart", function (e, dd) {
+        .bind("dragend", function (e, dd) {
+            if (dd.mode != "recycle") {
+                return;
+            }
+            $(this).css("background", "yellow");
+        })
+        .bind("dropend", function (e, dd) {
+            if (dd.mode != "recycle") {
+                return;
+            }
+            $(dd.available).css("background", "pink");
+        })
+
+        //Working, but being called over and over after sort
+        .bind("drop", function (e, dd) {
+//          .bind("dragend", function (e, dd) {
+            if (dd.mode != "recycle") {
+                return;
+            }
+            var rowsToDelete = dd.rows.sort().reverse();
+            var confirm_delete = confirm("Are you sure you want to delete this file?");
+            if (confirm_delete == true) {
+                $.post('/file_deleter', {grid_item: JSON.stringify(data[rowsToDelete])}, function(response) {
+                    console.log(response);
+                    if (response == "fail") {
+                        alert("This file can not be deleted");
+                    } else {
+                        var rows=[];
+                        var j = rowsToDelete[0];
+                        var stopRow;
+                        do{
+                            rows.push(j);
+                            j+=1;
+                            stopRow = j;
+                        }while(data[j] && data[j]['indent']>data[rowsToDelete[0]]['indent']);
+                        data.splice(rows[0], rows.length);
+//                        // Delete the File
+//                            for (var i = 0; i < rowsToDelete.length; i++) {
+//                              // Count the child files to delete
+//                              files_to_delete_count = 1;
+//                              // pass through the rows to delete and remove the file AND it's children from data
+//                              for (var j = rowsToDelete[i]; j < data.length; j++) {
+//                                  if (data[j+1]['indent'] > data[j]['indent']){
+//                                      files_to_delete_count++;
+//                                  }
+//                                  data.splice(rowsToDelete[i], 1);
+//                                  data.splice(rowsToDelete[i], files_to_delete_count);
+//                              }
+//                            }
+                        console.log("HI");
+                        console.log(data);
+                        console.log(rowsToDelete[0]);
+                        var x = rowsToDelete[0];
+                        for(x; x<data.length; x++){
+                            console.log("TEST_1");
+                            console.log(data[x]['id']);
+                            data[x]['id']=data[x]['id']-rows.length;
+                            if(data[x]['parent_path']){
+                                data[x]['parent']=data[x]['parent']-rows.length;
+                            }
+
+                        }
+                        console.log(data);
+                        dataView.setItems(data);
+                        grid.invalidate();
+                        grid.setSelectedRows([]);
+                        grid.render();
+                    }
+                });
+            }
+        });
+
     //Sorts new parent hierarchy
-    function sortHierarchy(){
-        var sorted = data.sort(comparer);
+    grid.sortHierarchy = function (){
+        var sorted = data.sort(grid.comparer);
         var hierarchical = [];
-        BuildHierarchy(sorted, hierarchical, undefined);
+        grid.BuildHierarchy(sorted, hierarchical, undefined);
         return hierarchical;
     }
 
     //Rebuilds parent id hierarchy
-    function BuildHierarchy(sorted, hierarchical, parent){
+    grid.BuildHierarchy =  function (sorted, hierarchical, parent){
         for(var i=0; i < sorted.length; i++)
         {
             var item = sorted[i];
@@ -559,14 +581,14 @@ $(function (){
             }
             if(item.parent == parentId){
                 hierarchical.push(sorted[i]);
-                BuildHierarchy(sorted, hierarchical, sorted[i]);
+                grid.BuildHierarchy(sorted, hierarchical, sorted[i]);
 
             }
         }
     }
 
     //Compare function
-    function comparer(a, b) {
+    grid.comparer = function (a, b) {
         var x = a[sortcol], y = b[sortcol];
 
         if(x == y){

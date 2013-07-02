@@ -211,7 +211,7 @@ def file_deleter():
 def sg_edit():
     item = json.loads(request.form['grid_item'])
     old_title = os.path.join(dir_root, item['path'])
-
+    print item
     if item['path']=="uploads":
         return "fail"
 

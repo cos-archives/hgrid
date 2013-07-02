@@ -1,3 +1,6 @@
+// Turn off the discover option so the URL error is not thrown with custom configuration
+Dropzone.autoDiscover = false;
+// Hook the drop success to the grid view update
 myDropzone.on("success", function(file) {
     // Assign values to the uploads folder, so we can insert the file in the correct spot in the view
     var uploadsFolder = {};

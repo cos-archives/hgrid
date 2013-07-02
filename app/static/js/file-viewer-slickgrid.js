@@ -30,8 +30,9 @@ var sortAsc = true;
 //Create columns
 var columns = [
     {id: "#", name: "", width: 40, behavior: "selectAndMove", selectable: false, resizable: false, cssClass: "cell-reorder dnd"},
-    {id: "title", name: "Title", field: "title", width: 400, cssClass: "cell-title", formatter: TaskNameFormatter, editor: Slick.Editors.Text, validator: requiredFieldValidator, sortable: true, defaultSortAsc: true},
-    {id: "size", name: "Size", field: "size", width: 200, editor: Slick.Editors.Text, sortable: true}
+    //{id: "unique", name: "ID", field: "id", width: 40, sortable: true},
+    {id: "title", name: "Title", field: "title", width: 450, cssClass: "cell-title", formatter: TaskNameFormatter, editor: Slick.Editors.Text, validator: requiredFieldValidator, sortable: true, defaultSortAsc: true},
+    {id: "size_read", name: "Size", field: "size_read", width: 110, editor: Slick.Editors.Text, sortable: true}
 ];
 
 //SlickGrid options
@@ -116,6 +117,7 @@ $(function (){
             d["indent"] = indent;
             d["title"] = info[i]['name'];
             d["size"] = info[i]['size'];
+            d["size_read"] = info[i]['size_read']
             d["unique"] = info[i]['unique'];
             d["type"] = info[i]['type'];
         }
@@ -134,31 +136,62 @@ $(function (){
     function onSort(e, args){
         sortAsc = !sortAsc;
         sortcol = args.sortCol.field;
-        var sortedData = sortHierarchy();
-
-        rebuild(sortedData);
+        var new_data = grid.sortHierarchy();
+        prep_java(new_data);
+        dataView.setItems(data);
+        grid.invalidate();
+        grid.setSelectedRows([]);
+        grid.render();
     }
 
-    //Destroys and recreates the grid to reassign hierarchy
-    function rebuild(sortedData){
-        data = sortedData;
-        var reorderedColumns=[];
-        var oldColumns=grid.getColumns();
-        console.log(sortcol);
-        for(i=0; i<oldColumns.length; i++){
-            reorderedColumns.push(oldColumns[i]);
+    function prep_java(sortedData){
+        var checker = {};
+        var indent = 0;
+        for (var i = 0; i < sortedData.length; i++) {
+            var parents = [];
+            var d = {};
+            var parent;
+
+            //Check if item has a parent
+            if (sortedData[i]['parent_path']){
+
+                //Assign parent paths, find ID of parent and assign its ID to "parent" attribute
+                d["parent_path"]=sortedData[i]['parent_path'];
+                for(var j=0; j<sortedData.length; j++){
+                    if (sortedData[j]['path']==d["parent_path"] && !d["parent"]){
+                        d["parent"]= j;
+                    }
+                }
+                //If parent hasn't been encountered, increment the indent
+                if (!(sortedData[i]['parent_path'] in checker)){
+                    indent++;
+                }
+                //If it has been encountered, make indent the same as others with same parent
+                else {
+                    indent = checker[sortedData[i]['parent_path']];
+                }
+
+                //Make sure parent_path is in checker
+                checker[sortedData[i]['parent_path']]=indent;
+            }
+
+            //If no parent, set parent to null and indent to 0
+            else {
+                indent=0;
+                d["parent"]=null;
+            }
+
+            //Set other values
+            d["path"] = sortedData[i]['path'];
+            d["id"] = i;
+            d["indent"] = indent;
+            d["title"] = sortedData[i]['title'];
+            d["size"] = sortedData[i]['size'];
+            d["size_read"] = sortedData[i]['size_read']
+            d["unique"] = sortedData[i]['unique'];
+            d["type"] = sortedData[i]['type'];
+            data[i]=d;
         }
-
-        grid.destroy();
-        // initialize the model
-        dataView.beginUpdate();
-        dataView.setItems(data);
-        dataView.setFilter(myFilter);
-        dataView.endUpdate();
-
-        // initialize the NEW grid
-        grid = new Slick.Grid("#myGrid", dataView, reorderedColumns, options);
-        initialize();
     }
 
     //Sets functions for moving rows, sorting, etc.
@@ -181,7 +214,6 @@ $(function (){
                     if(data[j]['id']==args.rows[i]){
                         src[i] = data[j]['path'];
                     }
-                    console.log(args.insertBefore);
                     if(data[j]['id']==args.insertBefore){
                         if (data[j-1]){
                             if(data[j-1]['type']=='folder') {
@@ -210,7 +242,6 @@ $(function (){
                 if (!dest[i]){
                     dest[i] = null;
                 }
-                console.log(dest[i]);
                 var index = true;
 
                 if (dest[i]!=null){
@@ -229,7 +260,6 @@ $(function (){
 
         //When rows are moved post to server and update data
         moveRowsPlugin.onMoveRows.subscribe(function (e, args) {
-            console.log(dest);
             //Post to server
             $.post('/sg_move', {src: JSON.stringify(src), dest: JSON.stringify(dest)}, function(response){
                 //Make sure move succeeds
@@ -282,54 +312,16 @@ $(function (){
                     for (var i = 0; i < rows.length; i++)
                         selectedRows.push(left.length + i);
 
-                    //Here are possible method calls to not destroy grid
-//                    dataView.beginUpdate();
-//                    dataView.setItems(data);
-//                    dataView.setFilter(myFilter);
-//                    dataView.endUpdate();
-//                    grid.invalidate();
-//                    grid.render();
+                    sortcol="unique";
+                    var sorted = grid.sortHierarchy();
 
-                    //Rebuild hierarchy and destroy/initialize grid
-                    sortcol = "unique";
-                    var data_sorted = data.sort(comparer);
-                    var hierarchical = [];
-                    BuildHierarchy(data, hierarchical, undefined);
-                    rebuild(hierarchical);
+                    prep_java(sorted);
+                    dataView.setItems(data);
+                    grid.invalidate();
+                    grid.setSelectedRows([]);
+                    grid.render();
                 }
             });
-
-//          Alexander's possible solution in place of rebuild()
-//                        var startRow = args.rows[0];
-//                        var destID = data[args.insertBefore]['id'];
-//                        var destIndex;
-//                        var j = 0;
-//                        var stopRow;
-//                        do{
-//                            rows.push(j);
-//                            j+=1;
-//                            stopRow = j;
-//                        }while(data[j]['indent']>data[args.rows[0]]['indent']);
-//
-//                        var movingData = data.splice(startRow, stopRow);
-//                        for (item in data) {
-//                            if (item['id'] == destID) {
-//                                destIndex = data.indexOf(item);
-//                            }
-//                        }
-//                        data.splice(destIndex, 0, movingData);
-//                        var rows=[];
-//
-//                        var j = args.rows[0];
-//                        var destID = data[args.insertBefore]['id'];
-//                        var destIndex;
-//                        //var j = 0;
-//                        var stopRow;
-//                        do{
-//                            rows.push(j);
-//                            j+=1;
-//                            stopRow = j;
-//                        }while(data[j]['indent']>data[args.rows[0]]['indent']);
         });
 
         grid.registerPlugin(moveRowsPlugin);
@@ -405,71 +397,6 @@ $(function (){
         });
         //End drag helper functions
 
-        // Return Mode to normal after drop
-        $.drop({mode: "mouse"});
-        //Create Drop Zone
-        $("#slick-recycle")
-//          .bind("dropstart", function (e, dd) {
-          .bind("dragend", function (e, dd) {
-            if (dd.mode != "recycle") {
-              return;
-            }
-            $(this).css("background", "yellow");
-          })
-          .bind("dropend", function (e, dd) {
-            if (dd.mode != "recycle") {
-              return;
-            }
-            $(dd.available).css("background", "pink");
-          })
-
-            //Working, but being called over and over after sort
-          .bind("drop", function (e, dd) {
-//          .bind("dragend", function (e, dd) {
-            if (dd.mode != "recycle") {
-              return;
-            }
-            var rowsToDelete = dd.rows.sort().reverse();
-            var confirm_delete = confirm("Are you sure you want to delete this file?");
-            if (confirm_delete == true) {
-                $.post('/file_deleter', {grid_item: JSON.stringify(data[rowsToDelete])}, function(response) {
-                    if (response == "fail") {
-                        alert("This file can not be deleted");
-                    } else {
-                    var rows=[];
-                    var j = rowsToDelete[0];
-                    var stopRow;
-                    do{
-                        rows.push(j);
-                        j+=1;
-                        stopRow = j;
-                    }while(data[j] && data[j]['indent']>data[rowsToDelete[0]]['indent']);
-                     data.splice(rows[0], rows.length);
-//                        // Delete the File
-//                            for (var i = 0; i < rowsToDelete.length; i++) {
-//                              // Count the child files to delete
-//                              files_to_delete_count = 1;
-//                              // pass through the rows to delete and remove the file AND it's children from data
-//                              for (var j = rowsToDelete[i]; j < data.length; j++) {
-//                                  if (data[j+1]['indent'] > data[j]['indent']){
-//                                      files_to_delete_count++;
-//                                  }
-//                                  data.splice(rowsToDelete[i], 1);
-//                                  data.splice(rowsToDelete[i], files_to_delete_count);
-//                              }
-//                            }
-                        console.log(data);
-                        sortcol="unique";
-                        var sorted = sortHierarchy();
-                        dataView.setItems(sorted);
-                        grid.invalidate();
-                        grid.setSelectedRows([]);
-                        grid.render();
-                    }
-                });
-            }
-          });
-
         //Update the item when edited
         grid.onCellChange.subscribe(function (e, args) {
             grid.getOptions().editable=false;
@@ -506,7 +433,7 @@ $(function (){
 
         //When a cell is double clicked, make it editable (unless it's uploads)
         grid.onDblClick.subscribe(function (e, args) {
-            if(data[grid.getActiveCell().row]['path']!="uploads" && grid.getActiveCell().cell==1){
+            if(data[grid.getActiveCell().row]['path']!="uploads" && grid.getActiveCell().cell==grid.getColumnIndex('title')){
                 grid.getOptions().editable=true;
             }
         });
@@ -535,18 +462,77 @@ $(function (){
         grid.onSort.subscribe(function (e, args) {
             onSort(e, args);
         });
+
     }
 
+
+    // Return Mode to normal after drop
+    $.drop({mode: "mouse"});
+    //Create Drop Zone
+    $("#slick-recycle")
+//          .bind("dropstart", function (e, dd) {
+        .bind("dragend", function (e, dd) {
+            if (dd.mode != "recycle") {
+                return;
+            }
+            $(this).css("background", "yellow");
+        })
+        .bind("dropend", function (e, dd) {
+            if (dd.mode != "recycle") {
+                return;
+            }
+            $(dd.available).css("background", "pink");
+        })
+
+        //Working, but being called over and over after sort
+        .bind("drop", function (e, dd) {
+//          .bind("dragend", function (e, dd) {
+            if (dd.mode != "recycle") {
+                return;
+            }
+            var rowsToDelete = dd.rows.sort().reverse();
+            var confirm_delete = confirm("Are you sure you want to delete this file?");
+            if (confirm_delete == true) {
+                $.post('/file_deleter', {grid_item: JSON.stringify(data[rowsToDelete])}, function(response) {
+                    if (response == "fail") {
+                        alert("This file can not be deleted");
+                    } else {
+                        var rows=[];
+                        var j = rowsToDelete[0];
+                        var stopRow;
+                        do{
+                            rows.push(j);
+                            j+=1;
+                            stopRow = j;
+                        }while(data[j] && data[j]['indent']>data[rowsToDelete[0]]['indent']);
+                        data.splice(rows[0], rows.length);
+                        var x = rowsToDelete[0];
+                        for(x; x<data.length; x++){
+                            data[x]['id']=data[x]['id']-rows.length;
+                            if(data[x]['parent_path']){
+                                data[x]['parent']=data[x]['parent']-rows.length;
+                            }
+
+                        }
+                        dataView.setItems(data);
+                        grid.invalidate();
+                        grid.setSelectedRows([]);
+                        grid.render();
+                    }
+                });
+            }
+        });
+
     //Sorts new parent hierarchy
-    function sortHierarchy(){
-        var sorted = data.sort(comparer);
+    grid.sortHierarchy = function (){
+        var sorted = data.sort(grid.comparer);
         var hierarchical = [];
-        BuildHierarchy(sorted, hierarchical, undefined);
+        grid.BuildHierarchy(sorted, hierarchical, undefined);
         return hierarchical;
     }
 
     //Rebuilds parent id hierarchy
-    function BuildHierarchy(sorted, hierarchical, parent){
+    grid.BuildHierarchy =  function (sorted, hierarchical, parent){
         for(var i=0; i < sorted.length; i++)
         {
             var item = sorted[i];
@@ -559,14 +545,16 @@ $(function (){
             }
             if(item.parent == parentId){
                 hierarchical.push(sorted[i]);
-                BuildHierarchy(sorted, hierarchical, sorted[i]);
-
+                grid.BuildHierarchy(sorted, hierarchical, sorted[i]);
             }
         }
     }
 
     //Compare function
-    function comparer(a, b) {
+    grid.comparer = function (a, b) {
+        if (sortcol=="size_read"){
+            sortcol="size";
+        }
         var x = a[sortcol], y = b[sortcol];
 
         if(x == y){

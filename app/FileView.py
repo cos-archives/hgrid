@@ -6,6 +6,7 @@ import json
 from flask import render_template, request
 from shutil import move, Error, rmtree
 from werkzeug.utils import secure_filename
+from hurry.filesize import size, alternative
 
 info = []
 # Sets the base file directories for the fileviewer
@@ -61,6 +62,7 @@ def file_walk(dir_path):
             appender['name'] = appender['path']
         # Calls the function folder_size to get the folder size
         appender['size'] = folder_size(os.path.join(dir_path, d))
+        appender['size_read'] = size(appender['size'], system=alternative)
         info.append(appender)
         # Recursively calls the file_walk function on all child files and folders
         file_walk(os.path.join(dir_path, d))
@@ -80,6 +82,7 @@ def file_walk(dir_path):
         else:
             appender['name'] = appender['path']
         appender['size'] = os.path.getsize(os.path.join(dir_path, f))
+        appender['size_read'] = size(appender['size'], system=alternative)
         info.append(appender)
 
 
@@ -224,7 +227,7 @@ def file_deleter():
 def sg_edit():
     item = json.loads(request.form['grid_item'])
     old_title = os.path.join(dir_root, item['path'])
-
+    print item
     if item['path']=="uploads":
         return "fail"
 

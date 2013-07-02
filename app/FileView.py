@@ -10,6 +10,8 @@ from werkzeug.utils import secure_filename
 info = []
 # Sets the base file directories for the fileviewer
 dir_root = os.path.abspath('tree')
+# Sets the walker type. Current options are: filesystem
+walker_type = "filesystem"
 
 
 # Determines the file size of a folder by summing the file sizes of its children
@@ -28,7 +30,7 @@ def folder_size(dir_path):
 
 
 # Walks a file directory and appends the file information to the global variable info
-def walk(dir_path):
+def file_walk(dir_path):
     dirs_holder = []
     files_holder = []
 
@@ -60,8 +62,8 @@ def walk(dir_path):
         # Calls the function folder_size to get the folder size
         appender['size'] = folder_size(os.path.join(dir_path, d))
         info.append(appender)
-        # Recursively calls the walk function on all child files and folders
-        walk(os.path.join(dir_path, d))
+        # Recursively calls the file_walk function on all child files and folders
+        file_walk(os.path.join(dir_path, d))
 
     # Loops through the files in the file system
     for f in files_holder:
@@ -81,6 +83,11 @@ def walk(dir_path):
         info.append(appender)
 
 
+walker_router = {
+    "filesystem": lambda: file_walk(dir_root)
+}[walker_type]
+
+
 # Main osf-fileviewer page, integrating SlickGrid.js
 @app.route('/', methods=['GET', 'POST'])
 def index():
@@ -89,7 +96,7 @@ def index():
     # Initialize the unique ID counter for all files
     counter = 0
     # Walk the directory to collect file information. Returns "info".
-    walk(dir_root)
+    walker_router()
     #Set's unique IDs to each item of info
     for i in info:
         i['unique'] = counter
@@ -98,6 +105,11 @@ def index():
     #print json.dumps(info)  # A test line to verify that the output is correct / in the correct format.
     return render_template("index.html", info=json.dumps(info))
 
+
+# # The script to route all file calls to the proper walker and file manipulator
+# @app.route('/routing', methods=['GET', 'Post'])
+# def routing():
+#
 
 # The script to upload files from Dropzone.js
 @app.route('/uploader', methods=['GET', 'POST'])
@@ -169,7 +181,7 @@ def sg_move():
     # Initialize the unique ID counter for all files
     counter = 0
     # Walk the directory to collect file information. Returns "info".
-    walk(dir_root)
+    file_walk(dir_root)
     #Set's unique IDs to each item of info
     for i in info:
         i['unique'] = counter

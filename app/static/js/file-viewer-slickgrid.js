@@ -32,7 +32,7 @@ var columns = [
     {id: "#", name: "", width: 40, behavior: "selectAndMove", selectable: false, resizable: false, cssClass: "cell-reorder dnd"},
     //{id: "unique", name: "ID", field: "id", width: 40, sortable: true},
     {id: "title", name: "Title", field: "title", width: 450, cssClass: "cell-title", formatter: TaskNameFormatter, editor: Slick.Editors.Text, validator: requiredFieldValidator, sortable: true, defaultSortAsc: true},
-    {id: "size", name: "Size", field: "size", width: 110, editor: Slick.Editors.Text, sortable: true}
+    {id: "size_read", name: "Size", field: "size_read", width: 110, editor: Slick.Editors.Text, sortable: true}
 ];
 
 //SlickGrid options
@@ -117,6 +117,7 @@ $(function (){
             d["indent"] = indent;
             d["title"] = info[i]['name'];
             d["size"] = info[i]['size'];
+            d["size_read"] = info[i]['size_read']
             d["unique"] = info[i]['unique'];
             d["type"] = info[i]['type'];
         }
@@ -178,6 +179,7 @@ $(function (){
             d["indent"] = indent;
             d["title"] = sortedData[i]['title'];
             d["size"] = sortedData[i]['size'];
+            d["size_read"] = sortedData[i]['size_read']
             d["unique"] = sortedData[i]['unique'];
             d["type"] = sortedData[i]['type'];
         }
@@ -542,6 +544,9 @@ $(function (){
 
     //Compare function
     grid.comparer = function (a, b) {
+        if (sortcol=="size_read"){
+            sortcol="size";
+        }
         var x = a[sortcol], y = b[sortcol];
 
         if(x == y){

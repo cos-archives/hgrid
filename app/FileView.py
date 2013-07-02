@@ -59,7 +59,8 @@ def walk(dir_path):
         else:
             appender['name'] = appender['path']
         # Calls the function folder_size to get the folder size
-        appender['size'] = size(folder_size(os.path.join(dir_path, d)), system=alternative)
+        appender['size'] = folder_size(os.path.join(dir_path, d))
+        appender['size_read'] = size(appender['size'], system=alternative)
         info.append(appender)
         # Recursively calls the walk function on all child files and folders
         walk(os.path.join(dir_path, d))
@@ -78,7 +79,8 @@ def walk(dir_path):
         # If it doesn't have a parent, just return the path information.
         else:
             appender['name'] = appender['path']
-        appender['size'] = size(os.path.getsize(os.path.join(dir_path, f)), system=alternative)
+        appender['size'] = os.path.getsize(os.path.join(dir_path, f))
+        appender['size_read'] = size(appender['size'], system=alternative)
         info.append(appender)
 
 

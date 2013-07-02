@@ -31,8 +31,8 @@ var sortAsc = true;
 var columns = [
     {id: "#", name: "", width: 40, behavior: "selectAndMove", selectable: false, resizable: false, cssClass: "cell-reorder dnd"},
     //{id: "unique", name: "ID", field: "id", width: 40, sortable: true},
-    {id: "title", name: "Title", field: "title", width: 400, cssClass: "cell-title", formatter: TaskNameFormatter, editor: Slick.Editors.Text, validator: requiredFieldValidator, sortable: true, defaultSortAsc: true},
-    {id: "size", name: "Size", field: "size", width: 160, editor: Slick.Editors.Text, sortable: true}
+    {id: "title", name: "Title", field: "title", width: 450, cssClass: "cell-title", formatter: TaskNameFormatter, editor: Slick.Editors.Text, validator: requiredFieldValidator, sortable: true, defaultSortAsc: true},
+    {id: "size", name: "Size", field: "size", width: 110, editor: Slick.Editors.Text, sortable: true}
 ];
 
 //SlickGrid options

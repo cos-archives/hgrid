@@ -6,6 +6,7 @@ import json
 from flask import render_template, request
 from shutil import move, Error, rmtree
 from werkzeug.utils import secure_filename
+from hurry.filesize import size, alternative
 
 info = []
 # Sets the base file directories for the fileviewer
@@ -58,7 +59,7 @@ def walk(dir_path):
         else:
             appender['name'] = appender['path']
         # Calls the function folder_size to get the folder size
-        appender['size'] = folder_size(os.path.join(dir_path, d))
+        appender['size'] = size(folder_size(os.path.join(dir_path, d)), system=alternative)
         info.append(appender)
         # Recursively calls the walk function on all child files and folders
         walk(os.path.join(dir_path, d))
@@ -77,7 +78,7 @@ def walk(dir_path):
         # If it doesn't have a parent, just return the path information.
         else:
             appender['name'] = appender['path']
-        appender['size'] = os.path.getsize(os.path.join(dir_path, f))
+        appender['size'] = size(os.path.getsize(os.path.join(dir_path, f)), system=alternative)
         info.append(appender)
 
 

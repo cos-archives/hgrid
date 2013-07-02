@@ -111,6 +111,7 @@ def uploader():
         print "The method was a POST"
         # Instantiates the date from the POST request
         requested_file = request.files['file']
+        print request.files #test!
         # Verifies that a file was passed to the page
         new_file_name = secure_filename(requested_file.filename)
         if requested_file:

@@ -54,9 +54,9 @@ def walk(dir_path):
         if parent:
             appender['name'] = os.path.basename(appender['path'])
             appender['parent_path'] = parent
-            appender['parent'] = os.path.basename(parent)
         # If it doesn't have a parent, just return the path information.
         else:
+            appender['parent_path'] = "null"
             appender['name'] = appender['path']
         # Calls the function folder_size to get the folder size
         appender['size'] = folder_size(os.path.join(dir_path, d))
@@ -75,9 +75,9 @@ def walk(dir_path):
         if parent:
             appender['name'] = os.path.basename(appender['path'])
             appender['parent_path'] = parent
-            appender['parent'] = os.path.basename(parent)
         # If it doesn't have a parent, just return the path information.
         else:
+            appender['parent_path'] = "null"
             appender['name'] = appender['path']
         appender['size'] = os.path.getsize(os.path.join(dir_path, f))
         appender['size_read'] = size(appender['size'], system=alternative)
@@ -89,14 +89,10 @@ def walk(dir_path):
 def index():
     # Clear old instances of info for a fresh data set
     del info[:]
-    # Initialize the unique ID counter for all files
-    counter = 0
+
     # Walk the directory to collect file information. Returns "info".
     walk(dir_root)
-    #Set's unique IDs to each item of info
-    for i in info:
-        i['unique'] = counter
-        counter += 1
+
 
     #print json.dumps(info)  # A test line to verify that the output is correct / in the correct format.
     return render_template("index.html", info=json.dumps(info))
@@ -169,14 +165,9 @@ def sg_move():
 
     # Clear old instances of info for a fresh data set
     del info[:]
-    # Initialize the unique ID counter for all files
-    counter = 0
+
     # Walk the directory to collect file information. Returns "info".
     walk(dir_root)
-    #Set's unique IDs to each item of info
-    for i in info:
-        i['unique'] = counter
-        counter += 1
 
     response = json.dumps(info)
     return json.dumps(info)
@@ -186,7 +177,7 @@ def sg_move():
 @app.route('/file_deleter', methods=['GET', 'POST'])
 def file_deleter():
     item = json.loads(request.form['grid_item'])
-    file_name = item['title']
+    file_name = item['name']
     file_path = os.path.join(dir_root, item['path'])
     # print file_path
 
@@ -194,7 +185,6 @@ def file_deleter():
         return "fail"
 
     print file_name
-    print file_path
     if file_path.find(dir_root) == 0 :
         if item['type'] == "file":
             try:
@@ -221,11 +211,11 @@ def sg_edit():
 
     if 'parent_path' in item:
         parent_path = os.path.join(dir_root, item['parent_path'])
-        ans = os.path.join(item['parent_path'], item['title'])
+        new_path = os.path.join(item['parent_path'], item['name'])
     else:
         parent_path = dir_root
-        ans = item['title']
-    new_title = os.path.join(parent_path, item['title'])
+        new_path = item['name']
+    new_title = os.path.join(parent_path, item['name'])
     print old_title
     print new_title
     try:
@@ -233,4 +223,4 @@ def sg_edit():
         print 'Changing name from %s to %s' % (os.path.basename(old_title), os.path.basename(new_title))
     except Error:
         return "fail"
-    return ans
+    return new_path

@@ -30,8 +30,8 @@ var sortAsc = true;
 //Create columns
 var columns = [
     {id: "#", name: "", width: 40, behavior: "selectAndMove", selectable: false, resizable: false, cssClass: "cell-reorder dnd"},
-    //{id: "unique", name: "ID", field: "id", width: 40, sortable: true},
-    {id: "title", name: "Title", field: "title", width: 450, cssClass: "cell-title", formatter: TaskNameFormatter, editor: Slick.Editors.Text, validator: requiredFieldValidator, sortable: true, defaultSortAsc: true},
+    //{id: "id", name: "ID", field: "id", width: 40, sortable: true},
+    {id: "name", name: "Name", field: "name", width: 450, cssClass: "cell-title", formatter: TaskNameFormatter, editor: Slick.Editors.Text, validator: requiredFieldValidator, sortable: true, defaultSortAsc: true},
     {id: "size_read", name: "Size", field: "size_read", width: 110, editor: Slick.Editors.Text, sortable: true}
 ];
 
@@ -82,11 +82,11 @@ $(function (){
             var d = (data[i] = {});
             var parent;
 
+            //Assign parent paths, find ID of parent and assign its ID to "parent" attribute
+            d["parent_path"]=info[i]['parent_path'];
             //Check if item has a parent
-            if (info[i]['parent_path']){
+            if (info[i]['parent_path']!="null"){
 
-                //Assign parent paths, find ID of parent and assign its ID to "parent" attribute
-                d["parent_path"]=info[i]['parent_path'];
                 for(var j=0; j<data.length; j++){
                     if (data[j]['path']==d["parent_path"]){
                         d["parent"]= j;
@@ -105,6 +105,7 @@ $(function (){
                 checker[info[i]['parent_path']]=indent;
             }
 
+
             //If no parent, set parent to null and indent to 0
             else {
                 indent=0;
@@ -115,10 +116,9 @@ $(function (){
             d["path"] = info[i]['path'];
             d["id"] = i;
             d["indent"] = indent;
-            d["title"] = info[i]['name'];
+            d["name"] = info[i]['name'];
             d["size"] = info[i]['size'];
             d["size_read"] = info[i]['size_read']
-            d["unique"] = info[i]['unique'];
             d["type"] = info[i]['type'];
         }
     }
@@ -144,9 +144,11 @@ $(function (){
         grid.render();
     }
 
+    //Same as previous prep function, but changes existing data instead of creating new
     function prep_java(sortedData){
         var checker = {};
         var indent = 0;
+
         for (var i = 0; i < sortedData.length; i++) {
             var parents = [];
             var d = {};
@@ -185,10 +187,9 @@ $(function (){
             d["path"] = sortedData[i]['path'];
             d["id"] = i;
             d["indent"] = indent;
-            d["title"] = sortedData[i]['title'];
+            d["name"] = sortedData[i]['name'];
             d["size"] = sortedData[i]['size'];
             d["size_read"] = sortedData[i]['size_read']
-            d["unique"] = sortedData[i]['unique'];
             d["type"] = sortedData[i]['type'];
             data[i]=d;
         }
@@ -312,9 +313,8 @@ $(function (){
                     for (var i = 0; i < rows.length; i++)
                         selectedRows.push(left.length + i);
 
-                    sortcol="unique";
+                    sortcol="id";
                     var sorted = grid.sortHierarchy();
-
                     prep_java(sorted);
                     dataView.setItems(data);
                     grid.invalidate();
@@ -400,15 +400,16 @@ $(function (){
         //Update the item when edited
         grid.onCellChange.subscribe(function (e, args) {
             grid.getOptions().editable=false;
-            $.post('/sg_edit', {grid_item: JSON.stringify(args.item)}, function(new_title){
+            var src=args.item;
+            $.post('/sg_edit', {grid_item: JSON.stringify(src)}, function(new_title){
                 if(new_title!="fail"){
-                    args.item['path']=new_title;
-                    dataView.updateItem(args.item.id, args.item);
+                    src['path']=new_title;
+                    dataView.updateItem(src.id, src);
                 }
                 else{
-                    args.item['title']=args.item['path'];
+                    src['name']=src['path'];
                     alert("You can't change the uploads folder!");
-                    dataView.updateItem(args.item.id, args.item);
+                    dataView.updateItem(src.id, src);
                 }
             });
         });
@@ -433,7 +434,7 @@ $(function (){
 
         //When a cell is double clicked, make it editable (unless it's uploads)
         grid.onDblClick.subscribe(function (e, args) {
-            if(data[grid.getActiveCell().row]['path']!="uploads" && grid.getActiveCell().cell==grid.getColumnIndex('title')){
+            if(data[grid.getActiveCell().row]['path']!="uploads" && grid.getActiveCell().cell==grid.getColumnIndex('name')){
                 grid.getOptions().editable=true;
             }
         });
@@ -484,19 +485,24 @@ $(function (){
             $(dd.available).css("background", "pink");
         })
 
-        //Working, but being called over and over after sort
+        //Delete files and folders when dragged to recycle bin, confirm delete
         .bind("drop", function (e, dd) {
 //          .bind("dragend", function (e, dd) {
             if (dd.mode != "recycle") {
                 return;
             }
             var rowsToDelete = dd.rows.sort().reverse();
+            var src = data[rowsToDelete];
             var confirm_delete = confirm("Are you sure you want to delete this file?");
             if (confirm_delete == true) {
-                $.post('/file_deleter', {grid_item: JSON.stringify(data[rowsToDelete])}, function(response) {
+
+                //Post to server and delete item
+                $.post('/file_deleter', {grid_item: JSON.stringify(src)}, function(response) {
                     if (response == "fail") {
                         alert("This file can not be deleted");
                     } else {
+
+                        //Splice data and delete all children if folder is dropped
                         var rows=[];
                         var j = rowsToDelete[0];
                         var stopRow;
@@ -505,12 +511,19 @@ $(function (){
                             j+=1;
                             stopRow = j;
                         }while(data[j] && data[j]['indent']>data[rowsToDelete[0]]['indent']);
-                        data.splice(rows[0], rows.length);
+                        var check = data.splice(rows[0], rows.length);
                         var x = rowsToDelete[0];
+
+                        //Change IDs and parents for rest of data to re-render grid properly
                         for(x; x<data.length; x++){
                             data[x]['id']=data[x]['id']-rows.length;
                             if(data[x]['parent_path']){
-                                data[x]['parent']=data[x]['parent']-rows.length;
+                                if (check[0]['parent_path']){
+                                    if(check[0]['parent_path']!=data[x]['parent_path']){
+                                        data[x]['parent']=data[x]['parent']-rows.length;
+                                    }
+                                }
+
                             }
 
                         }
@@ -552,6 +565,8 @@ $(function (){
 
     //Compare function
     grid.comparer = function (a, b) {
+
+        //If sorting by size, must sort by int value, not readable string
         if (sortcol=="size_read"){
             sortcol="size";
         }

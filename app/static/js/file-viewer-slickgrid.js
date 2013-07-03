@@ -154,11 +154,10 @@ $(function (){
             var d = {};
             var parent;
 
+            //Assign parent paths, find ID of parent and assign its ID to "parent" attribute
+            d["parent_path"]=sortedData[i]['parent_path'];
             //Check if item has a parent
             if (sortedData[i]['parent_path']){
-
-                //Assign parent paths, find ID of parent and assign its ID to "parent" attribute
-                d["parent_path"]=sortedData[i]['parent_path'];
                 for(var j=0; j<sortedData.length; j++){
                     if (sortedData[j]['path']==d["parent_path"] && !d["parent"]){
                         d["parent"]= j;
@@ -186,7 +185,7 @@ $(function (){
             //Set other values
             d["path"] = sortedData[i]['path'];
             d["id"] = i;
-            d["indent"] = indent;
+            d["indent"] = indent-1;
             d["name"] = sortedData[i]['name'];
             d["size"] = sortedData[i]['size'];
             d["size_read"] = sortedData[i]['size_read']
@@ -268,9 +267,10 @@ $(function (){
                     e.stopImmediatePropagation();
                 }
                 else{
-                    //Get new data and prep it
+//                    Get new data and prep it
                     var insert = JSON.parse(response);
                     prep(insert);
+                    console.log(response);
                     var rows=[];
 
                     //Make sure all children move as well
@@ -320,6 +320,37 @@ $(function (){
                     grid.invalidate();
                     grid.setSelectedRows([]);
                     grid.render();
+
+
+//                        //Splice data and delete all children if folder is dropped
+//                        var rows=[];
+//                        var j = rowsToDelete[0];
+//                        var stopRow;
+//                        do{
+//                            rows.push(j);
+//                            j+=1;
+//                            stopRow = j;
+//                        }while(data[j] && data[j]['indent']>data[rowsToDelete[0]]['indent']);
+//                        var check = data.splice(rows[0], rows.length);
+//                        var x = rowsToDelete[0];
+//
+//                        //Change IDs and parents for rest of data to re-render grid properly
+//                        for(x; x<data.length; x++){
+//                            data[x]['id']=data[x]['id']-rows.length;
+//                            if(data[x]['parent_path']){
+//                                if (check[0]['parent_path']){
+//                                    if(check[0]['parent_path']!=data[x]['parent_path']){
+//                                        data[x]['parent']=data[x]['parent']-rows.length;
+//                                    }
+//                                }
+//
+//                            }
+//
+//                        }
+//                        dataView.setItems(data);
+//                        grid.invalidate();
+//                        grid.setSelectedRows([]);
+//                        grid.render();
                 }
             });
         });
@@ -403,6 +434,18 @@ $(function (){
             var src=args.item;
             $.post('/sg_edit', {grid_item: JSON.stringify(src)}, function(new_title){
                 if(new_title!="fail"){
+                    var i = src['id']+1;
+                    while(data[i]['parent_path'].indexOf(data[src['id']]['path'])==0){
+                        if(data[i]['parent_path']==data[src['id']]['path']){
+                            data[i]['parent_path']=new_title;
+                            data[i]['path']=new_title+ "/" + data[i]['name'];
+                        }
+                        else{
+                            data[i]['parent_path']=data[data[i]['parent']]['path'];
+                            data[i]['path']=data[i]['parent_path'] + "/" + data[i]['name'];
+                        }
+                        i++;
+                    }
                     src['path']=new_title;
                     dataView.updateItem(src.id, src);
                 }

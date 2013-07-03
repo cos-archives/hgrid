@@ -158,13 +158,16 @@ def uploader():
 def sg_move():
     src_load = json.loads(request.form['src'])
     dest_load = json.loads(request.form['dest'])
+    print dest_load
     for index in range(len(src_load)):
         src = os.path.join(dir_root, src_load[index])
         print dest_load[index]
         if dest_load[index] is None:
             dest=dir_root
+            response = json.dumps(src_load[index])
         else:
             dest = os.path.join(dir_root, dest_load[index])
+            response = json.dumps(dest_load[0])
 
         # A test line to verify that the output is correct / in the correct format.
         try:
@@ -173,13 +176,11 @@ def sg_move():
         except Error:
             return "fail"
 
-
     # Clear old instances of info for a fresh data set
     del info[:]
-
-    # Walk the directory to collect file information. Returns "info".
+    #
+    # # Walk the directory to collect file information. Returns "info".
     file_walk(dir_root)
-    response = json.dumps(info)
     return json.dumps(info)
 
 

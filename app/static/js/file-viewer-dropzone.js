@@ -11,8 +11,8 @@ myDropzone.on("success", function(file) {
     } else {
         // Loop through the data and find the Uploads folder
         for (var i = 0; i < data.length; i++) {
-            if ((data[i]['title'] == "uploads") && (data[i]['parent'] == null)){
-                console.log(data[i]['title']);
+            if ((data[i]['name'] == "uploads") && (data[i]['parent'] == null)){
+                console.log(data[i]['name']);
                 uploadsFolder['id'] = data[i]['id'];
                 uploadsFolder['index'] = i;
                 // Collapse the uploads folder to get rid of glitches in the view render
@@ -25,20 +25,18 @@ myDropzone.on("success", function(file) {
         // Assign response data to slickItem
         var slickTitle = newSlickInfo[0].name;
         var slickId = data.length;
-        var slickUnique = data.length;
         var slickIndent = 1;
         var slickSize = newSlickInfo[0].size;
         var slickParent = uploadsFolder['id'];
         var slickParentPath = newSlickInfo[0].parent_path;
         var slickPath = newSlickInfo[0].path;
         var slickItem = {
-            title: slickTitle,
+            name: slickTitle,
             size: slickSize,
             parent_path: slickParentPath,
             parent: slickParent,
             path: slickPath,
             id: slickId,
-            unique: slickUnique,
             indent: slickIndent
         }
         // Splice in the new row after the uploads folder

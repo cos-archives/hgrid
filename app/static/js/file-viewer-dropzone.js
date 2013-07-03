@@ -1,5 +1,7 @@
-var myDropzone_init = function() {
-    myDropzone.on("success", function(file) {
+// Turn off the discover option so the URL error is not thrown with custom configuration
+Dropzone.autoDiscover = false;
+// Hook the drop success to the grid view update
+myDropzone.on("success", function(file) {
     // Assign values to the uploads folder, so we can insert the file in the correct spot in the view
     var uploadsFolder = {};
     // Check if the server says that the file exists already
@@ -27,7 +29,7 @@ var myDropzone_init = function() {
         var slickIndent = 1;
         var slickSize = newSlickInfo[0].size;
         var slickParent = uploadsFolder['id'];
-        var slickParentPath = newSlickInfo[0].uploader_path;
+        var slickParentPath = newSlickInfo[0].parent_path;
         var slickPath = newSlickInfo[0].path;
         var slickItem = {
             title: slickTitle,
@@ -41,6 +43,21 @@ var myDropzone_init = function() {
         }
         // Splice in the new row after the uploads folder
         data.splice(uploadsFolder['index'] + 1, 0, slickItem);
+        var new_id = uploadsFolder['id']+1;
+        console.log(slickItem["path"]);
+        for(var x = uploadsFolder['index'] + 1; x<data.length; x++){
+            data[x]['id']=new_id;
+            new_id+=1;
+            if(data[x]['parent_path']){
+                for(var i=0; i<data.length; i++){
+                    if(data[i]['path']==data[x]['parent_path']){
+                        data[x]['parent']=data[i]['id'];
+                    }
+                }
+            }
+
+        }
+        console.log(data);
         // Update the dataView
         dataView.beginUpdate();
         dataView.setItems(data);
@@ -51,5 +68,4 @@ var myDropzone_init = function() {
     grid.updateRowCount();
     grid.invalidate();
     grid.render();
-    });
-};
+});

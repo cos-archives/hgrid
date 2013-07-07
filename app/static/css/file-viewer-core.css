@@ -20,3 +20,6 @@
 .toggle.collapse {
     background: url('../images/collapse.gif') no-repeat center center;
 }
+.slick-row.dragger-guide {
+    background-color: rgba(0,0,255,0.5);
+}

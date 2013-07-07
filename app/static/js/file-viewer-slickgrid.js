@@ -208,6 +208,7 @@ $(function (){
 
         //Before rows are moved, make sure their dest is valid, document source and target
         moveRowsPlugin.onBeforeMoveRows.subscribe(function (e, args) {
+            grid.draggerGuide(e, args);
             for (var i = 0; i < args.rows.length; i++) {
                 // no point in moving before or after itself
                 for(var j=0; j<data.length; j++){
@@ -250,6 +251,7 @@ $(function (){
                     }
                 }
                 if (args.rows[i] == args.insertBefore - 1 || index == false || src[i] == "uploads" || dest[i] == "uploads") {
+                    grid.removeDraggerGuide();
                     e.stopPropagation();
                     return false;
                 }
@@ -260,6 +262,7 @@ $(function (){
 
         //When rows are moved post to server and update data
         moveRowsPlugin.onMoveRows.subscribe(function (e, args) {
+            grid.removeDraggerGuide();
             //Post to server
             $.post('/sg_move', {src: JSON.stringify(src), dest: JSON.stringify(dest)}, function(response){
                 //Make sure move succeeds
@@ -270,7 +273,6 @@ $(function (){
 //                    Get new data and prep it
                     var insert = JSON.parse(response);
                     prep(insert);
-                    console.log(response);
                     var rows=[];
 
                     //Make sure all children move as well
@@ -585,7 +587,7 @@ $(function (){
         var hierarchical = [];
         grid.BuildHierarchy(sorted, hierarchical, undefined);
         return hierarchical;
-    }
+    };
 
     //Rebuilds parent id hierarchy
     grid.BuildHierarchy =  function (sorted, hierarchical, parent){
@@ -604,7 +606,7 @@ $(function (){
                 grid.BuildHierarchy(sorted, hierarchical, sorted[i]);
             }
         }
-    }
+    };
 
     //Compare function
     grid.comparer = function (a, b) {
@@ -624,5 +626,24 @@ $(function (){
         else{
             return x < y ? 1 : -1;
         }
-    }
-})
+    };
+    // Remove the Blue Background from drag destination rows
+    grid.removeDraggerGuide = function() {
+        $(".dragger-guide").removeClass("dragger-guide");
+    };
+    // Add a Blue Background to the drag destination row
+    grid.draggerGuide = function(e, args) {
+        grid.removeDraggerGuide();
+        // If a target row exists
+        if (args.insertBefore > 0) {
+            draggerGuideBefore = data[args.insertBefore];
+            // If the destination is not the top level
+            if (draggerGuideBefore['parent'] != null) {
+                // Get the row node from the parent of the first cell in the row
+                // This seems to be the only way to get the row node with current Slick Grid options
+                dragParent = grid.getCellNode(draggerGuideBefore['parent'], 0).parentNode;
+                $(dragParent).addClass("dragger-guide");
+            }
+        }
+    };
+});

@@ -11,6 +11,7 @@ myDropzone.on("dragover", function(e){
     currentDropCell.insertBefore = currentDropCell['row'];
     grid.draggerGuide(e, currentDropCell);
     dropDestination = data[currentDropCell['row']]['parent_path'];
+    dest[0] = dropDestination;
 });
 // Pass the destination folder to the server
 myDropzone.on("sending", function(file, xhr, formData){

@@ -6,7 +6,6 @@ import json
 from flask import render_template, request
 from shutil import move, Error, rmtree
 from werkzeug.utils import secure_filename
-from hurry.filesize import size, alternative
 
 info = []
 # Sets the base file directories for the fileviewer
@@ -23,7 +22,8 @@ def folder_size(dir_path):
     for item in os.listdir(dir_path):
         item_path = os.path.join(dir_path, item)
         if os.path.isfile(item_path):
-            total_size += os.path.getsize(item_path)
+            if item!=".DS_Store":
+                total_size += os.path.getsize(item_path)
         elif os.path.isdir(item_path):
             # Recursively returns file sizes of children of children
             total_size += folder_size(item_path)
@@ -62,7 +62,6 @@ def file_walk(dir_path):
             appender['name'] = appender['path']
         # Calls the function folder_size to get the folder size
         appender['size'] = folder_size(os.path.join(dir_path, d))
-        appender['size_read'] = size(appender['size'], system=alternative)
         info.append(appender)
         # Recursively calls the file_walk function on all child files and folders
         file_walk(os.path.join(dir_path, d))
@@ -82,7 +81,6 @@ def file_walk(dir_path):
             appender['parent_path'] = "null"
             appender['name'] = appender['path']
         appender['size'] = os.path.getsize(os.path.join(dir_path, f))
-        appender['size_read'] = size(appender['size'], system=alternative)
         info.append(appender)
 
 
@@ -175,12 +173,7 @@ def sg_move():
         except Error:
             return "fail"
 
-    # Clear old instances of info for a fresh data set
-    del info[:]
-    #
-    # # Walk the directory to collect file information. Returns "info".
-    file_walk(dir_root)
-    return json.dumps(info)
+    return "success"
 
 
 # Delete Files passed by the grid

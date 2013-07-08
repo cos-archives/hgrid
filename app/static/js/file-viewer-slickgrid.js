@@ -26,6 +26,9 @@ var dataView;
 var grid;
 var data = [];
 var sortAsc = true;
+//Create arrays to hold moving objects and their destinations
+var src = [];
+var dest = [];
 
 //Create columns
 var columns = [
@@ -118,7 +121,7 @@ $(function (){
             d["indent"] = indent;
             d["name"] = info[i]['name'];
             d["size"] = info[i]['size'];
-            d["size_read"] = info[i]['size_read']
+            d["size_read"] = readableSize(info[i]['size']);
             d["type"] = info[i]['type'];
         }
     }
@@ -188,7 +191,7 @@ $(function (){
             d["indent"] = indent-1;
             d["name"] = sortedData[i]['name'];
             d["size"] = sortedData[i]['size'];
-            d["size_read"] = sortedData[i]['size_read']
+            d["size_read"] = readableSize(sortedData[i]['size']);
             d["type"] = sortedData[i]['type'];
             data[i]=d;
         }
@@ -202,13 +205,10 @@ $(function (){
             cancelEditOnDrag: true
         });
 
-        //Create arrays to hold moving objects and their destinations
-        var src = [];
-        var dest = [];
-
         //Before rows are moved, make sure their dest is valid, document source and target
         moveRowsPlugin.onBeforeMoveRows.subscribe(function (e, args) {
-            grid.draggerGuide(e, args);
+            src = [];
+            dest = [];
             for (var i = 0; i < args.rows.length; i++) {
                 // no point in moving before or after itself
                 for(var j=0; j<data.length; j++){
@@ -244,7 +244,7 @@ $(function (){
                     dest[i] = null;
                 }
                 var index = true;
-
+                grid.draggerGuide(e, args);
                 if (dest[i]!=null){
                     if (dest[i].indexOf(src[i]) == 0 || dest=="catch" || dest[i].indexOf("uploads") == 0){
                         index = false;
@@ -260,99 +260,114 @@ $(function (){
             return true;
         });
 
-        //When rows are moved post to server and update data
-        moveRowsPlugin.onMoveRows.subscribe(function (e, args) {
+////        When rows are moved post to server and update data
+//        moveRowsPlugin.onMoveRows.subscribe(function (e, args) {
+//            grid.removeDraggerGuide();
+//            //Post to server
+//            $.post('/sg_move', {src: JSON.stringify(src), dest: JSON.stringify(dest)}, function(response){
+//                //Make sure move succeeds
+//                if (response=="fail"){
+//                    e.stopImmediatePropagation();
+//                }
+//                else{
+//                    var insert = JSON.parse(response);
+//                    prep(insert);
+//
+////                    sortcol=grid.getSortColumns[0];
+////                    var sorted = grid.sortHierarchy();
+////                    prep_java(sorted);
+//                    dataView.setItems(data);
+//                    grid.invalidate();
+//                    grid.setSelectedRows([]);
+//                    grid.render();
+//                }
+//            });
+//        });
+
+        moveRowsPlugin.onMoveRows.subscribe(function(e, args){
             grid.removeDraggerGuide();
-            //Post to server
             $.post('/sg_move', {src: JSON.stringify(src), dest: JSON.stringify(dest)}, function(response){
                 //Make sure move succeeds
                 if (response=="fail"){
                     e.stopImmediatePropagation();
                 }
                 else{
-//                    Get new data and prep it
-                    var insert = JSON.parse(response);
-                    prep(insert);
-                    var rows=[];
 
-                    //Make sure all children move as well
-                    var j = args.rows[0];
-                    var destIndex;
-                    var stopRow;
-                    do{
-                        rows.push(j);
-                        j+=1;
-                        stopRow = j;
-                    }while(data[j] && data[j]['indent']>data[args.rows[0]]['indent']);
+                    for(var y=0; y<args.rows.length; y++){
+                        ;
+                        var rows=[];
 
-                    //Update data
-                    var extractedRows = [], left, right;
+                        //Make sure all children move as well
+                        var j = args.rows[y];
+                        var destIndex;
+                        var stopRow;
+                        do{
+                            rows.push(j);
+                            j+=1;
+                            stopRow = j;
+                        }while(data[j] && data[j]['indent']>data[args.rows[y]]['indent']);
 
-                    var insertBefore = args.insertBefore;
-                    left = data.slice(0, insertBefore);
-                    right = data.slice(insertBefore, data.length);
+                        //Update data
+                        var extractedRows = [], left, right;
 
-                    rows.sort(function(a,b) { return a-b; });
+                        var insertBefore = args.insertBefore;
+                        left = data.slice(0, insertBefore);
+                        right = data.slice(insertBefore, data.length);
 
-                    for (var i = 0; i < rows.length; i++) {
-                        extractedRows.push(data[rows[i]]);
-                    }
+                        rows.sort(function(a,b) { return a-b; });
 
-                    rows.reverse();
-
-                    for (var i = 0; i < rows.length; i++) {
-                        var row = rows[i];
-                        if (row < insertBefore) {
-                            left.splice(row, 1);
-                        } else {
-                            right.splice(row - insertBefore, 1);
+                        for (var i = 0; i < rows.length; i++) {
+                            extractedRows.push(data[rows[i]]);
                         }
+
+                        rows.reverse();
+
+                        for (var i = 0; i < rows.length; i++) {
+                            var row = rows[i];
+                            if (row < insertBefore) {
+                                left.splice(row, 1);
+                            } else {
+                                right.splice(row - insertBefore, 1);
+                            }
+                        }
+
+//                    Change parent path and path
+                        var checker = {};
+                        var old_path = extractedRows[0]['path'];
+                        extractedRows[0]['path'] = dest[0] + '/' + extractedRows[0]['name'];
+                        var new_path = extractedRows[0]['path'];
+                        checker[old_path]=new_path;
+                        extractedRows[0]['parent_path']=dest[0];
+
+                        if (extractedRows.length > 1){
+                            for(var m=1; m<extractedRows.length; m++){
+                                extractedRows[m]['parent_path']=checker[extractedRows[m]['parent_path']];
+                                old_path=extractedRows[m]['path'];
+                                extractedRows[m]['path']=extractedRows[m]['parent_path']+'/'+extractedRows[m]['name'];
+                                checker[old_path]=extractedRows[m]['path'];
+                            }
+                        }
+
+                        data = left.concat(extractedRows.concat(right));
+
+                        var selectedRows = [];
+                        for (var i = 0; i < rows.length; i++)
+                            selectedRows.push(left.length + i);
+
+//                        grid.size_update(data[args.rows[y]]['parent_path']);
+                        prep_java(data);
+
                     }
+                    //Update sizes
+//                    for(var i=0; i<src.length; i++){
+//                        grid.size_update(src[i])
+//                    }
+//                    grid.size_update(dest[0]);
 
-                    data = left.concat(extractedRows.concat(right));
-
-                    var selectedRows = [];
-                    for (var i = 0; i < rows.length; i++)
-                        selectedRows.push(left.length + i);
-
-                    sortcol="id";
-                    var sorted = grid.sortHierarchy();
-                    prep_java(sorted);
                     dataView.setItems(data);
                     grid.invalidate();
                     grid.setSelectedRows([]);
                     grid.render();
-
-
-//                        //Splice data and delete all children if folder is dropped
-//                        var rows=[];
-//                        var j = rowsToDelete[0];
-//                        var stopRow;
-//                        do{
-//                            rows.push(j);
-//                            j+=1;
-//                            stopRow = j;
-//                        }while(data[j] && data[j]['indent']>data[rowsToDelete[0]]['indent']);
-//                        var check = data.splice(rows[0], rows.length);
-//                        var x = rowsToDelete[0];
-//
-//                        //Change IDs and parents for rest of data to re-render grid properly
-//                        for(x; x<data.length; x++){
-//                            data[x]['id']=data[x]['id']-rows.length;
-//                            if(data[x]['parent_path']){
-//                                if (check[0]['parent_path']){
-//                                    if(check[0]['parent_path']!=data[x]['parent_path']){
-//                                        data[x]['parent']=data[x]['parent']-rows.length;
-//                                    }
-//                                }
-//
-//                            }
-//
-//                        }
-//                        dataView.setItems(data);
-//                        grid.invalidate();
-//                        grid.setSelectedRows([]);
-//                        grid.render();
                 }
             });
         });
@@ -627,23 +642,71 @@ $(function (){
             return x < y ? 1 : -1;
         }
     };
+
     // Remove the Blue Background from drag destination rows
     grid.removeDraggerGuide = function() {
         $(".dragger-guide").removeClass("dragger-guide");
     };
+
+
     // Add a Blue Background to the drag destination row
     grid.draggerGuide = function(e, args) {
         grid.removeDraggerGuide();
         // If a target row exists
-        if (args.insertBefore > 0) {
-            draggerGuideBefore = data[args.insertBefore];
-            // If the destination is not the top level
-            if (draggerGuideBefore['parent'] != null) {
-                // Get the row node from the parent of the first cell in the row
-                // This seems to be the only way to get the row node with current Slick Grid options
-                dragParent = grid.getCellNode(draggerGuideBefore['parent'], 0).parentNode;
-                $(dragParent).addClass("dragger-guide");
+        if(dest[0]){
+            if (dest[0]!=null){
+                for (var x = 0; x<data.length; x++){
+                    if (data[x]['path']==dest[0]){
+                        dragParent = grid.getCellNode(data[x]['id'], 0).parentNode;
+                        $(dragParent).addClass("dragger-guide");
+                    }
+                }
             }
         }
     };
+
+    grid.size_update = function(folder) {
+        var size=0;
+        for (var i=0; i<data.length; i++){
+            if (data[i]['path']==folder){
+                var target = data[i];
+                break;
+            }
+        }
+        var j = target['id']+1;
+        do{
+            size+=data[j]['size'];
+            j+=1;
+        }while(data[j] && data[j]['indent']>target['indent']);
+
+        target['size_read']=readableSize(size);
+        target['size'] = size;
+        if (target['parent']!=null){
+            grid.size_update(target['parent_path']);
+        }
+    };
+
+    grid.callReadableSize = function(bytes){
+        readableSize(bytes);
+    };
+
+    //From StackOverflow
+    function readableSize(bytes) {
+        var s = ['bytes', 'kB', 'MB', 'GB', 'TB', 'PB'];
+        var e = Math.floor(Math.log(bytes) / Math.log(1024));
+        var returner;
+        if (e==0){
+            returner = (bytes / Math.pow(1024, e) + " bytes");
+        }
+        else{
+            returner = (bytes / Math.pow(1024, e)).toFixed(2) + " " + s[e];
+        }
+
+        if (bytes== 0){
+            returner = "0 bytes";
+        }
+
+        return returner;
+    };
+
 });

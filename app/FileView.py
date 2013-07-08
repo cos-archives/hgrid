@@ -112,10 +112,6 @@ def index():
 # The script to upload files from Dropzone.js
 @app.route('/uploader', methods=['GET', 'POST'])
 def uploader():
-    # Set the folder for all uploads
-    upload_folder = "uploads"
-    # Set the file system path to the upload folder
-    uploader_dir = os.path.join(dir_root, upload_folder) # Make sure that they can't create a separate uploads folder? / rewrite this?
     # Make sure the data is sent by a POST method
     if request.method == 'POST':
         print "The method was a POST"
@@ -124,6 +120,10 @@ def uploader():
         print request.files #test!
         # Verifies that a file was passed to the page
         new_file_name = secure_filename(requested_file.filename)
+        # Set the folder for the upload
+        upload_folder = request.form['destination']
+        # Set the file system path to the upload folder
+        uploader_dir = os.path.join(dir_root, upload_folder) # Make sure that they can't create a separate uploads folder? / rewrite this?
         if requested_file:
             print "The file was posted"
             print new_file_name  # A test line to verify that the output is correct / in the correct format.
@@ -138,7 +138,6 @@ def uploader():
                 new_info_item = {}
                 new_info_item['name'] = requested_file.filename
                 new_info_item['path'] = os.path.join(upload_folder, requested_file.filename)
-                new_info_item['parent'] = upload_folder
                 new_info_item['parent_path'] = upload_folder
                 new_info_item['uploader_path'] = os.path.join(upload_folder, requested_file.filename)
                 new_info_item['size'] = os.path.getsize(os.path.join(uploader_dir, requested_file.filename))

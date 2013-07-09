@@ -74,7 +74,6 @@ $(function (){
     prep(y);
 
     function prep(info){
-        console.log('HERE');
         data = [];
         var indent = 0;
         var checker = {};
@@ -125,6 +124,7 @@ $(function (){
             sortHierarchy();
             prep_java(data);
         }
+        console.log(data);
     }
     // initialize the model
     dataView = new Slick.Data.DataView({ inlineFilters: true });

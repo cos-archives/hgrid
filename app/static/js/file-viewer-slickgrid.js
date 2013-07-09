@@ -74,6 +74,7 @@ $(function (){
     prep(y);
 
     function prep(info){
+        console.log('HERE');
         data = [];
         var indent = 0;
         var checker = {};
@@ -124,7 +125,6 @@ $(function (){
             sortHierarchy();
             prep_java(data);
         }
-        console.log(data);
     }
     // initialize the model
     dataView = new Slick.Data.DataView({ inlineFilters: true });
@@ -161,7 +161,7 @@ $(function (){
             //Assign parent paths, find ID of parent and assign its ID to "parent" attribute
             d["parent_path"]=sortedData[i]['parent_path'];
             //Check if item has a parent
-            if (sortedData[i]['parent_path']){
+            if (sortedData[i]['parent_path']!="null"){
                 for(var j=0; j<sortedData.length; j++){
                     if (sortedData[j]['path']==d["parent_path"] && !d["parent"]){
                         d["parent"]= j;
@@ -189,7 +189,7 @@ $(function (){
             //Set other values
             d["path"] = sortedData[i]['path'];
             d["id"] = i;
-            d["indent"] = indent-1;
+            d["indent"] = indent;
             d["name"] = sortedData[i]['name'];
             d["size"] = sortedData[i]['size'];
             d["size_read"] = readableSize(sortedData[i]['size']);
@@ -313,10 +313,17 @@ $(function (){
 //                    Change parent path and path
                         var checker = {};
                         var old_path = extractedRows[0]['path'];
-                        extractedRows[0]['path'] = dest[0] + '/' + extractedRows[0]['name'];
+                        if (dest[0]==null){
+                            extractedRows[0]['path'] = extractedRows[0]['name'];
+                            extractedRows[0]['parent_path']="null";
+                        }
+                        else{
+                            extractedRows[0]['path'] = dest[0] + '/' + extractedRows[0]['name'];
+                            extractedRows[0]['parent_path']=dest[0];
+                        }
                         var new_path = extractedRows[0]['path'];
                         checker[old_path]=new_path;
-                        extractedRows[0]['parent_path']=dest[0];
+
 
                         if (extractedRows.length > 1){
                             for(var m=1; m<extractedRows.length; m++){

@@ -10,8 +10,18 @@ myDropzone.on("dragover", function(e){
     currentDropCell = grid.getCellFromEvent(e);
     currentDropCell.insertBefore = currentDropCell['row'];
     grid.draggerGuide(e, currentDropCell);
+    if(data[currentDropCell['row']-1]['type']=='folder'){
+        dropDestination = data[currentDropCell['row']-1]['path'];
+    }
+    else{
     dropDestination = data[currentDropCell['row']]['parent_path'];
+    }
+    console.log(dropDestination);
     dest[0] = dropDestination;
+});
+
+myDropzone.on("dragleave", function(e){
+    grid.removeDraggerGuide();
 });
 // Pass the destination folder to the server
 myDropzone.on("sending", function(file, xhr, formData){

@@ -73,56 +73,57 @@ $(function (){
     var y = info_dict;
     prep(y);
 
-    //Receives data from server and prepares it
     function prep(info){
-        data=[];
+        console.log('HERE');
+        data = [];
         var indent = 0;
-        var checker ={};
+        var checker = {};
+        var i = 0;
+        var data_counter=0;
 
-        //Go through each item in info and create a dictionary with values needed for grid
-        for (var i = 0; i < info.length; i++) {
-            var parents = [];
-            var d = (data[i] = {});
-            var parent;
+        while (info.length>=1){
+            var d= {};
+            if (info[i]['parent_path']=="null"){
+                d['parent_path']="null";
+                d['parent']=null;
+                d['name']=info[i]['name'];
+                d['path']=info[i]['path'];
+                d['indent']=0;
+                d['size']=info[i]['size'];
+                d['size_read']=readableSize(d['size']);
+                d['type']=info[i]['type'];
+                d['id']=data_counter;
+                checker[d['path']]=[d['indent'], data_counter];
+                data[data_counter]=d;
+                data_counter++;
+                info.splice(i, 1);
+            }
+            else if(info[i]['parent_path'] in checker){
+                d['parent_path']=info[i]['parent_path'];
+                d['parent']=checker[d['parent_path']][1];
+                d['name']=info[i]['name'];
+                d['path']=info[i]['path'];
+                d['indent']=checker[d['parent_path']][0]+1;
+                d['size']=info[i]['size'];
+                d['size_read']=readableSize(d['size']);
+                d['type']=info[i]['type'];
+                d['id']=data_counter;
+                checker[d['path']]=[d['indent'], data_counter];
+                data[data_counter]=d;
+                data_counter++;
+                info.splice(i, 1);
 
-            //Assign parent paths, find ID of parent and assign its ID to "parent" attribute
-            d["parent_path"]=info[i]['parent_path'];
-            //Check if item has a parent
-            if (info[i]['parent_path']!="null"){
-
-                for(var j=0; j<data.length; j++){
-                    if (data[j]['path']==d["parent_path"]){
-                        d["parent"]= j;
-                    }
-                }
-                //If parent hasn't been encountered, increment the indent
-                if (!(info[i]['parent_path'] in checker)){
-                    indent++;
-                }
-                //If it has been encountered, make indent the same as others with same parent
-                else {
-                    indent = checker[info[i]['parent_path']];
-                }
-
-                //Make sure parent_path is in checker
-                checker[info[i]['parent_path']]=indent;
+            }
+            else{
+                i++;
+            }
+            if(i>=info.length){
+                i=0;
             }
 
-
-            //If no parent, set parent to null and indent to 0
-            else {
-                indent=0;
-                d["parent"]=null;
-            }
-
-            //Set other values
-            d["path"] = info[i]['path'];
-            d["id"] = i;
-            d["indent"] = indent;
-            d["name"] = info[i]['name'];
-            d["size"] = info[i]['size'];
-            d["size_read"] = readableSize(info[i]['size']);
-            d["type"] = info[i]['type'];
+            sortcol='path';
+            sortHierarchy();
+            prep_java(data);
         }
     }
     // initialize the model
@@ -139,7 +140,7 @@ $(function (){
     function onSort(e, args){
         sortAsc = !sortAsc;
         sortcol = args.sortCol.field;
-        var new_data = grid.sortHierarchy();
+        var new_data = grid.callSortHierarchy();
         prep_java(new_data);
         dataView.setItems(data);
         grid.invalidate();
@@ -260,30 +261,8 @@ $(function (){
             return true;
         });
 
-////        When rows are moved post to server and update data
-//        moveRowsPlugin.onMoveRows.subscribe(function (e, args) {
-//            grid.removeDraggerGuide();
-//            //Post to server
-//            $.post('/sg_move', {src: JSON.stringify(src), dest: JSON.stringify(dest)}, function(response){
-//                //Make sure move succeeds
-//                if (response=="fail"){
-//                    e.stopImmediatePropagation();
-//                }
-//                else{
-//                    var insert = JSON.parse(response);
-//                    prep(insert);
-//
-////                    sortcol=grid.getSortColumns[0];
-////                    var sorted = grid.sortHierarchy();
-////                    prep_java(sorted);
-//                    dataView.setItems(data);
-//                    grid.invalidate();
-//                    grid.setSelectedRows([]);
-//                    grid.render();
-//                }
-//            });
-//        });
 
+//        When rows are moved post to server and update data
         moveRowsPlugin.onMoveRows.subscribe(function(e, args){
             grid.removeDraggerGuide();
             $.post('/sg_move', {src: JSON.stringify(src), dest: JSON.stringify(dest)}, function(response){
@@ -294,7 +273,7 @@ $(function (){
                 else{
 
                     for(var y=0; y<args.rows.length; y++){
-                        ;
+
                         var rows=[];
 
                         //Make sure all children move as well
@@ -597,15 +576,18 @@ $(function (){
         });
 
     //Sorts new parent hierarchy
-    grid.sortHierarchy = function (){
-        var sorted = data.sort(grid.comparer);
+    grid.callSortHierarchy = function (){
+        return sortHierarchy();
+    };
+
+    function sortHierarchy(){
+        var sorted = data.sort(comparer);
         var hierarchical = [];
-        grid.BuildHierarchy(sorted, hierarchical, undefined);
+        buildHierarchy(sorted, hierarchical, undefined);
         return hierarchical;
     };
 
-    //Rebuilds parent id hierarchy
-    grid.BuildHierarchy =  function (sorted, hierarchical, parent){
+    function buildHierarchy(sorted, hierarchical, parent){
         for(var i=0; i < sorted.length; i++)
         {
             var item = sorted[i];
@@ -618,13 +600,17 @@ $(function (){
             }
             if(item.parent == parentId){
                 hierarchical.push(sorted[i]);
-                grid.BuildHierarchy(sorted, hierarchical, sorted[i]);
+                buildHierarchy(sorted, hierarchical, sorted[i]);
             }
         }
     };
+    //Rebuilds parent id hierarchy
+    grid.callBuildHierarchy = function(sorted, hierarchical, parent){
+        buildHierarchy(sorted, hierarchical, parent);
+    };
 
     //Compare function
-    grid.comparer = function (a, b) {
+    function comparer(a, b) {
 
         //If sorting by size, must sort by int value, not readable string
         if (sortcol=="size_read"){

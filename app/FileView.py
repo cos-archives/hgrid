@@ -3,6 +3,7 @@ __author__ = 'jakerose27'
 from app import app
 import os
 import json
+import random
 from flask import render_template, request
 from shutil import move, Error, rmtree
 from werkzeug.utils import secure_filename
@@ -98,8 +99,21 @@ def index():
     # Walk the directory to collect file information. Returns "info".
     walker_router()
 
+    tester = [
+        {'path': 'another', 'size': 568, 'type': 'folder', 'name': 'another', 'parent_path': 'null'},
+        {'path': 'uploads/test3.txt', 'size': 24, 'type': 'file', 'name': 'test3.txt', 'parent_path': 'uploads'},
+        {'path': 'another/l_dir', 'size': 568, 'type': 'folder', 'name': 'l_dir', 'parent_path': 'another'},
+        {'path': 'uploads/test2.txt', 'size': 17, 'type': 'file', 'name': 'test2.txt', 'parent_path': 'uploads'},
+        {'path': 'another/l_dir/check-folder', 'size': 568, 'type': 'folder', 'name': 'check-folder', 'parent_path': 'another/l_dir'},
+        {'path': 'uploads/test1.txt', 'size': 17, 'type': 'file', 'name': 'test1.txt', 'parent_path': 'uploads'},
+        {'path': 'another/l_dir/check-folder/checker1.txt', 'size': 72, 'type': 'file', 'name': 'checker1.txt', 'parent_path': 'another/l_dir/check-folder'},
+        {'path': 'uploads', 'size': 58, 'type': 'folder', 'name': 'uploads', 'parent_path': 'null'},
+        {'path': 'another/l_dir/check-folder/checker3.txt', 'size': 486, 'type': 'file', 'name': 'checker3.txt', 'parent_path': 'another/l_dir/check-folder'},
+        {'path': 'another/l_dir/check-folder/FileView.py', 'size': 10, 'type': 'file', 'name': 'FileView.py', 'parent_path': 'another/l_dir/check-folder'}
+    ]
+    randint = random.randint(0, 1000)
     #print json.dumps(info)  # A test line to verify that the output is correct / in the correct format.
-    return render_template("index.html", info=json.dumps(info))
+    return render_template("index.html", info=json.dumps(info), randint=randint)
 
 
 # # The script to route all file calls to the proper walker and file manipulator

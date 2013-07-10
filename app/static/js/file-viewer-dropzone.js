@@ -9,15 +9,18 @@ var myDropzone = new Dropzone("#myGrid", {
 myDropzone.on("dragover", function(e){
     currentDropCell = grid.getCellFromEvent(e);
     currentDropCell.insertBefore = currentDropCell['row'];
-    grid.draggerGuide(e, currentDropCell);
+
     if(data[currentDropCell['row']-1]['type']=='folder'){
         dropDestination = data[currentDropCell['row']-1]['path'];
     }
     else{
     dropDestination = data[currentDropCell['row']]['parent_path'];
     }
-    console.log(dropDestination);
-    dest[0] = dropDestination;
+    dropHighlight = null;
+    if (data[currentDropCell['row']-1]){
+        dropHighlight = data[currentDropCell['row']-1];
+    };
+    grid.draggerGuide(e, currentDropCell, dropHighlight);
 });
 
 myDropzone.on("dragleave", function(e){

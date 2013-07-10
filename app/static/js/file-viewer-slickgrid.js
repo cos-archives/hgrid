@@ -26,14 +26,14 @@ var dataView;
 var grid;
 var data = [];
 var sortAsc = true;
-//Create arrays to hold moving objects and their destinations
 var src = [];
 var dest = [];
+var numRowsCollapsed = 0;
 
 //Create columns
 var columns = [
     {id: "#", name: "", width: 40, behavior: "selectAndMove", selectable: false, resizable: false, cssClass: "cell-reorder dnd"},
-    //{id: "id", name: "ID", field: "id", width: 40, sortable: true},
+    {id: "id", name: "ID", field: "id", width: 40, sortable: true},
     {id: "name", name: "Name", field: "name", width: 450, cssClass: "cell-title", formatter: TaskNameFormatter, editor: Slick.Editors.Text, validator: requiredFieldValidator, sortable: true, defaultSortAsc: true},
     {id: "size_read", name: "Size", field: "size_read", width: 110, editor: Slick.Editors.Text, sortable: true}
 ];
@@ -51,21 +51,15 @@ function myFilter(item) {
     if (item.parent != null) {
         var parentIdx = dataView.getIdxById(item.parent);
         var parent = data[parentIdx];
-
         while (parent) {
             if (parent._collapsed) {
                 return false;
             }
-
             var parentParentIdx = dataView.getIdxById(parent.parent);
             parent = data[parentParentIdx];
         }
     }
     return true;
-}
-
-function renderCell(row, cell, value, columnDef, dataContext) {
-    return "<div> test <b>html</b></div>";
 }
 
 //Function called on page load
@@ -74,7 +68,6 @@ $(function (){
     prep(y);
 
     function prep(info){
-        console.log('HERE');
         data = [];
         var indent = 0;
         var checker = {};
@@ -112,7 +105,6 @@ $(function (){
                 data[data_counter]=d;
                 data_counter++;
                 info.splice(i, 1);
-
             }
             else{
                 i++;
@@ -120,19 +112,20 @@ $(function (){
             if(i>=info.length){
                 i=0;
             }
-
-            sortcol='path';
-            sortHierarchy();
-            prep_java(data);
+            if(d['name']=="null"){
+                d['name']+=i
+            }
         }
+        sortcol='path';
+        sortHierarchy();
+        prep_java(data);
     }
-    // initialize the model
+    // initialize the model and grid
     dataView = new Slick.Data.DataView({ inlineFilters: true });
     dataView.beginUpdate();
     dataView.setItems(data);
     dataView.setFilter(myFilter);
     dataView.endUpdate();
-    // initialize the grid
     grid = new Slick.Grid("#myGrid", dataView, columns, options);
     initialize();
 
@@ -152,12 +145,10 @@ $(function (){
     function prep_java(sortedData){
         var checker = {};
         var indent = 0;
-
         for (var i = 0; i < sortedData.length; i++) {
             var parents = [];
             var d = {};
             var parent;
-
             //Assign parent paths, find ID of parent and assign its ID to "parent" attribute
             d["parent_path"]=sortedData[i]['parent_path'];
             //Check if item has a parent
@@ -175,17 +166,17 @@ $(function (){
                 else {
                     indent = checker[sortedData[i]['parent_path']];
                 }
-
                 //Make sure parent_path is in checker
                 checker[sortedData[i]['parent_path']]=indent;
             }
-
             //If no parent, set parent to null and indent to 0
             else {
                 indent=0;
                 d["parent"]=null;
             }
-
+            if (sortedData[i]._collapsed){
+                d._collapsed=sortedData[i]._collapsed;
+            }
             //Set other values
             d["path"] = sortedData[i]['path'];
             d["id"] = i;
@@ -201,7 +192,6 @@ $(function (){
     //Sets functions for moving rows, sorting, etc.
     function initialize(){
         grid.setSelectionModel(new Slick.RowSelectionModel());
-
         var moveRowsPlugin = new Slick.RowMoveManager({
             cancelEditOnDrag: true
         });
@@ -210,13 +200,19 @@ $(function (){
         moveRowsPlugin.onBeforeMoveRows.subscribe(function (e, args) {
             src = [];
             dest = [];
+            //console.log(grid.getCellNode(args.insertBefore, grid.getColumnIndex('id')));
+            var inserter=null;
+            if (grid.getDataItem(args.insertBefore-1)){
+                inserter = grid.getDataItem(args.insertBefore-1);
+            }
+            var insertBefore = grid.getDataItem(args.insertBefore)['id'];
             for (var i = 0; i < args.rows.length; i++) {
                 // no point in moving before or after itself
                 for(var j=0; j<data.length; j++){
                     if(data[j]['id']==args.rows[i]){
                         src[i] = data[j]['path'];
                     }
-                    if(data[j]['id']==args.insertBefore){
+                    if(data[j]['id']==insertBefore){
                         if (data[j-1]){
                             if(data[j-1]['type']=='folder') {
                                 dest[i] = data[j-1]['path'];
@@ -229,8 +225,8 @@ $(function (){
                             dest[i] = null;
                         }
                     }
-                    if(args.insertBefore>data.length-1){
-                        var m = args.insertBefore
+                    if(insertBefore>data.length-1){
+                        var m = insertBefore;
                         if (data[m-1]){
                             if(data[m-1]['type']=='folder') {
                                 dest[i] = data[m-1]['path'];
@@ -245,22 +241,20 @@ $(function (){
                     dest[i] = null;
                 }
                 var index = true;
-                grid.draggerGuide(e, args);
+                grid.draggerGuide(e, args, inserter);
                 if (dest[i]!=null){
                     if (dest[i].indexOf(src[i]) == 0 || dest=="catch" || dest[i].indexOf("uploads") == 0){
                         index = false;
                     }
                 }
-                if (args.rows[i] == args.insertBefore - 1 || index == false || src[i] == "uploads" || dest[i] == "uploads") {
+                if (args.rows[i] == insertBefore - 1 || index == false || src[i] == "uploads" || dest[i] == "uploads") {
                     grid.removeDraggerGuide();
                     e.stopPropagation();
                     return false;
                 }
-
             }
             return true;
         });
-
 
 //        When rows are moved post to server and update data
         moveRowsPlugin.onMoveRows.subscribe(function(e, args){
@@ -269,11 +263,10 @@ $(function (){
                 //Make sure move succeeds
                 if (response=="fail"){
                     e.stopImmediatePropagation();
+                    alert("Move failed!");
                 }
                 else{
-
                     for(var y=0; y<args.rows.length; y++){
-
                         var rows=[];
 
                         //Make sure all children move as well
@@ -290,6 +283,10 @@ $(function (){
                         var extractedRows = [], left, right;
 
                         var insertBefore = args.insertBefore;
+                        if (numRowsCollapsed!=0){
+                            insertBefore = grid.getDataItem(args.insertBefore)['id'];
+                        }
+
                         left = data.slice(0, insertBefore);
                         right = data.slice(insertBefore, data.length);
 
@@ -323,7 +320,6 @@ $(function (){
                         }
                         var new_path = extractedRows[0]['path'];
                         checker[old_path]=new_path;
-
 
                         if (extractedRows.length > 1){
                             for(var m=1; m<extractedRows.length; m++){
@@ -465,13 +461,23 @@ $(function (){
             if ($(e.target).hasClass("toggle")) {
                 var item = dataView.getItem(args.row);
                 if (item) {
+                    var i=args.row;
+                    var counter = -1;
+                    do{
+                        counter+=1;
+                        i+=1;
+                    }
+                    while(data[i] && data[i]['indent']>data[args.row]['indent'])
+
                     if (!item._collapsed) {
                         item._collapsed = true;
                     } else {
                         item._collapsed = false;
+                        counter=-counter;
                     }
 
                     dataView.updateItem(item.id, item);
+                    grid.changeRowsCollapsed(counter, i);
                 }
                 e.stopImmediatePropagation();
             }
@@ -512,7 +518,6 @@ $(function (){
 
     }
 
-
     // Return Mode to normal after drop
     $.drop({mode: "mouse"});
     //Create Drop Zone
@@ -533,7 +538,6 @@ $(function (){
 
         //Delete files and folders when dragged to recycle bin, confirm delete
         .bind("drop", function (e, dd) {
-//          .bind("dragend", function (e, dd) {
             if (dd.mode != "recycle") {
                 return;
             }
@@ -558,21 +562,8 @@ $(function (){
                             stopRow = j;
                         }while(data[j] && data[j]['indent']>data[rowsToDelete[0]]['indent']);
                         var check = data.splice(rows[0], rows.length);
+                        prep_java(data);
                         var x = rowsToDelete[0];
-
-                        //Change IDs and parents for rest of data to re-render grid properly
-                        for(x; x<data.length; x++){
-                            data[x]['id']=data[x]['id']-rows.length;
-                            if(data[x]['parent_path']){
-                                if (check[0]['parent_path']){
-                                    if(check[0]['parent_path']!=data[x]['parent_path']){
-                                        data[x]['parent']=data[x]['parent']-rows.length;
-                                    }
-                                }
-
-                            }
-
-                        }
                         dataView.setItems(data);
                         grid.invalidate();
                         grid.setSelectedRows([]);
@@ -611,6 +602,7 @@ $(function (){
             }
         }
     };
+
     //Rebuilds parent id hierarchy
     grid.callBuildHierarchy = function(sorted, hierarchical, parent){
         buildHierarchy(sorted, hierarchical, parent);
@@ -618,7 +610,6 @@ $(function (){
 
     //Compare function
     function comparer(a, b) {
-
         //If sorting by size, must sort by int value, not readable string
         if (sortcol=="size_read"){
             sortcol="size";
@@ -641,20 +632,23 @@ $(function (){
         $(".dragger-guide").removeClass("dragger-guide");
     };
 
-
     // Add a Blue Background to the drag destination row
-    grid.draggerGuide = function(e, args) {
+    grid.draggerGuide = function(e, args, inserter) {
         grid.removeDraggerGuide();
         // If a target row exists
-        if(dest[0]){
-            if (dest[0]!=null){
-                for (var x = 0; x<data.length; x++){
-                    if (data[x]['path']==dest[0]){
-                        dragParent = grid.getCellNode(data[x]['id'], 0).parentNode;
-                        $(dragParent).addClass("dragger-guide");
-                    }
+        if(inserter==null){
+            //grid highlight;
+        }
+        else{
+            if (inserter['path']!="uploads"){
+                if(inserter['type']=='folder'){
+                    dragParent = grid.getCellNode(dataView.getRowById(inserter['id']), 0).parentNode;
+                }
+                else{
+                    dragParent = grid.getCellNode(dataView.getRowById(inserter['parent']), 0).parentNode;
                 }
             }
+            $(dragParent).addClass("dragger-guide");
         }
     };
 
@@ -682,6 +676,11 @@ $(function (){
     grid.callReadableSize = function(bytes){
         readableSize(bytes);
     };
+
+    grid.changeRowsCollapsed = function(num, position){
+        numRowsCollapsed+=num;
+    };
+
 
     //From StackOverflow
     function readableSize(bytes) {

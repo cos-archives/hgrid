@@ -23,3 +23,7 @@
 .slick-row.dragger-guide {
     background-color: rgba(0,0,255,0.5);
 }
+
+.slick-viewport.dragger-guide1{
+    border: 5px solid rgba(0,0,255,0.5);
+}

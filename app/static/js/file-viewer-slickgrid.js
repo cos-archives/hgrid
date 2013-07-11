@@ -22,6 +22,13 @@ var TaskNameFormatter = function (row, cell, value, columnDef, dataContext) {
     }
 };
 
+var NameFormatter = function (row, cell, value, columnDef, dataContext){
+    if(value == 'another'){
+        return "<a href=\"http://www.w3schools.com/\">" + TaskNameFormatter(row, cell, value, columnDef, dataContext) + "</a>";
+    }
+    else return TaskNameFormatter(row, cell, value, columnDef, dataContext);
+}
+
 var dataView;
 var grid;
 var data = [];
@@ -41,7 +48,7 @@ var columns = [
 //SlickGrid options
 var options = {
     editable: false,
-    enableCellNavigation: true,
+    enableCellNavigation: false,
     asyncEditorLoading: false,
     enableColumnReorder: true
 };
@@ -205,7 +212,14 @@ $(function (){
             if (grid.getDataItem(args.insertBefore-1)){
                 inserter = grid.getDataItem(args.insertBefore-1);
             }
-            var insertBefore = grid.getDataItem(args.insertBefore)['id'];
+            try{
+                var insertBefore = grid.getDataItem(args.insertBefore)['id'];
+            }
+            catch(error){
+                if(error.name == TypeError){
+                    e.stopImmediatePropagation();
+                }
+            }
             for (var i = 0; i < args.rows.length; i++) {
                 // no point in moving before or after itself
                 for(var j=0; j<data.length; j++){
@@ -630,25 +644,34 @@ $(function (){
     // Remove the Blue Background from drag destination rows
     grid.removeDraggerGuide = function() {
         $(".dragger-guide").removeClass("dragger-guide");
+        $(".slick-viewport").removeClass("dragger-guide1")
     };
 
     // Add a Blue Background to the drag destination row
     grid.draggerGuide = function(e, args, inserter) {
         grid.removeDraggerGuide();
+        dragParent=false;
         // If a target row exists
         if(inserter==null){
-            //grid highlight;
+            $(".slick-viewport").addClass("dragger-guide1")
         }
+
         else{
             if (inserter['path']!="uploads"){
                 if(inserter['type']=='folder'){
                     dragParent = grid.getCellNode(dataView.getRowById(inserter['id']), 0).parentNode;
                 }
                 else{
-                    dragParent = grid.getCellNode(dataView.getRowById(inserter['parent']), 0).parentNode;
+                    try{
+                        dragParent = grid.getCellNode(dataView.getRowById(inserter['parent']), 0).parentNode;
+                    }
+                    catch(err){
+                    }
                 }
             }
-            $(dragParent).addClass("dragger-guide");
+            if(dragParent){
+                $(dragParent).addClass("dragger-guide");
+            }
         }
     };
 

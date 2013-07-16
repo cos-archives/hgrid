@@ -70,11 +70,17 @@ var HGrid = {
 
     },
 
-    getItemByValue: function(data, searchVal, searchProp) {
+    getItemByValue: function(data, searchVal, searchProp, returnProp) {
+        var returnProp = (returnProp ? returnProp : false);
         var ans;
         for(var i =0; i<data.length; i++){
             if(data[i][searchProp]==searchVal){
+                if(returnProp==false){
                 ans = data[i];
+                }
+                else{
+                    ans=data[i][returnProp];
+                }
                 return ans;
             }
         }
@@ -88,29 +94,6 @@ var HGrid = {
             }
         }
         return propArray;
-    },
-
-    createPaths: function(data){
-        for(var l=0; l<data.length; l++){
-            var path = [];
-            path.push(data[l]['uid']);
-            if(data[l]['parent_uid']!="null"){
-                for(var m=0; m<l; m++){
-                    if(data[m]['uid']==data[l]['parent_uid']){
-//                        var x = m;
-                        while(data[m]['parent_uid']!="null"){
-                            path.push(data[m]['uid']);
-                            m = data[m]['parent'];
-                        }
-                        path.push(data[m]['uid']);
-                        break;
-                    }
-                }
-            }
-            path.reverse();
-            data[l]['path']=path;
-            data[l]['sortpath']=path.join('/')
-        }
     }
 }
 

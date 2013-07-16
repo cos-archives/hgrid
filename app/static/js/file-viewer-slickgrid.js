@@ -113,8 +113,28 @@ function prep(info){
         }
     }
 
-    HGrid.createPaths(data);
-        sortcol='sortpath';
+        for(var l=0; l<data.length; l++){
+            var path = [];
+            path.push(data[l]['uid']);
+            if(data[l]['parent_uid']!="null"){
+                for(var m=0; m<l; m++){
+                    if(data[m]['uid']==data[l]['parent_uid']){
+//                        var x = m;
+                        while(data[m]['parent_uid']!="null"){
+                            path.push(data[m]['uid']);
+                            m = data[m]['parent'];
+                        }
+                        path.push(data[m]['uid']);
+                        break;
+                    }
+                }
+            }
+            path.reverse();
+            data[l]['path']=path;
+            data[l]['sortpath']=path.join('/')
+        }
+
+    sortcol='sortpath';
         sortHierarchy();
         prep_java(data);
     }
@@ -618,6 +638,7 @@ function prep(info){
                         extractedRows[0]['parent_uid']=dest[dest.length-1];
                         extractedRows[0]['path'] = dest.slice();
                         extractedRows[0]['path'].push(extractedRows[0]['uid']);
+                        extractedRows[0]['sortpath']=extractedRows[0]['path'].join('/');
                     }
 
 
@@ -634,6 +655,7 @@ function prep(info){
                             var par = HGrid.getItemByValue(extractedRows, extractedRows[m]['parent_uid'], 'uid')['path'];
                             extractedRows[m]['path']= par.slice();
                             extractedRows[m]['path'].push(extractedRows[m]['uid']);
+                            extractedRows[m]['sortpath']=extractedRows[m]['path'].join('/');
                         }
                     }
 

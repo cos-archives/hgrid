@@ -1,7 +1,7 @@
-// Turn off the discover option so the URL error is not thrown with custom configuration
+function hGridDropInit(hGridContainer){// Turn off the discover option so the URL error is not thrown with custom configuration
 Dropzone.autoDiscover = false;
 // Instantiate this Dropzone
-var myDropzone = new Dropzone("#myGrid", {
+var myDropzone = new Dropzone(hGridContainer, {
     url: "/uploader",
     previewsContainer: "#drop-preview-panel"
 } );
@@ -101,3 +101,4 @@ myDropzone.on("success", function(file) {
     grid.invalidate();
     grid.render();
 });
+};

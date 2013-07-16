@@ -37,13 +37,16 @@
 <script src="/static/js/slick-grid-dependencies/slick.cellselectionmodel.js?{{ randint }}"></script>
 <script src="/static/js/slick-grid-dependencies/slick.rowselectionmodel.js?{{ randint }}"></script>
 <script src="/static/js/slick-grid-dependencies/slick.rowmovemanager.js?{{ randint }}"></script>
-<script src="/static/js/file-viewer-slickgrid.js?{{ randint }}"></script>
+<script src="/static/js/file-viewer-slickgrid.js"></script>
+<script src="/static/js/hgrid.js?{{ randint }}"></script>
+
 
 <script>
-    var info_dict = {{ info | safe }}
-{#    columns = {};#}
-{#    options = [];#}
-{#    myhslickgrid = HSlickGrid(anchor, data, columns, options);#}
+    var myGrid = HGrid.create({
+        container: "#myGrid",
+        data: {{ info | safe }},
+        url: "/sg_move"
+    });
 </script>
 
 </body>

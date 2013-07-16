@@ -51,16 +51,16 @@ def file_walk(dir_path):
         appender = {}
         appender['type'] = 'folder'
         # Sets the base path top to dir_root
-        appender['path'] = os.path.join(dir_path, d).split(dir_root + os.sep)[1]
-        parent = os.path.dirname(appender['path'])
+        appender['uid'] = os.path.join(dir_path, d).split(dir_root + os.sep)[1]
+        parent = os.path.dirname(appender['uid'])
         # If it has a parent, add the parent information.
         if parent:
-            appender['name'] = os.path.basename(appender['path'])
-            appender['parent_path'] = parent
+            appender['name'] = os.path.basename(appender['uid'])
+            appender['parent_uid'] = parent
         # If it doesn't have a parent, just return the path information.
         else:
-            appender['parent_path'] = "null"
-            appender['name'] = appender['path']
+            appender['parent_uid'] = "null"
+            appender['name'] = appender['uid']
         # Calls the function folder_size to get the folder size
         appender['size'] = folder_size(os.path.join(dir_path, d))
         info.append(appender)
@@ -71,16 +71,16 @@ def file_walk(dir_path):
     for f in files_holder:
         appender = {}
         appender['type'] = 'file'
-        appender['path'] = os.path.join(dir_path, f).split(dir_root + os.sep)[1]
-        parent = os.path.dirname(appender['path'])
+        appender['uid'] = os.path.join(dir_path, f).split(dir_root + os.sep)[1]
+        parent = os.path.dirname(appender['uid'])
         # If it has a parent, add the parent information.
         if parent:
-            appender['name'] = os.path.basename(appender['path'])
-            appender['parent_path'] = parent
+            appender['name'] = os.path.basename(appender['uid'])
+            appender['parent_uid'] = parent
         # If it doesn't have a parent, just return the path information.
         else:
-            appender['parent_path'] = "null"
-            appender['name'] = appender['path']
+            appender['parent_uid'] = "null"
+            appender['name'] = appender['uid']
         appender['size'] = os.path.getsize(os.path.join(dir_path, f))
         info.append(appender)
 
@@ -100,16 +100,31 @@ def index():
     walker_router()
 
     tester = [
-        {'path': 'another', 'size': 568, 'type': 'folder', 'name': 'another', 'parent_path': 'null'},
-        {'path': 'uploads/test3.txt', 'size': 24, 'type': 'file', 'name': 'test3.txt', 'parent_path': 'uploads'},
-        {'path': 'another/l_dir', 'size': 568, 'type': 'folder', 'name': 'l_dir', 'parent_path': 'another'},
-        {'path': 'uploads/test2.txt', 'size': 17, 'type': 'file', 'name': 'test2.txt', 'parent_path': 'uploads'},
-        {'path': 'another/l_dir/check-folder', 'size': 568, 'type': 'folder', 'name': 'check-folder', 'parent_path': 'another/l_dir'},
-        {'path': 'uploads/test1.txt', 'size': 17, 'type': 'file', 'name': 'test1.txt', 'parent_path': 'uploads'},
-        {'path': 'another/l_dir/check-folder/checker1.txt', 'size': 72, 'type': 'file', 'name': 'checker1.txt', 'parent_path': 'another/l_dir/check-folder'},
-        {'path': 'uploads', 'size': 58, 'type': 'folder', 'name': 'uploads', 'parent_path': 'null'},
-        {'path': 'another/l_dir/check-folder/checker3.txt', 'size': 486, 'type': 'file', 'name': 'checker3.txt', 'parent_path': 'another/l_dir/check-folder'},
-        {'path': 'another/l_dir/check-folder/FileView.py', 'size': 10, 'type': 'file', 'name': 'FileView.py', 'parent_path': 'another/l_dir/check-folder'}
+        {'uid': 'another', 'size': 568, 'type': 'folder', 'name': 'another', 'parent_uid': 'null'},
+        {'uid': 'uploads/test3.txt', 'size': 24, 'type': 'file', 'name': 'test3.txt', 'parent_uid': 'uploads'},
+        {'uid': 'another/l_dir', 'size': 568, 'type': 'folder', 'name': 'l_dir', 'parent_uid': 'another'},
+        {'uid': 'uploads/test2.txt', 'size': 17, 'type': 'file', 'name': 'test2.txt', 'parent_uid': 'uploads'},
+        {'uid': 'another/l_dir/check-folder', 'size': 568, 'type': 'folder', 'name': 'check-folder', 'parent_uid': 'another/l_dir'},
+        {'uid': 'uploads/test1.txt', 'size': 17, 'type': 'file', 'name': 'test1.txt', 'parent_uid': 'uploads'},
+        {'uid': 'another/l_dir/check-folder/checker1.txt', 'size': 72, 'type': 'file', 'name': 'checker1.txt', 'parent_uid': 'another/l_dir/check-folder'},
+        {'uid': 'uploads', 'size': 58, 'type': 'folder', 'name': 'uploads', 'parent_uid': 'null'},
+        {'uid': 'another/l_dir/check-folder/checker3.txt', 'size': 486, 'type': 'file', 'name': 'checker3.txt', 'parent_uid': 'another/l_dir/check-folder'},
+        {'uid': 'another/l_dir/check-folder/FileView.py', 'size': 10, 'type': 'file', 'name': 'FileView.py', 'parent_uid': 'another/l_dir/check-folder'}
+    ]
+
+    tester2 = [
+        {'uid': 1, 'size': 568, 'type': 'folder', 'name': 'skaters', 'parent_uid': 'null'},
+        {'uid': 4, 'size': 568, 'type': 'folder', 'name': 'soccer_players', 'parent_uid': 'null'},
+        {'uid': 5, 'size': 568, 'type': 'folder', 'name': 'pro', 'parent_uid': 4},
+        {'uid': 8, 'size': 568, 'type': 'folder', 'name': 'regular', 'parent_uid': 4},
+        {'uid': 11, 'size': 568, 'type': 'folder', 'name': 'bad', 'parent_uid': 8},
+        {'uid': 2, 'size': 568, 'type': 'file', 'name': 'tony', 'parent_uid': 1},
+        {'uid': 3, 'size': 568, 'type': 'file', 'name': 'bucky', 'parent_uid': 1},
+        {'uid': 6, 'size': 568, 'type': 'file', 'name': 'ronaldo', 'parent_uid': 5},
+        {'uid': 7, 'size': 568, 'type': 'file', 'name': 'messi', 'parent_uid': 5},
+        {'uid': 9, 'size': 568, 'type': 'file', 'name': 'jake', 'parent_uid': 8},
+        {'uid': 10, 'size': 568, 'type': 'file', 'name': 'laura', 'parent_uid': 8},
+        {'uid': 12, 'size': 568, 'type': 'file', 'name': 'torres', 'parent_uid': 11}
     ]
     randint = random.randint(0, 1000)
     #print json.dumps(info)  # A test line to verify that the output is correct / in the correct format.
@@ -149,8 +164,8 @@ def uploader():
                 info_append = []
                 new_info_item = {}
                 new_info_item['name'] = requested_file.filename
-                new_info_item['path'] = os.path.join(upload_folder, requested_file.filename)
-                new_info_item['parent_path'] = upload_folder
+                new_info_item['uid'] = os.path.join(upload_folder, requested_file.filename)
+                new_info_item['parent_uid'] = upload_folder
                 new_info_item['uploader_path'] = os.path.join(upload_folder, requested_file.filename)
                 new_info_item['size'] = os.path.getsize(os.path.join(uploader_dir, requested_file.filename))
                 new_info_item['type'] = "file"
@@ -172,13 +187,13 @@ def sg_move():
     print dest_load
     for index in range(len(src_load)):
         src = os.path.join(dir_root, src_load[index])
-        print dest_load[index]
-        if dest_load[index] is None:
+        print dest_load
+        if dest_load is None:
             dest=dir_root
             response = json.dumps(src_load[index])
         else:
-            dest = os.path.join(dir_root, dest_load[index])
-            response = json.dumps(dest_load[0])
+            dest = os.path.join(dir_root, dest_load)
+            response = json.dumps(dest_load)
 
         # A test line to verify that the output is correct / in the correct format.
         try:
@@ -195,10 +210,10 @@ def sg_move():
 def file_deleter():
     item = json.loads(request.form['grid_item'])
     file_name = item['name']
-    file_path = os.path.join(dir_root, item['path'])
+    file_path = os.path.join(dir_root, item['uid'])
     # print file_path
 
-    if item['path']=="uploads":
+    if item['uid']=="uploads":
         return "fail"
 
     print file_name
@@ -221,14 +236,14 @@ def file_deleter():
 @app.route('/sg_edit', methods=['GET', 'POST'])
 def sg_edit():
     item = json.loads(request.form['grid_item'])
-    old_title = os.path.join(dir_root, item['path'])
+    old_title = os.path.join(dir_root, item['uid'])
     print item
-    if item['path']=="uploads":
+    if item['uid']=="uploads":
         return "fail"
 
-    if 'parent_path' in item:
-        parent_path = os.path.join(dir_root, item['parent_path'])
-        new_path = os.path.join(item['parent_path'], item['name'])
+    if 'parent_uid' in item:
+        parent_path = os.path.join(dir_root, item['parent_uid'])
+        new_path = os.path.join(item['parent_uid'], item['name'])
     else:
         parent_path = dir_root
         new_path = item['name']

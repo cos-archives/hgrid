@@ -31,22 +31,25 @@
 <script src="/static/js/slick-grid-dependencies/slick.core.js?{{ randint }}"></script>
 <script src="/static/js/slick-grid-dependencies/slick.formatters.js?{{ randint }}"></script>
 <script src="/static/js/slick-grid-dependencies/slick.editors.js?{{ randint }}"></script>
-<script src="/static/js/slick-grid-dependencies/slick.grid.js?{{ randint }}"></script>
-<script src="/static/js/slick-grid-dependencies/slick.dataview.js?{{ randint }}"></script>
+<script src="/static/js/slick-grid-dependencies/slick.grid.js"></script>
+<script src="/static/js/slick-grid-dependencies/slick.dataview.js"></script>
 <script src="/static/js/slick-grid-dependencies/slick.cellrangeselector.js?{{ randint }}"></script>
 <script src="/static/js/slick-grid-dependencies/slick.cellselectionmodel.js?{{ randint }}"></script>
 <script src="/static/js/slick-grid-dependencies/slick.rowselectionmodel.js?{{ randint }}"></script>
 <script src="/static/js/slick-grid-dependencies/slick.rowmovemanager.js?{{ randint }}"></script>
 <script src="/static/js/file-viewer-slickgrid.js"></script>
-<script src="/static/js/hgrid.js?{{ randint }}"></script>
+<script src="/static/js/hgrid.js"></script>
 
 
 <script>
     var myGrid = HGrid.create({
         container: "#myGrid",
-        data: {{ info | safe }},
+        info: {{ info | safe }},
         url: "/sg_move"
     });
+    data = myGrid.data;
+    console.log(data);
+    dataView = myGrid.Slick.dataView;
 </script>
 
 </body>

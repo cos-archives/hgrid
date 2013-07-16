@@ -10,8 +10,8 @@ function requiredFieldValidator(value) {
 var TaskNameFormatter = function (row, cell, value, columnDef, dataContext) {
     value = value.replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");
     var spacer = "<span style='display:inline-block;height:1px;width:" + (15 * dataContext["indent"]) + "px'></span>";
-    var idx = dataView.getIdxById(dataContext.id);
-    if (data[idx]['type']=='folder') {
+    var idx = HGrid.Slick.dataView.getIdxById(dataContext.id);
+    if (HGrid.data[idx]['type']=='folder') {
         if (dataContext._collapsed) {
             return spacer + " <span class='toggle expand'></span>&nbsp;" + value;
         } else {
@@ -29,8 +29,6 @@ var NameFormatter = function (row, cell, value, columnDef, dataContext){
     else return TaskNameFormatter(row, cell, value, columnDef, dataContext);
 }
 
-var dataView;
-var grid;
 var data = [];
 var sortAsc = true;
 var numRowsCollapsed = 0;
@@ -46,7 +44,9 @@ var options = {
 };
 
 //Filter for expand/collapse parents
-function myFilter(item) {
+function myFilter(item, args) {
+    var data = args[0];
+    var dataView = args[1];
     if (item.parent != null) {
         var parentIdx = dataView.getIdxById(item.parent);
         var parent = data[parentIdx];
@@ -62,132 +62,132 @@ function myFilter(item) {
 }
 
 //Function called on page load
-function hGridSlickInit(hGridInfo, hGridContainer, hGridColumns){
-    prep(hGridInfo);
+function hGridSlickInit(hGridInfo, hGridContainer, hGridColumns, grid, dataView){
+//    prep(hGridInfo);
     // initialize the model and grid
-    dataView = new Slick.Data.DataView({ inlineFilters: true });
-    dataView.beginUpdate();
-    dataView.setItems(data);
-    dataView.setFilter(myFilter);
-    dataView.endUpdate();
-    grid = new Slick.Grid(hGridContainer, dataView, hGridColumns, options);
-    initialize();
+//    dataView = new Slick.Data.DataView({ inlineFilters: true });
+//    dataView.beginUpdate();
+//    dataView.setItems(data);
+//    dataView.setFilter(myFilter);
+//    dataView.endUpdate();
+//    grid = new Slick.Grid(hGridContainer, dataView, hGridColumns, options);
+    initialize(grid, dataView);
 };
 
 
-function prep(info){
-    data = [];
-    var indent = 0;
-    var checker = {};
-    var i = 0;
-    var data_counter=0;
-
-    while (info.length>=1){
-        var d = info[i];
-        if (info[i]['parent_uid']=="null"){
-            d['parent']=null;
-            d['indent']=0;
-            d['id']=data_counter;
-            checker[d['uid']]=[d['indent'], data_counter];
-            data[data_counter]=d;
-            data_counter++;
-            info.splice(i, 1);
-        }
-        else if(info[i]['parent_uid'] in checker){
-            d['parent']=checker[d['parent_uid']][1];
-            d['indent']=checker[d['parent_uid']][0]+1;
-            d['id']=data_counter;
-            checker[d['uid']]=[d['indent'], data_counter];
-            data[data_counter]=d;
-            data_counter++;
-            info.splice(i, 1);
-        }
-        else{
-            i++;
-        }
-        if(i>=info.length){
-            i=0;
-        }
-        if(d['name']=="null"){
-            d['name']+=i
-        }
-    }
-
-        for(var l=0; l<data.length; l++){
-            var path = [];
-            path.push(data[l]['uid']);
-            if(data[l]['parent_uid']!="null"){
-                for(var m=0; m<l; m++){
-                    if(data[m]['uid']==data[l]['parent_uid']){
-//                        var x = m;
-                        while(data[m]['parent_uid']!="null"){
-                            path.push(data[m]['uid']);
-                            m = data[m]['parent'];
-                        }
-                        path.push(data[m]['uid']);
-                        break;
-                    }
-                }
-            }
-            path.reverse();
-            data[l]['path']=path;
-            data[l]['sortpath']=path.join('/')
-        }
-
-    sortcol='sortpath';
-        sortHierarchy();
-        prep_java(data);
-    }
+//function prep(info){
+//    data = [];
+//    var indent = 0;
+//    var checker = {};
+//    var i = 0;
+//    var data_counter=0;
+//
+//    while (info.length>=1){
+//        var d = info[i];
+//        if (info[i]['parent_uid']=="null"){
+//            d['parent']=null;
+//            d['indent']=0;
+//            d['id']=data_counter;
+//            checker[d['uid']]=[d['indent'], data_counter];
+//            data[data_counter]=d;
+//            data_counter++;
+//            info.splice(i, 1);
+//        }
+//        else if(info[i]['parent_uid'] in checker){
+//            d['parent']=checker[d['parent_uid']][1];
+//            d['indent']=checker[d['parent_uid']][0]+1;
+//            d['id']=data_counter;
+//            checker[d['uid']]=[d['indent'], data_counter];
+//            data[data_counter]=d;
+//            data_counter++;
+//            info.splice(i, 1);
+//        }
+//        else{
+//            i++;
+//        }
+//        if(i>=info.length){
+//            i=0;
+//        }
+//        if(d['name']=="null"){
+//            d['name']+=i
+//        }
+//    }
+//
+//        for(var l=0; l<data.length; l++){
+//            var path = [];
+//            path.push(data[l]['uid']);
+//            if(data[l]['parent_uid']!="null"){
+//                for(var m=0; m<l; m++){
+//                    if(data[m]['uid']==data[l]['parent_uid']){
+////                        var x = m;
+//                        while(data[m]['parent_uid']!="null"){
+//                            path.push(data[m]['uid']);
+//                            m = data[m]['parent'];
+//                        }
+//                        path.push(data[m]['uid']);
+//                        break;
+//                    }
+//                }
+//            }
+//            path.reverse();
+//            data[l]['path']=path;
+//            data[l]['sortpath']=path.join('/')
+//        }
+//
+//    sortcol='sortpath';
+//        sortHierarchy();
+//        prep_java(data);
+//    }
 
 //Same as previous prep function, but changes existing data instead of creating new
-    function prep_java(sortedData){
-        var checker = {};
-        var indent = 0;
-        for (var i = 0; i < sortedData.length; i++) {
-            var parents = [];
-            var parent;
-            var d = {};
-            var path = [];
-//      var d = sortedData[i];
-            //Assign parent paths, find ID of parent and assign its ID to "parent" attribute
-            d['parent_uid']=sortedData[i]['parent_uid'];
-            path.push(sortedData[i]['uid']);
-            //Check if item has a parent
-            if (sortedData[i]['parent_uid']!="null"){
-                for(var j=0; j<sortedData.length; j++){
-                    if (sortedData[j]['uid']==d['parent_uid'] && !d["parent"]){
-                        d["parent"]= j;
-                        break;
-                    }
-                }
-                //If parent hasn't been encountered, increment the indent
-                if (!(sortedData[i]['parent_uid'] in checker)){
-                    indent++;
-                }
-                //If it has been encountered, make indent the same as others with same parent
-                else {
-                    indent = checker[sortedData[i]['parent_uid']];
-                }
-                //Make sure parent_path is in checker
-                checker[sortedData[i]['parent_uid']]=indent;
-            }
-            //If no parent, set parent to null and indent to 0
-            else {
-                indent=0;
-                d["parent"]=null;
-            }
-            if (sortedData[i]._collapsed){
-                d._collapsed=sortedData[i]._collapsed;
-            }
-            //Set other values
-            d["id"] = i;
-            d["indent"] = indent;
-            d = $.extend(true, sortedData[i], d);
-            data[i]=d;
-        }
-    }
+//    function prep_java(sortedData){
+//        var checker = {};
+//        var indent = 0;
+//        for (var i = 0; i < sortedData.length; i++) {
+//            var parents = [];
+//            var parent;
+//            var d = {};
+//            var path = [];
+////      var d = sortedData[i];
+//            //Assign parent paths, find ID of parent and assign its ID to "parent" attribute
+//            d['parent_uid']=sortedData[i]['parent_uid'];
+//            path.push(sortedData[i]['uid']);
+//            //Check if item has a parent
+//            if (sortedData[i]['parent_uid']!="null"){
+//                for(var j=0; j<sortedData.length; j++){
+//                    if (sortedData[j]['uid']==d['parent_uid'] && !d["parent"]){
+//                        d["parent"]= j;
+//                        break;
+//                    }
+//                }
+//                //If parent hasn't been encountered, increment the indent
+//                if (!(sortedData[i]['parent_uid'] in checker)){
+//                    indent++;
+//                }
+//                //If it has been encountered, make indent the same as others with same parent
+//                else {
+//                    indent = checker[sortedData[i]['parent_uid']];
+//                }
+//                //Make sure parent_path is in checker
+//                checker[sortedData[i]['parent_uid']]=indent;
+//            }
+//            //If no parent, set parent to null and indent to 0
+//            else {
+//                indent=0;
+//                d["parent"]=null;
+//            }
+//            if (sortedData[i]._collapsed){
+//                d._collapsed=sortedData[i]._collapsed;
+//            }
+//            //Set other values
+//            d["id"] = i;
+//            d["indent"] = indent;
+//            d = $.extend(true, sortedData[i], d);
+//            data[i]=d;
+//        }
+//    }
 //Sets functions for moving rows, sorting, etc.
-    function initialize(){
+    function initialize(grid, dataView){
         var src = [];
         var dest = "";
         grid.setSelectionModel(new Slick.RowSelectionModel());
@@ -470,23 +470,23 @@ function prep(info){
 
 
 //Compare function
-    function comparer(a, b) {
-        //If sorting by size, must sort by int value, not readable string
-        if (sortcol=="size_read"){
-            sortcol="size";
-        }
-        var x = a[sortcol], y = b[sortcol];
-
-        if(x == y){
-            return 0;
-        }
-        if(sortAsc){
-            return x > y ? 1 : -1;
-        }
-        else{
-            return x < y ? 1 : -1;
-        }
-    };
+//    function comparer(a, b) {
+//        //If sorting by size, must sort by int value, not readable string
+//        if (sortcol=="size_read"){
+//            sortcol="size";
+//        }
+//        var x = a[sortcol], y = b[sortcol];
+//
+//        if(x == y){
+//            return 0;
+//        }
+//        if(sortAsc){
+//            return x > y ? 1 : -1;
+//        }
+//        else{
+//            return x < y ? 1 : -1;
+//        }
+//    };
 
 // Remove the Blue Background from drag destination rows
     function removeDraggerGuide () {
@@ -549,7 +549,7 @@ function prep(info){
 //Function called when sort is clicked
     function onSort(e, args){
         sortAsc = !sortAsc;
-        sortcol = args.sortCol.field;
+//        sortcol = args.sortCol.field;
         var new_data = sortHierarchy();
         prep_java(new_data);
         dataView.setItems(data);

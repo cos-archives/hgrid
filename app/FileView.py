@@ -127,7 +127,7 @@ def index():
         {'uid': 11, 'size': 568, 'type': 'file', 'name': 'torres', 'parent_uid': 10}
     ]
     randint = random.randint(0, 1000)
-    #print json.dumps(info)  # A test line to verify that the output is correct / in the correct format.
+    print json.dumps(info)  # A test line to verify that the output is correct / in the correct format.
     return render_template("index.html", info=json.dumps(tester2), randint=randint)
 
 

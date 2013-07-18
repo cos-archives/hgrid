@@ -438,12 +438,13 @@ var HGrid = {
     onSort: function (e, args, grid, dataView, data){
         HGrid.sortAsc = !HGrid.sortAsc;
         var sortingCol = args.sortCol.field;
-        this.sortHierarchy(data, sortingCol, dataView, grid);
-//        HGrid.prepJava(data);
-//        dataView.setItems(data);
-//        grid.invalidate();
-//        grid.setSelectedRows([]);
-//        grid.render();
+        var sorted = this.sortHierarchy(data, sortingCol, dataView, grid);
+        var new_data = HGrid.prepJava(sorted);
+        HGrid.data = new_data;
+        dataView.setItems(new_data);
+        grid.invalidate();
+        grid.setSelectedRows([]);
+        grid.render();
     },
 
     sortHierarchy: function (data, sortingCol, dataView, grid){
@@ -460,16 +461,9 @@ var HGrid = {
                 return x < y ? 1 : -1;
             }
         });
-
-        var new_data = HGrid.prep(data);
-        dataView.setItems(new_data);
-        HGrid.data = new_data;
-        grid.invalidate();
-        grid.setSelectedRows([]);
-        grid.render();
-//        var hierarchical = [];
-//        this.buildHierarchy(sorted, hierarchical, undefined);
-//        return hierarchical;
+        var hierarchical = [];
+        this.buildHierarchy(sorted, hierarchical, undefined);
+        return hierarchical;
     },
 
     buildHierarchy: function (sorted, hierarchical, parent) {
@@ -478,12 +472,12 @@ var HGrid = {
             var item = sorted[i];
             var parentId;
             if(parent){
-                parentId = parent.uid;
+                parentId = parent.id;
             }
             else{
                 parentId = undefined;
             }
-            if(item.parent_uid == parentId){
+            if(item.parent == parentId){
                 hierarchical.push(sorted[i]);
                 HGrid.buildHierarchy(sorted, hierarchical, sorted[i]);
             }

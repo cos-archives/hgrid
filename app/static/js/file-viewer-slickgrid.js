@@ -726,9 +726,8 @@ function hGridSlickInit(grid, dataView, data){
                             j+=1;
                             stopRow = j;
                         }while(data[j] && data[j]['indent']>data[rowsToDelete[0]]['indent']);
-                        var check = data.splice(rows[0], rows.length);
+                        data.splice(rows[0], rows.length);
                         prep_java(data);
-                        var x = rowsToDelete[0];
                         dataView.setItems(data);
                         grid.invalidate();
                         grid.setSelectedRows([]);

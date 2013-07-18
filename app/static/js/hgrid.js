@@ -155,8 +155,26 @@ var HGrid = {
         _this.itemMover(value, url, src_uid, dest_path);
     },
 
-    deleteItem: function() {
+    deleteItem: function(rowsToDelete) {
+        var _this = this;
+        //Splice data and delete all children if folder is dropped
+        for(var i=0; i<rowsToDelete.length; i++){
+            var rows=[];
+            var check = _this.Slick.dataView.getRowById(rowsToDelete[i]);
+            var j = check;
+            do{
+                rows.push(j);
+                j+=1;
+            }while(_this.data[j] && _this.data[j]['indent']>_this.data[check]['indent']);
 
+            _this.data.splice(rows[0], rows.length);
+            _this.Slick.dataView.setItems(_this.data);
+        }
+        _this.prepJava(_this.data);
+        _this.Slick.dataView.setItems(_this.data);
+        _this.Slick.grid.invalidate();
+        _this.Slick.grid.setSelectedRows([]);
+        _this.Slick.grid.render();
     },
 
     editItem: function(src_uid, name) {

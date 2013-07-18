@@ -134,8 +134,27 @@ var HGrid = {
         this.Slick.grid = grid;
     },
 
-    addItem: function() {
+    addItem: function(item) {
+        var _this = this;
+//        if (!item['parent_uid'] || !item['uid'] || !item['name'] || !item['type'] || _this.getItemByValue(_this.data, item['uid'], 'uid')){
+//            alert("This is an invalid item.");
+//            return;
+//        }
+            var parent= _this.getItemByValue(_this.data, item['parent_uid'], 'uid');
 
+        if(item['parent_uid']!="null"){
+            var parent_path = parent['path'];
+            item['path']=[];
+            item['path'].concat(parent_path, item['uid']);
+            item['sortpath']=item['path'].join('/');
+        }
+        _this.data.splice(parent['id']+1, 0,item);
+        _this.prepJava(_this.data);
+        _this.Slick.dataView.setItems(_this.data);
+        _this.Slick.grid.invalidate();
+        _this.Slick.grid.setSelectedRows([]);
+        _this.Slick.grid.render();
+        return item;
     },
 
     moveItems: function(src, dest) {
@@ -191,6 +210,7 @@ var HGrid = {
                 return ans;
             }
         }
+        return false;
     },
 
     getItemsByValue: function(data, searchVal, searchProp) {
@@ -462,7 +482,7 @@ var HGrid = {
         var dragParent=false;
         // If a target row exists
         if(inserter==null){
-            $(_this.options.container + ".slick-viewport").addClass("dragger-guide1");
+            $(".slick-viewport").addClass("dragger-guide1");
         }
         else{
             if (inserter['uid']!="uploads"){

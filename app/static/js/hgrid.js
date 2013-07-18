@@ -159,8 +159,10 @@ var HGrid = {
 
     },
 
-    editItem: function() {
-
+    editItem: function(src_uid, name) {
+        var src = this.getItemByValue(this.data, src_uid, 'uid');
+        src['name']=name;
+        this.Slick.dataView.updateItem(src['id'], src);
     },
 
     getItemByValue: function(data, searchVal, searchProp) {
@@ -646,29 +648,31 @@ var HGrid = {
             _this.options.editable=false;
 //            HGrid.options.editable=false;
             var src=args.item;
-            $.post('/sg_edit', {grid_item: JSON.stringify(src)}, function(new_title){
-                if(new_title!="fail"){
-                    var i = src['id']+1;
-                    while(data[i]['parent_uid'].indexOf(data[src['id']]['uid'])==0){
-                        if(data[i]['parent_uid']==data[src['id']]['uid']){
-                            data[i]['parent_uid']=new_title;
-                            data[i]['uid']=new_title+ "/" + data[i]['name'];
-                        }
-                        else{
-                            data[i]['parent_uid']=data[data[i]['parent']]['uid'];
-                            data[i]['uid']=data[i]['parent_uid'] + "/" + data[i]['name'];
-                        }
-                        i++;
-                    }
-                    src['uid']=new_title;
-                    dataView.updateItem(src.id, src);
-                }
-                else{
-                    src['name']=src['uid'];
-                    alert("You can't change the uploads folder!");
-                    dataView.updateItem(src.id, src);
-                }
-            });
+            console.log(args);
+            _this.Slick.dataView.updateItem(src.id, src);
+//            $.post('/sg_edit', {grid_item: JSON.stringify(src)}, function(new_title){
+//                if(new_title!="fail"){
+//                    var i = src['id']+1;
+//                    while(data[i]['parent_uid'].indexOf(data[src['id']]['uid'])==0){
+//                        if(data[i]['parent_uid']==data[src['id']]['uid']){
+//                            data[i]['parent_uid']=new_title;
+//                            data[i]['uid']=new_title+ "/" + data[i]['name'];
+//                        }
+//                        else{
+//                            data[i]['parent_uid']=data[data[i]['parent']]['uid'];
+//                            data[i]['uid']=data[i]['parent_uid'] + "/" + data[i]['name'];
+//                        }
+//                        i++;
+//                    }
+//                    src['uid']=new_title;
+//                    dataView.updateItem(src.id, src);
+//                }
+//                else{
+//                    src['name']=src['uid'];
+//                    alert("You can't change the uploads folder!");
+//                    dataView.updateItem(src.id, src);
+//                }
+//            });
         });
 
         grid.onClick.subscribe(function (e, args) {
@@ -721,6 +725,13 @@ var HGrid = {
         grid.onSort.subscribe(function (e, args) {
             _this.onSort(e, args, grid, dataView, data);
 //            HGrid.onSort(e, args, grid, dataView, data);
+        });
+
+        //When a cell is double clicked, make it editable (unless it's uploads)
+        grid.onDblClick.subscribe(function (e, args) {
+            if(data[grid.getActiveCell().row]['uid']!="uploads" && grid.getActiveCell().cell==grid.getColumnIndex('name')){
+                grid.getOptions().editable=true;
+            }
         });
     }
 }

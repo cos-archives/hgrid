@@ -414,12 +414,12 @@ function hGridSlickInit(grid, dataView, data){
 //            grid.getOptions().editable=false;
 //        });
 
-        //When a cell is double clicked, make it editable (unless it's uploads)
-        grid.onDblClick.subscribe(function (e, args) {
-            if(data[grid.getActiveCell().row]['uid']!="uploads" && grid.getActiveCell().cell==grid.getColumnIndex('name')){
-                grid.getOptions().editable=true;
-            }
-        });
+//        //When a cell is double clicked, make it editable (unless it's uploads)
+//        grid.onDblClick.subscribe(function (e, args) {
+//            if(data[grid.getActiveCell().row]['uid']!="uploads" && grid.getActiveCell().cell==grid.getColumnIndex('name')){
+//                grid.getOptions().editable=true;
+//            }
+//        });
 
 
 //        //If amount of rows are changed, update and render

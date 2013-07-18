@@ -10,10 +10,6 @@ var HGrid = {
     defaultOptions: {
         container: null,
         url: null,
-//        add_url: getUrl,
-//        move_url: this.getUrl,
-//        delete_url: this.getUrl,
-//        edit_url: this.getUrl,
         info: null,
         columns: [
             {id: "#", name: "", width: 40, behavior: "selectAndMove", selectable: false, resizable: false, cssClass: "cell-reorder dnd"},
@@ -51,6 +47,12 @@ var HGrid = {
     create: function(options) {
         var self = Object.create(this);
         self.options = $.extend(true, this.defaultOptions, options);
+        var urls = ['urlAdd','urlMove','urlEdit','urlDelete']
+        for (var i = 0; i<urls.length; i++) {
+            if (!self.options[urls[i]]) {
+                self.options[urls[i]] = self.options['url'];
+            }
+        }
         self.initialize();
         return self;
     },

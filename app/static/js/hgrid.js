@@ -1,3 +1,10 @@
+/**
+ * Prototype for creating a Hierarchical Grid Structure
+ *
+ * @class HGrid
+ * @author Jake Rosenberg
+ * @author Alexander Ferguson
+ */
 var HGrid = {
     //Gives each div a class based on type (folder or file)
     defaultOptions: {
@@ -10,7 +17,7 @@ var HGrid = {
         info: null,
         columns: [
             {id: "#", name: "", width: 40, behavior: "selectAndMove", selectable: false, resizable: false, cssClass: "cell-reorder dnd"},
-            {id: "id", name: "id", width: 40, field: "id"},
+            {id: "uid", name: "uid", width: 40, field: "uid"},
             {id: "name", name: "Name", field: "name", width: 450, cssClass: "cell-title", editor: Slick.Editors.Text, sortable: true, defaultSortAsc: true}
         ],
         editable: false,
@@ -26,10 +33,24 @@ var HGrid = {
 
     sortAsc: true,
 
+    /**
+     * This function creates a new HGrid object and calls initialize()
+     * @constructor
+     * @method create
+     *
+     * @param {Object} options Data to be passed to grid
+     *   @param {String} options.url Url to post to
+     *   @param {Object} options.info Information dictionary
+     *     @param options.info.parent_uid Parent unique ID
+     *     @param options.info.uid Unique ID
+     *     @param options.info.name Name
+     *     @param {String} options.info.type Folder or file
+     *   @param {String} options.container Div ID of container for HGrid
+     * @return {HGrid} Returns a new HGrid object.
+     */
     create: function(options) {
         var self = Object.create(this);
         self.options = $.extend(true, this.defaultOptions, options);
-        //self.slickgrid = new Slick.Grid(hGridContainer, dataView, hGridColumns, options)
         self.initialize();
         return self;
     },
@@ -40,10 +61,6 @@ var HGrid = {
         var hGridColumns = this.options.columns;
         this.data = this.prep(hGridInfo);
         this.Slick.dataView = new Slick.Data.DataView({ inlineFilters: true });
-//        this.setData(this.prep(hGridInfo));
-//        this.setDataView(new Slick.Data.DataView({ inlineFilters: true }));
-//        HGrid.setData(this.prep(hGridInfo));
-//        HGrid.setDataView(new Slick.Data.DataView({ inlineFilters: true }));
         this.Slick.dataView.beginUpdate();
         this.Slick.dataView.setItems(this.data);
         var data = this.data;
@@ -52,8 +69,6 @@ var HGrid = {
         this.Slick.dataView.setFilter(this.myFilter);
         this.Slick.dataView.endUpdate();
         this.Slick.grid = new Slick.Grid(hGridContainer, this.Slick.dataView, hGridColumns, this.options);
-//        this.setGrid(new Slick.Grid(hGridContainer, this.Slick.dataView, hGridColumns, this.options));
-//        HGrid.setGrid(new Slick.Grid(hGridContainer, this.Slick.dataView, hGridColumns, this.options));
 
         this.options.columns[this.Slick.grid.getColumnIndex('name')].formatter = this.TaskNameFormatter;
         this.options.columns[this.Slick.grid.getColumnIndex('name')].validator = this.requiredFieldValidator;
@@ -61,9 +76,7 @@ var HGrid = {
         this.Slick.grid.render();
 
         this.setupListeners();
-//        hGridSlickInit(this.Slick.grid, this.Slick.dataView, this.data);
         hGridDropInit(hGridContainer);
-        return this;
     },
 
     requiredFieldValidator: function (value) {
@@ -93,18 +106,12 @@ var HGrid = {
         var dataView = args[1];
         var _this = args[2];
         if (item.parent != null) {
-//        var parentIdx = dataView.getIdxById(item.parent);
-//        var parent = data[parentIdx];
             var parent = _this.getItemByValue(data, item.parent_uid, 'uid');
-//            var parent = HGrid.getItemByValue(data, item.parent_uid, 'uid');
             while (parent) {
                 if (parent._collapsed) {
                     return false;
                 }
-//            var parentParentIdx = dataView.getIdxById(parent.parent);
-//            parent = data[parentParentIdx];
                 parent = _this.getItemByValue(data, parent.parent_uid, 'uid');
-//                parent = HGrid.getItemByValue(data, parent.parent_uid, 'uid');
             }
         }
         return true;
@@ -118,29 +125,24 @@ var HGrid = {
         this.data = data;
     },
 
-    getDataView: function() {
-        return this.Slick.dataView;
-    },
-
-    setDataView: function(dataView) {
-        this.Slick.dataView = dataView;
-    },
-
-    getGrid: function() {
-        return this.Slick.grid;
-    },
-
-    setGrid: function(grid) {
-        this.Slick.grid = grid;
-    },
-
+    /**
+     * Allows the user to add a new item to the grid
+     * @method addItem
+     *
+     * @param {Object} item New item to be added
+     *  @param item.parent_uid Parent unique ID
+     *  @param item.uid Unique ID
+     *  @param item.name Name
+     *  @param {String} item.type Folder or file
+     * @return {Object} Item added
+     */
     addItem: function(item) {
         var _this = this;
 //        if (!item['parent_uid'] || !item['uid'] || !item['name'] || !item['type'] || _this.getItemByValue(_this.data, item['uid'], 'uid')){
 //            alert("This is an invalid item.");
 //            return;
 //        }
-            var parent= _this.getItemByValue(_this.data, item['parent_uid'], 'uid');
+        var parent= _this.getItemByValue(_this.data, item['parent_uid'], 'uid');
 
         if(item['parent_uid']!="null"){
             var parent_path = parent['path'];
@@ -157,29 +159,57 @@ var HGrid = {
         return item;
     },
 
-    moveItems: function(src, dest) {
+    /**
+     * Allows the user to move items and all of their children to another place on the grid
+     * @method moveItems
+     *
+     * @param {Array} src_uid Unique IDs of each item that should move
+     * @param {int} dest Unique ID of the destination parent
+     *
+     * @return {Boolean}  True if success, false if failure
+     */
+    moveItems: function(src_uid, dest) {
         var _this = this;
-        var src_uid = src;
+        var src_id = [];
         var dest = _this.getItemByValue(_this.data, dest, 'uid');
         var dest_path = dest['path'];
+        for(var i=0; i<src_uid.length; i++){
+            if ($.inArray(src_uid[i], dest_path)!=-1){
+                return false;
+            }
+            src_id.push(_this.getItemByValue(_this.data, src_uid[i], 'uid')['id']);
+        }
+
         var url = _this.options.url;
 
         var value = {};
         value['rows']=[];
-        for(var j=0; j<src_uid.length; j++){
-            value['rows'].push(src_uid[j]);
+        console.log(src_id);
+        for(var j=0; j<src_id.length; j++){
+            value['rows'].push(_this.Slick.dataView.getRowById(src_id[j]));
         }
         value['insertBefore']=dest['id']+1;
 
-        _this.itemMover(value, url, src_uid, dest_path);
+        if(_this.itemMover(value, url, src_id, dest_path)){
+            console.log("here");
+            return true;
+        }
+        return false;
     },
 
-    deleteItem: function(rowsToDelete) {
+    /**
+     * Allows the user to delete items and all of their children
+     * @method deleteItems
+     *
+     * @param {Array} rowsToDelete Array of unique IDs of rows to delete
+     * @return {Boolean}
+     */
+    deleteItems: function(rowsToDelete) {
         var _this = this;
         //Splice data and delete all children if folder is dropped
         for(var i=0; i<rowsToDelete.length; i++){
             var rows=[];
-            var check = _this.Slick.dataView.getRowById(rowsToDelete[i]);
+            var check = _this.Slick.dataView.getRowById(_this.getItemByValue(_this.data, rowsToDelete[i], 'uid')['id']);
             var j = check;
             do{
                 rows.push(j);
@@ -194,12 +224,23 @@ var HGrid = {
         _this.Slick.grid.invalidate();
         _this.Slick.grid.setSelectedRows([]);
         _this.Slick.grid.render();
+        return true;
     },
 
+    /**
+     * Allows the user to edit the name of the item passed
+     * @method editItem
+     *
+     * @param src_uid Unique ID of the item to change
+     * @param {String} name New name for the item being changed
+     *
+     * @return {Boolean}
+     */
     editItem: function(src_uid, name) {
         var src = this.getItemByValue(this.data, src_uid, 'uid');
         src['name']=name;
         this.Slick.dataView.updateItem(src['id'], src);
+        return true;
     },
 
     getItemByValue: function(data, searchVal, searchProp) {
@@ -290,7 +331,6 @@ var HGrid = {
                 return 0;
             }
             if(_this.sortAsc){
-//            if(HGrid.sortAsc){
                 return x > y ? 1 : -1;
             }
             else{
@@ -305,11 +345,10 @@ var HGrid = {
         var checker = {};
         var indent = 0;
         for (var i = 0; i < sortedData.length; i++) {
-            var parents = [];
             var parent;
             var d = {};
             var path = [];
-//      var d = sortedData[i];
+
             //Assign parent paths, find ID of parent and assign its ID to "parent" attribute
             d['parent_uid']=sortedData[i]['parent_uid'];
             path.push(sortedData[i]['uid']);
@@ -351,16 +390,13 @@ var HGrid = {
 
     itemMover: function (args, url, src, dest){
         this.removeDraggerGuide();
-//        HGrid.removeDraggerGuide();
 //        $.post(url, {src: JSON.stringify(src), dest: JSON.stringify(dest)}, function(response){
 //            //Make sure move succeeds
 //            if (response=="fail"){
 //                alert("Move failed!");
+//                return false;
 //            }
 //            else{
-        console.log(args);
-        console.log(src);
-        console.log(dest);
 
         for(var y=0; y<args.rows.length; y++){
             var rows=[];
@@ -372,25 +408,20 @@ var HGrid = {
                 j+=1;
                 stopRow = j;
             }while(this.data[j] && this.data[j]['indent']>this.data[args.rows[y]]['indent']);
-//            }while(HGrid.data[j] && HGrid.data[j]['indent']>HGrid.data[args.rows[y]]['indent']);
 
             //Update data
             var extractedRows = [], left, right;
 
             var insertBefore = this.Slick.grid.getDataItem(args.insertBefore)['id'];
-//            var insertBefore = HGrid.Slick.grid.getDataItem(args.insertBefore)['id'];
 
 
             left = this.data.slice(0, insertBefore);
             right = this.data.slice(insertBefore, this.data.length);
-//            left = HGrid.data.slice(0, insertBefore);
-//            right = HGrid.data.slice(insertBefore, HGrid.data.length);
 
             rows.sort(function(a,b) { return a-b; });
 
             for (var i = 0; i < rows.length; i++) {
                 extractedRows.push(this.data[rows[i]]);
-//                extractedRows.push(HGrid.data[rows[i]]);
             }
 
             rows.reverse();
@@ -426,13 +457,7 @@ var HGrid = {
 
             if (extractedRows.length > 1){
                 for(var m=1; m<extractedRows.length; m++){
-//                            extractedRows[m]['parent_uid']=checker[extractedRows[m]['parent_uid']];
-//                            old_path=extractedRows[m]['uid'];
-//                            extractedRows[m]['uid']=extractedRows[m]['parent_uid']+'/'+extractedRows[m]['name'];
-//                            checker[old_path]=extractedRows[m]['uid'];
-
                     var par = this.getItemByValue(extractedRows, extractedRows[m]['parent_uid'], 'uid')['path'];
-//                    var par = HGrid.getItemByValue(extractedRows, extractedRows[m]['parent_uid'], 'uid')['path'];
                     extractedRows[m]['path']= par.slice();
                     extractedRows[m]['path'].push(extractedRows[m]['uid']);
                     extractedRows[m]['sortpath']=extractedRows[m]['path'].join('/');
@@ -440,34 +465,19 @@ var HGrid = {
             }
 
             this.data = left.concat(extractedRows.concat(right));
-//            HGrid.data = left.concat(extractedRows.concat(right));
 
             var selectedRows = [];
             for (var i = 0; i < rows.length; i++)
                 selectedRows.push(left.length + i);
 
-//                        grid.size_update(data[args.rows[y]]['parent_uid']);
             var new_data = this.prepJava(this.data);
             this.data = new_data;
-//            var new_data = HGrid.prepJava(HGrid.data);
-//            HGrid.data = new_data;
         }
-        //Update sizes
-//                    for(var i=0; i<src.length; i++){
-//                        grid.size_update(src[i])
-//                    }
-//                    grid.size_update(dest[0]);
-
         this.Slick.dataView.setItems(this.data);
         this.Slick.grid.invalidate();
         this.Slick.grid.setSelectedRows([]);
         this.Slick.grid.render();
-//        HGrid.Slick.dataView.setItems(HGrid.data);
-//        HGrid.Slick.grid.invalidate();
-//        HGrid.Slick.grid.setSelectedRows([]);
-//        HGrid.Slick.grid.render();
-//            }
-//        });
+        return true;
     },
 
     removeDraggerGuide: function() {
@@ -478,7 +488,6 @@ var HGrid = {
     draggerGuide: function(inserter) {
         var _this = this;
         _this.removeDraggerGuide();
-//        HGrid.removeDraggerGuide();
         var dragParent=false;
         // If a target row exists
         if(inserter==null){
@@ -488,12 +497,10 @@ var HGrid = {
             if (inserter['uid']!="uploads"){
                 if(inserter['type']=='folder'){
                     dragParent = _this.Slick.grid.getCellNode(_this.Slick.dataView.getRowById(inserter['id']), 0).parentNode;
-//                    dragParent = HGrid.Slick.grid.getCellNode(HGrid.Slick.dataView.getRowById(inserter['id']), 0).parentNode;
                 }
                 else{
                     try{
                         dragParent = _this.Slick.grid.getCellNode(_this.Slick.dataView.getRowById(inserter['parent']), 0).parentNode;
-//                        dragParent = HGrid.Slick.grid.getCellNode(HGrid.Slick.dataView.getRowById(inserter['parent']), 0).parentNode;
                     }
                     catch(err){
                     }
@@ -508,13 +515,10 @@ var HGrid = {
     //Function called when sort is clicked
     onSort: function (e, args, grid, dataView, data){
         this.sortAsc = !this.sortAsc;
-//        HGrid.sortAsc = !HGrid.sortAsc;
         var sortingCol = args.sortCol.field;
         var sorted = this.sortHierarchy(data, sortingCol, dataView, grid);
         var new_data = this.prepJava(sorted);
         this.data = new_data;
-//        var new_data = HGrid.prepJava(sorted);
-//        HGrid.data = new_data;
         dataView.setItems(new_data);
         grid.invalidate();
         grid.setSelectedRows([]);
@@ -530,7 +534,6 @@ var HGrid = {
                 return 0;
             }
             if(_this.sortAsc){
-//            if(HGrid.sortAsc){
                 return x > y ? 1 : -1;
             }
             else{
@@ -556,7 +559,6 @@ var HGrid = {
             if(item.parent == parentId){
                 hierarchical.push(sorted[i]);
                 this.buildHierarchy(sorted, hierarchical, sorted[i]);
-//                HGrid.buildHierarchy(sorted, hierarchical, sorted[i]);
             }
         }
     },
@@ -566,9 +568,6 @@ var HGrid = {
         var grid = this.Slick.grid;
         var data = this.data;
         var dataView = this.Slick.dataView;
-//        var grid = HGrid.Slick.grid;
-//        var data = HGrid.data;
-//        var dataView = HGrid.Slick.dataView;
         var src = [];
         var dest = "";
         grid.setSelectionModel(new Slick.RowSelectionModel());
@@ -580,7 +579,6 @@ var HGrid = {
         moveRowsPlugin.onBeforeMoveRows.subscribe(function (e, args) {
             src = [];
             dest = "";
-            //console.log(grid.getCellNode(args.insertBefore, grid.getColumnIndex('id')));
             var inserter=null;
             if (grid.getDataItem(args.insertBefore-1)){
                 if(args.insertBefore==args.rows[0]+1){
@@ -595,7 +593,6 @@ var HGrid = {
             }
             catch(error){
                 if(error.name == TypeError){
-                    //e.stopImmediatePropagation();
                     return false;
                 }
             }
@@ -606,7 +603,6 @@ var HGrid = {
                 }
                 else{
                     dest = _this.getItemByValue(data, inserter['parent_uid'], 'uid');
-//                dest = HGrid.getItemByValue(data, inserter['parent_uid'], 'uid');
                     dest = dest['path'];
                 }
             }
@@ -616,26 +612,7 @@ var HGrid = {
 
             for (var i = 0; i < args.rows.length; i++) {
                 src[i]=_this.getItemByValue(_this.data, _this.Slick.dataView.getItem(args.rows[i])['id'], 'id')['path'];
-
-                // no point in moving before or after itself
-                for(var j=0; j<data.length; j++){
-                    if(data[j]['id']==args.rows[i]){
-//                        src[i] = data[j]['path'];
-                    }
-                    if(insertBefore>data.length-1){
-                        var m = insertBefore;
-                        if (data[m-1]){
-                            if(data[m-1]['type']=='folder') {
-//                                dest = data[m-1]['path'];
-                            }
-                            else{
-                                var x = data[m-1]['parent_uid'];
-//                                dest = _this.getItemByValue(data, x, 'uid')['path'];
-//                                dest = HGrid.getItemByValue(data, x, 'uid')['path'];
-                            }
-                        }
-                    }
-                }
+//                src[i]=args.rows[i];
                 if (dest==""){
                     dest = null;
                 }
@@ -650,11 +627,8 @@ var HGrid = {
                     inserter=null;
                 }
                 _this.draggerGuide(inserter);
-//                HGrid.draggerGuide(inserter);
                 if (args.rows[i] == insertBefore - 1 || index == false || src[i] == "uploads" || dest == "uploads") {
                     _this.removeDraggerGuide();
-//                    HGrid.removeDraggerGuide();
-                    //e.stopPropagation();
                     return false;
                 }
             }
@@ -668,15 +642,14 @@ var HGrid = {
                 src_id.unshift(src[i].pop());
             }
 
-            var value = {};
-            value['rows']=[];
-            for(var j=0; j<src_id.length; j++){
-                value['rows'].push(src_id[j]);
-            }
-            value['insertBefore']=args['insertBefore'];
+//            var value = {};
+//            value['rows']=[];
+//            for(var j=0; j<src_id.length; j++){
+//                value['rows'].push(src_id[j]);
+//            }
+//            value['insertBefore']=args['insertBefore'];
 
-            _this.itemMover(value, "/sg_move", src_id, dest);
-//            HGrid.itemMover(e, args, "/sg_move", src_id, dest);
+            _this.itemMover(args, "/sg_move", src, dest);
         });
 
         grid.registerPlugin(moveRowsPlugin);
@@ -684,26 +657,11 @@ var HGrid = {
         //Update the item when edited
         grid.onCellChange.subscribe(function (e, args) {
             _this.options.editable=false;
-//            HGrid.options.editable=false;
             var src=args.item;
             console.log(args);
             _this.Slick.dataView.updateItem(src.id, src);
 //            $.post('/sg_edit', {grid_item: JSON.stringify(src)}, function(new_title){
 //                if(new_title!="fail"){
-//                    var i = src['id']+1;
-//                    while(data[i]['parent_uid'].indexOf(data[src['id']]['uid'])==0){
-//                        if(data[i]['parent_uid']==data[src['id']]['uid']){
-//                            data[i]['parent_uid']=new_title;
-//                            data[i]['uid']=new_title+ "/" + data[i]['name'];
-//                        }
-//                        else{
-//                            data[i]['parent_uid']=data[data[i]['parent']]['uid'];
-//                            data[i]['uid']=data[i]['parent_uid'] + "/" + data[i]['name'];
-//                        }
-//                        i++;
-//                    }
-//                    src['uid']=new_title;
-//                    dataView.updateItem(src.id, src);
 //                }
 //                else{
 //                    src['name']=src['uid'];
@@ -755,14 +713,12 @@ var HGrid = {
         grid.onColumnsReordered.subscribe(function(e, args){
             grid.invalidate();
             _this.options.columns=args.cols;
-//            HGrid.options.columns=args.cols;
             grid.render();
         });
 
         //When sort is clicked, call sort function
         grid.onSort.subscribe(function (e, args) {
             _this.onSort(e, args, grid, dataView, data);
-//            HGrid.onSort(e, args, grid, dataView, data);
         });
 
         //When a cell is double clicked, make it editable (unless it's uploads)

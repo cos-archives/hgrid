@@ -79,12 +79,12 @@ var HGrid = {
         var spacer = "<span style='display:inline-block;height:1px;width:" + (15 * dataContext["indent"]) + "px'></span>";
         if (dataContext['type']=='folder') {
             if (dataContext._collapsed) {
-                return spacer + " <span class='toggle expand'></span>&nbsp;" + value;
+                return spacer + " <span class='toggle expand'></span><span class='folder'></span>&nbsp;" + value;
             } else {
-                return spacer + " <span class='toggle collapse'></span>&nbsp;" + value;
+                return spacer + " <span class='toggle collapse'></span><span class='folder'></span>&nbsp;" + value;
             }
         } else {
-            return spacer + " <span class='toggle'></span>&nbsp;" + value;
+            return spacer + " <span class='toggle spacer'></span>&nbsp;" + value;
         }
     },
 

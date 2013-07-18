@@ -14,7 +14,7 @@ var HGrid = {
             {id: "name", name: "Name", field: "name", width: 450, cssClass: "cell-title", editor: Slick.Editors.Text, sortable: true, defaultSortAsc: true}
         ],
         editable: false,
-        enableCellNavigation: false,
+        enableCellNavigation: true,
         asyncEditorLoading: false,
         enableColumnReorder: true
     },
@@ -138,24 +138,21 @@ var HGrid = {
 
     },
 
-    moveItem: function(src, dest) {
+    moveItems: function(src, dest) {
         var _this = this;
-        url = "/sg_move";
-        var ans = function (e){
-            var value = {};
-            value.rows = [];
-            for (var i=0; i<src.length; i++){
-                for(var j=0; j<_this.data.length; j++){
-                    if(_this.data[j]['path']==src[i]){
-                        value.rows.push(j);
-                    }
-                    if(_this.data[j]['path']==dest[0]){
-                        value.insertBefore = j+1;
-                    }
-                }
-            }
-            _this.itemMover(e, value, url, src, dest);
-        }();
+        var src_uid = src;
+        var dest = _this.getItemByValue(_this.data, dest, 'uid');
+        var dest_path = dest['path'];
+        var url = _this.options.url;
+
+        var value = {};
+        value['rows']=[];
+        for(var j=0; j<src_uid.length; j++){
+            value['rows'].push(src_uid[j]);
+        }
+        value['insertBefore']=dest['id']+1;
+
+        _this.itemMover(value, url, src_uid, dest_path);
     },
 
     deleteItem: function() {
@@ -312,17 +309,19 @@ var HGrid = {
         return output;
     },
 
-    itemMover: function (e, args, url, src, dest){
+    itemMover: function (args, url, src, dest){
         this.removeDraggerGuide();
 //        HGrid.removeDraggerGuide();
-        console.log(src);
-        console.log(dest);
 //        $.post(url, {src: JSON.stringify(src), dest: JSON.stringify(dest)}, function(response){
 //            //Make sure move succeeds
 //            if (response=="fail"){
 //                alert("Move failed!");
 //            }
 //            else{
+        console.log(args);
+        console.log(src);
+        console.log(dest);
+
         for(var y=0; y<args.rows.length; y++){
             var rows=[];
             //Make sure all children move as well
@@ -545,7 +544,7 @@ var HGrid = {
             var inserter=null;
             if (grid.getDataItem(args.insertBefore-1)){
                 if(args.insertBefore==args.rows[0]+1){
-                inserter = grid.getDataItem(args.insertBefore-2);
+                    inserter = grid.getDataItem(args.insertBefore-2);
                 }
                 else{
                     inserter = grid.getDataItem(args.insertBefore-1);
@@ -561,36 +560,37 @@ var HGrid = {
                 }
             }
 
-            console.log(inserter);
             if(inserter!=null){
-            if(inserter['type']=='folder'){
-                dest = inserter['path'];
-            }
-            else{
-                dest = _this.getItemByValue(data, inserter['parent_uid'], 'uid');
+                if(inserter['type']=='folder'){
+                    dest = inserter['path'];
+                }
+                else{
+                    dest = _this.getItemByValue(data, inserter['parent_uid'], 'uid');
 //                dest = HGrid.getItemByValue(data, inserter['parent_uid'], 'uid');
-                dest = dest['path'];
-                console.log(dest);
-            }
+                    dest = dest['path'];
+                }
             }
             else{
                 dest = null;
             }
+
             for (var i = 0; i < args.rows.length; i++) {
+                src[i]=_this.getItemByValue(_this.data, _this.Slick.dataView.getItem(args.rows[i])['id'], 'id')['path'];
+
                 // no point in moving before or after itself
                 for(var j=0; j<data.length; j++){
                     if(data[j]['id']==args.rows[i]){
-                        src[i] = data[j]['path'];
+//                        src[i] = data[j]['path'];
                     }
                     if(insertBefore>data.length-1){
                         var m = insertBefore;
                         if (data[m-1]){
                             if(data[m-1]['type']=='folder') {
-                                dest = data[m-1]['path'];
+//                                dest = data[m-1]['path'];
                             }
                             else{
                                 var x = data[m-1]['parent_uid'];
-                                dest = _this.getItemByValue(data, x, 'uid')['path'];
+//                                dest = _this.getItemByValue(data, x, 'uid')['path'];
 //                                dest = HGrid.getItemByValue(data, x, 'uid')['path'];
                             }
                         }
@@ -627,7 +627,15 @@ var HGrid = {
             for(var i=0; i<src.length; i++){
                 src_id.unshift(src[i].pop());
             }
-            _this.itemMover(e, args, "/sg_move", src_id, dest);
+
+            var value = {};
+            value['rows']=[];
+            for(var j=0; j<src_id.length; j++){
+                value['rows'].push(src_id[j]);
+            }
+            value['insertBefore']=args['insertBefore'];
+
+            _this.itemMover(value, "/sg_move", src_id, dest);
 //            HGrid.itemMover(e, args, "/sg_move", src_id, dest);
         });
 
@@ -709,7 +717,7 @@ var HGrid = {
             grid.render();
         });
 
-     //When sort is clicked, call sort function
+        //When sort is clicked, call sort function
         grid.onSort.subscribe(function (e, args) {
             _this.onSort(e, args, grid, dataView, data);
 //            HGrid.onSort(e, args, grid, dataView, data);

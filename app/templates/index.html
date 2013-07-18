@@ -17,6 +17,8 @@
     <div id="slick-recycle" class="recycle-bin" style="width: 190px; height:90px; padding: 5px; float:right;">Recycle Bin</div>
 </div>
 <div id="myGrid" class="dropzone dz-Clickable" style="width:600px;height:500px;"></div>
+<div id="bucky" class="dropzone dz-Clickable" style="width:600px;height:500px;"></div>
+
 
 
 
@@ -37,7 +39,6 @@
 <script src="/static/js/slick-grid-dependencies/slick.cellselectionmodel.js?{{ randint }}"></script>
 <script src="/static/js/slick-grid-dependencies/slick.rowselectionmodel.js?{{ randint }}"></script>
 <script src="/static/js/slick-grid-dependencies/slick.rowmovemanager.js?{{ randint }}"></script>
-<script src="/static/js/file-viewer-slickgrid.js"></script>
 <script src="/static/js/hgrid.js"></script>
 
 
@@ -47,6 +48,11 @@
         info: {{ info | safe }},
         url: "/sg_move"
     });
+{#    var buckyGrid = HGrid.create({#}
+{#        container: "#bucky",#}
+{#        info: {{ infoBucky | safe }},#}
+{#        url: "/sg_move"#}
+{#    });#}
 {#    data = myGrid.data;#}
 {#    console.log(data);#}
 {#    dataView = myGrid.Slick.dataView;#}

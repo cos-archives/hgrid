@@ -38,14 +38,22 @@ var HGrid = {
         var hGridContainer = this.options.container;
         var hGridInfo = this.options.info;
         var hGridColumns = this.options.columns;
-        HGrid.setData(this.prep(hGridInfo));
-        HGrid.setDataView(new Slick.Data.DataView({ inlineFilters: true }));
+        this.data = this.prep(hGridInfo);
+        this.Slick.dataView = new Slick.Data.DataView({ inlineFilters: true });
+//        this.setData(this.prep(hGridInfo));
+//        this.setDataView(new Slick.Data.DataView({ inlineFilters: true }));
+//        HGrid.setData(this.prep(hGridInfo));
+//        HGrid.setDataView(new Slick.Data.DataView({ inlineFilters: true }));
         this.Slick.dataView.beginUpdate();
         this.Slick.dataView.setItems(this.data);
-        this.Slick.dataView.setFilterArgs([this.data, this.Slick.dataView]);
+        var data = this.data;
+        var dataView = this.Slick.dataView;
+        this.Slick.dataView.setFilterArgs([data, dataView, this]);
         this.Slick.dataView.setFilter(this.myFilter);
         this.Slick.dataView.endUpdate();
-        HGrid.setGrid(new Slick.Grid(hGridContainer, this.Slick.dataView, hGridColumns, this.options));
+        this.Slick.grid = new Slick.Grid(hGridContainer, this.Slick.dataView, hGridColumns, this.options);
+//        this.setGrid(new Slick.Grid(hGridContainer, this.Slick.dataView, hGridColumns, this.options));
+//        HGrid.setGrid(new Slick.Grid(hGridContainer, this.Slick.dataView, hGridColumns, this.options));
 
         this.options.columns[this.Slick.grid.getColumnIndex('name')].formatter = this.TaskNameFormatter;
         this.options.columns[this.Slick.grid.getColumnIndex('name')].validator = this.requiredFieldValidator;
@@ -53,7 +61,7 @@ var HGrid = {
         this.Slick.grid.render();
 
         this.setupListeners();
-        hGridSlickInit(this.Slick.grid, this.Slick.dataView, this.data);
+//        hGridSlickInit(this.Slick.grid, this.Slick.dataView, this.data);
         hGridDropInit(hGridContainer);
         return this;
     },
@@ -83,17 +91,20 @@ var HGrid = {
     myFilter: function (item, args) {
         var data = args[0];
         var dataView = args[1];
+        var _this = args[2];
         if (item.parent != null) {
 //        var parentIdx = dataView.getIdxById(item.parent);
 //        var parent = data[parentIdx];
-            var parent = HGrid.getItemByValue(data, item.parent_uid, 'uid');
+            var parent = _this.getItemByValue(data, item.parent_uid, 'uid');
+//            var parent = HGrid.getItemByValue(data, item.parent_uid, 'uid');
             while (parent) {
                 if (parent._collapsed) {
                     return false;
                 }
 //            var parentParentIdx = dataView.getIdxById(parent.parent);
 //            parent = data[parentParentIdx];
-                parent = HGrid.getItemByValue(data, parent.parent_uid, 'uid');
+                parent = _this.getItemByValue(data, parent.parent_uid, 'uid');
+//                parent = HGrid.getItemByValue(data, parent.parent_uid, 'uid');
             }
         }
         return true;
@@ -128,21 +139,22 @@ var HGrid = {
     },
 
     moveItem: function(src, dest) {
+        var _this = this;
         url = "/sg_move";
         var ans = function (e){
             var value = {};
             value.rows = [];
             for (var i=0; i<src.length; i++){
-                for(var j=0; j<this.data.length; j++){
-                    if(this.data[j]['path']==src[i]){
+                for(var j=0; j<_this.data.length; j++){
+                    if(_this.data[j]['path']==src[i]){
                         value.rows.push(j);
                     }
-                    if(this.data[j]['path']==dest[0]){
+                    if(_this.data[j]['path']==dest[0]){
                         value.insertBefore = j+1;
                     }
                 }
             }
-            this.itemMover(e, value, url, src, dest);
+            _this.itemMover(e, value, url, src, dest);
         }();
     },
 
@@ -180,6 +192,7 @@ var HGrid = {
         var i = 0;
         var data_counter=0;
         var output = [];
+        var _this = this;
         while (info.length>=1){
 
             var d = info[i];
@@ -239,7 +252,8 @@ var HGrid = {
             if(x == y){
                 return 0;
             }
-            if(HGrid.sortAsc){
+            if(_this.sortAsc){
+//            if(HGrid.sortAsc){
                 return x > y ? 1 : -1;
             }
             else{
@@ -299,7 +313,8 @@ var HGrid = {
     },
 
     itemMover: function (e, args, url, src, dest){
-        HGrid.removeDraggerGuide();
+        this.removeDraggerGuide();
+//        HGrid.removeDraggerGuide();
         console.log(src);
         console.log(dest);
 //        $.post(url, {src: JSON.stringify(src), dest: JSON.stringify(dest)}, function(response){
@@ -317,21 +332,26 @@ var HGrid = {
                 rows.push(j);
                 j+=1;
                 stopRow = j;
-            }while(HGrid.data[j] && HGrid.data[j]['indent']>HGrid.data[args.rows[y]]['indent']);
+            }while(this.data[j] && this.data[j]['indent']>this.data[args.rows[y]]['indent']);
+//            }while(HGrid.data[j] && HGrid.data[j]['indent']>HGrid.data[args.rows[y]]['indent']);
 
             //Update data
             var extractedRows = [], left, right;
 
-            var insertBefore = HGrid.Slick.grid.getDataItem(args.insertBefore)['id'];
+            var insertBefore = this.Slick.grid.getDataItem(args.insertBefore)['id'];
+//            var insertBefore = HGrid.Slick.grid.getDataItem(args.insertBefore)['id'];
 
 
-            left = HGrid.data.slice(0, insertBefore);
-            right = HGrid.data.slice(insertBefore, HGrid.data.length);
+            left = this.data.slice(0, insertBefore);
+            right = this.data.slice(insertBefore, this.data.length);
+//            left = HGrid.data.slice(0, insertBefore);
+//            right = HGrid.data.slice(insertBefore, HGrid.data.length);
 
             rows.sort(function(a,b) { return a-b; });
 
             for (var i = 0; i < rows.length; i++) {
-                extractedRows.push(HGrid.data[rows[i]]);
+                extractedRows.push(this.data[rows[i]]);
+//                extractedRows.push(HGrid.data[rows[i]]);
             }
 
             rows.reverse();
@@ -372,22 +392,26 @@ var HGrid = {
 //                            extractedRows[m]['uid']=extractedRows[m]['parent_uid']+'/'+extractedRows[m]['name'];
 //                            checker[old_path]=extractedRows[m]['uid'];
 
-                    var par = HGrid.getItemByValue(extractedRows, extractedRows[m]['parent_uid'], 'uid')['path'];
+                    var par = this.getItemByValue(extractedRows, extractedRows[m]['parent_uid'], 'uid')['path'];
+//                    var par = HGrid.getItemByValue(extractedRows, extractedRows[m]['parent_uid'], 'uid')['path'];
                     extractedRows[m]['path']= par.slice();
                     extractedRows[m]['path'].push(extractedRows[m]['uid']);
                     extractedRows[m]['sortpath']=extractedRows[m]['path'].join('/');
                 }
             }
 
-            HGrid.data = left.concat(extractedRows.concat(right));
+            this.data = left.concat(extractedRows.concat(right));
+//            HGrid.data = left.concat(extractedRows.concat(right));
 
             var selectedRows = [];
             for (var i = 0; i < rows.length; i++)
                 selectedRows.push(left.length + i);
 
 //                        grid.size_update(data[args.rows[y]]['parent_uid']);
-            var new_data = HGrid.prepJava(HGrid.data);
-            HGrid.data = new_data;
+            var new_data = this.prepJava(this.data);
+            this.data = new_data;
+//            var new_data = HGrid.prepJava(HGrid.data);
+//            HGrid.data = new_data;
         }
         //Update sizes
 //                    for(var i=0; i<src.length; i++){
@@ -395,10 +419,14 @@ var HGrid = {
 //                    }
 //                    grid.size_update(dest[0]);
 
-        HGrid.Slick.dataView.setItems(HGrid.data);
-        HGrid.Slick.grid.invalidate();
-        HGrid.Slick.grid.setSelectedRows([]);
-        HGrid.Slick.grid.render();
+        this.Slick.dataView.setItems(this.data);
+        this.Slick.grid.invalidate();
+        this.Slick.grid.setSelectedRows([]);
+        this.Slick.grid.render();
+//        HGrid.Slick.dataView.setItems(HGrid.data);
+//        HGrid.Slick.grid.invalidate();
+//        HGrid.Slick.grid.setSelectedRows([]);
+//        HGrid.Slick.grid.render();
 //            }
 //        });
     },
@@ -409,20 +437,24 @@ var HGrid = {
     },
 
     draggerGuide: function(inserter) {
-        HGrid.removeDraggerGuide();
-        dragParent=false;
+        var _this = this;
+        _this.removeDraggerGuide();
+//        HGrid.removeDraggerGuide();
+        var dragParent=false;
         // If a target row exists
         if(inserter==null){
-            $(".slick-viewport").addClass("dragger-guide1");
+            $(_this.options.container + ".slick-viewport").addClass("dragger-guide1");
         }
         else{
             if (inserter['uid']!="uploads"){
                 if(inserter['type']=='folder'){
-                    dragParent = HGrid.Slick.grid.getCellNode(HGrid.Slick.dataView.getRowById(inserter['id']), 0).parentNode;
+                    dragParent = _this.Slick.grid.getCellNode(_this.Slick.dataView.getRowById(inserter['id']), 0).parentNode;
+//                    dragParent = HGrid.Slick.grid.getCellNode(HGrid.Slick.dataView.getRowById(inserter['id']), 0).parentNode;
                 }
                 else{
                     try{
-                        dragParent = HGrid.Slick.grid.getCellNode(HGrid.Slick.dataView.getRowById(inserter['parent']), 0).parentNode;
+                        dragParent = _this.Slick.grid.getCellNode(_this.Slick.dataView.getRowById(inserter['parent']), 0).parentNode;
+//                        dragParent = HGrid.Slick.grid.getCellNode(HGrid.Slick.dataView.getRowById(inserter['parent']), 0).parentNode;
                     }
                     catch(err){
                     }
@@ -436,11 +468,14 @@ var HGrid = {
 
     //Function called when sort is clicked
     onSort: function (e, args, grid, dataView, data){
-        HGrid.sortAsc = !HGrid.sortAsc;
+        this.sortAsc = !this.sortAsc;
+//        HGrid.sortAsc = !HGrid.sortAsc;
         var sortingCol = args.sortCol.field;
         var sorted = this.sortHierarchy(data, sortingCol, dataView, grid);
-        var new_data = HGrid.prepJava(sorted);
-        HGrid.data = new_data;
+        var new_data = this.prepJava(sorted);
+        this.data = new_data;
+//        var new_data = HGrid.prepJava(sorted);
+//        HGrid.data = new_data;
         dataView.setItems(new_data);
         grid.invalidate();
         grid.setSelectedRows([]);
@@ -448,13 +483,15 @@ var HGrid = {
     },
 
     sortHierarchy: function (data, sortingCol, dataView, grid){
+        var _this = this;
         var sorted = data.sort(function(a, b){
             var x = a[sortingCol], y = b[sortingCol];
 
             if(x == y){
                 return 0;
             }
-            if(HGrid.sortAsc){
+            if(_this.sortAsc){
+//            if(HGrid.sortAsc){
                 return x > y ? 1 : -1;
             }
             else{
@@ -479,15 +516,20 @@ var HGrid = {
             }
             if(item.parent == parentId){
                 hierarchical.push(sorted[i]);
-                HGrid.buildHierarchy(sorted, hierarchical, sorted[i]);
+                this.buildHierarchy(sorted, hierarchical, sorted[i]);
+//                HGrid.buildHierarchy(sorted, hierarchical, sorted[i]);
             }
         }
     },
 
     setupListeners: function(){
-        var grid = HGrid.Slick.grid;
-        var data = HGrid.data;
-        var dataView = HGrid.Slick.dataView;
+        var _this = this;
+        var grid = this.Slick.grid;
+        var data = this.data;
+        var dataView = this.Slick.dataView;
+//        var grid = HGrid.Slick.grid;
+//        var data = HGrid.data;
+//        var dataView = HGrid.Slick.dataView;
         var src = [];
         var dest = "";
         grid.setSelectionModel(new Slick.RowSelectionModel());
@@ -525,7 +567,8 @@ var HGrid = {
                 dest = inserter['path'];
             }
             else{
-                dest = HGrid.getItemByValue(data, inserter['parent_uid'], 'uid');
+                dest = _this.getItemByValue(data, inserter['parent_uid'], 'uid');
+//                dest = HGrid.getItemByValue(data, inserter['parent_uid'], 'uid');
                 dest = dest['path'];
                 console.log(dest);
             }
@@ -547,7 +590,8 @@ var HGrid = {
                             }
                             else{
                                 var x = data[m-1]['parent_uid'];
-                                dest = HGrid.getItemByValue(data, x, 'uid')['path'];
+                                dest = _this.getItemByValue(data, x, 'uid')['path'];
+//                                dest = HGrid.getItemByValue(data, x, 'uid')['path'];
                             }
                         }
                     }
@@ -565,9 +609,11 @@ var HGrid = {
                 else{
                     inserter=null;
                 }
-                HGrid.draggerGuide(inserter);
+                _this.draggerGuide(inserter);
+//                HGrid.draggerGuide(inserter);
                 if (args.rows[i] == insertBefore - 1 || index == false || src[i] == "uploads" || dest == "uploads") {
-                    HGrid.removeDraggerGuide();
+                    _this.removeDraggerGuide();
+//                    HGrid.removeDraggerGuide();
                     //e.stopPropagation();
                     return false;
                 }
@@ -581,14 +627,16 @@ var HGrid = {
             for(var i=0; i<src.length; i++){
                 src_id.unshift(src[i].pop());
             }
-            HGrid.itemMover(e, args, "/sg_move", src_id, dest);
+            _this.itemMover(e, args, "/sg_move", src_id, dest);
+//            HGrid.itemMover(e, args, "/sg_move", src_id, dest);
         });
 
         grid.registerPlugin(moveRowsPlugin);
 
         //Update the item when edited
         grid.onCellChange.subscribe(function (e, args) {
-            HGrid.options.editable=false;
+            _this.options.editable=false;
+//            HGrid.options.editable=false;
             var src=args.item;
             $.post('/sg_edit', {grid_item: JSON.stringify(src)}, function(new_title){
                 if(new_title!="fail"){
@@ -656,13 +704,15 @@ var HGrid = {
         //When columns are dragged around, make columns new order
         grid.onColumnsReordered.subscribe(function(e, args){
             grid.invalidate();
-            HGrid.options.columns=args.cols;
+            _this.options.columns=args.cols;
+//            HGrid.options.columns=args.cols;
             grid.render();
         });
 
      //When sort is clicked, call sort function
         grid.onSort.subscribe(function (e, args) {
-            HGrid.onSort(e, args, grid, dataView, data);
+            _this.onSort(e, args, grid, dataView, data);
+//            HGrid.onSort(e, args, grid, dataView, data);
         });
     }
 }

@@ -45,8 +45,9 @@ var HGrid = {
      * @return {HGrid} Returns a new HGrid object.
      */
     create: function(options) {
-        var self = Object.create(this);
-        self.options = $.extend(true, this.defaultOptions, options);
+        _this = this;
+        var self = Object.create(_this);
+        self.options = $.extend({}, self.defaultOptions, options);
         var urls = ['urlAdd','urlMove','urlEdit','urlDelete']
         for (var i = 0; i<urls.length; i++) {
             if (!self.options[urls[i]]) {
@@ -483,8 +484,9 @@ var HGrid = {
     },
 
     removeDraggerGuide: function() {
-        $(".dragger-guide").removeClass("dragger-guide");
-        $(".slick-viewport").removeClass("dragger-guide1");
+        var _this = this;
+        $(_this.options.container + ".dragger-guide").removeClass("dragger-guide");
+        $(_this.options.container + ".slick-viewport").removeClass("dragger-guide1");
     },
 
     draggerGuide: function(inserter) {
@@ -493,7 +495,7 @@ var HGrid = {
         var dragParent=false;
         // If a target row exists
         if(inserter==null){
-            $(".slick-viewport").addClass("dragger-guide1");
+            $(_this.options.container + " .slick-viewport").addClass("dragger-guide1");
         }
         else{
             if (inserter['uid']!="uploads"){

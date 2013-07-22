@@ -49,9 +49,28 @@
         url: "/sg_move"
     });
 
-{#    data = myGrid.data;#}
-{#    console.log(data);#}
-{#    dataView = myGrid.Slick.dataView;#}
+    myGrid.hGridBeforeMove.subscribe(function(e, args){
+        var insertBefore = myGrid.getItemByValue(myGrid.data, args.insertBefore, 'id')['parent_uid'];
+        var new_parent = myGrid.getItemByValue(myGrid.data, insertBefore, 'uid')['name'];
+        if(new_parent==="soccer_players"){
+            console.log("Moving " + myGrid.getItemByValue(myGrid.data, args.rows[0], 'uid')['name'] + " to " + new_parent);
+            return true;
+        }
+        else return false;
+    });
+
+    myGrid.hGridAfterMove.subscribe(function(e, args){
+        if(args.success){
+            console.log("Done moving");
+        }
+        else{
+            console.log("Try again");
+        }
+    });
+
+    {#    data = myGrid.data;#}
+    {#    console.log(data);#}
+    {#    dataView = myGrid.Slick.dataView;#}
 </script>
 
 </body>

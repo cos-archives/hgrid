@@ -55,6 +55,16 @@ var HGrid = {
             }
         }
         self.initialize();
+        $.extend(this, {
+            hGridBeforeMove: new Slick.Event(),
+            hGridAfterMove: new Slick.Event(),
+            hGridBeforeEdit: new Slick.Event(),
+            hGridAfterEdit: new Slick.Event(),
+            hGridBeforeDelete: new Slick.Event(),
+            hGridAfterDelete: new Slick.Event(),
+            hGridBeforeAdd: new Slick.Event(),
+            hGridAfterAdd: new Slick.Event()
+        });
         return self;
     },
 
@@ -137,7 +147,7 @@ var HGrid = {
      *  @param item.uid Unique ID
      *  @param item.name Name
      *  @param {String} item.type Folder or file
-     * @return {Object} Item added
+     * @return {Boolean}
      */
     addItem: function(item) {
         var _this = this;
@@ -146,20 +156,29 @@ var HGrid = {
 //            return;
 //        }
         var parent= _this.getItemByValue(_this.data, item['parent_uid'], 'uid');
-
-        if(item['parent_uid']!="null"){
-            var parent_path = parent['path'];
-            item['path']=[];
-            item['path'].concat(parent_path, item['uid']);
-            item['sortpath']=item['path'].join('/');
+        var value = {'item': item, 'parent':parent};
+        if(_this.hGridBeforeAdd.notify(value)){
+            if(item['parent_uid']!="null"){
+                var parent_path = parent['path'];
+                item['path']=[];
+                item['path'].concat(parent_path, item['uid']);
+                item['sortpath']=item['path'].join('/');
+            }
+            _this.data.splice(parent['id']+1, 0,item);
+            _this.prepJava(_this.data);
+            _this.Slick.dataView.setItems(_this.data);
+            _this.Slick.grid.invalidate();
+            _this.Slick.grid.setSelectedRows([]);
+            _this.Slick.grid.render();
+            value['success'] = true;
+            _this.hGridAfterAdd.notify(value);
+            return true;
         }
-        _this.data.splice(parent['id']+1, 0,item);
-        _this.prepJava(_this.data);
-        _this.Slick.dataView.setItems(_this.data);
-        _this.Slick.grid.invalidate();
-        _this.Slick.grid.setSelectedRows([]);
-        _this.Slick.grid.render();
-        return item;
+        else{
+            value['success'] = false;
+            _this.hGridAfterAdd.notify(value);
+            return false;
+        }
     },
 
     /**
@@ -206,24 +225,37 @@ var HGrid = {
     deleteItems: function(rowsToDelete) {
         var _this = this;
         //Splice data and delete all children if folder is dropped
-        for(var i=0; i<rowsToDelete.length; i++){
-            var rows=[];
-            var check = _this.Slick.dataView.getRowById(_this.getItemByValue(_this.data, rowsToDelete[i], 'uid')['id']);
-            var j = check;
-            do{
-                rows.push(j);
-                j+=1;
-            }while(_this.data[j] && _this.data[j]['indent']>_this.data[check]['indent']);
-
-            _this.data.splice(rows[0], rows.length);
-            _this.Slick.dataView.setItems(_this.data);
+        var value = {'items': []};
+        for (var j=0; j<rowsToDelete.length; j++){
+            value['items'].push(_this.getItemByValue(_this.data, rowsToDelete[i], 'uid'));
         }
-        _this.prepJava(_this.data);
-        _this.Slick.dataView.setItems(_this.data);
-        _this.Slick.grid.invalidate();
-        _this.Slick.grid.setSelectedRows([]);
-        _this.Slick.grid.render();
-        return true;
+        if(_this.hGridBeforeDelete.notify(value)){
+            for(var i=0; i<rowsToDelete.length; i++){
+                var rows=[];
+                var check = _this.Slick.dataView.getRowById(_this.getItemByValue(_this.data, rowsToDelete[i], 'uid')['id']);
+                var j = check;
+                do{
+                    rows.push(j);
+                    j+=1;
+                }while(_this.data[j] && _this.data[j]['indent']>_this.data[check]['indent']);
+
+                _this.data.splice(rows[0], rows.length);
+                _this.Slick.dataView.setItems(_this.data);
+            }
+            _this.prepJava(_this.data);
+            _this.Slick.dataView.setItems(_this.data);
+            _this.Slick.grid.invalidate();
+            _this.Slick.grid.setSelectedRows([]);
+            _this.Slick.grid.render();
+            value['success']=true;
+            _this.hGridAfterDelete.notify(value);
+            return true;
+        }
+        else{
+            value['success']=false;
+            _this.hGridAfterDelete.notify(value);
+            return false;
+        }
     },
 
     /**
@@ -237,9 +269,19 @@ var HGrid = {
      */
     editItem: function(src_uid, name) {
         var src = this.getItemByValue(this.data, src_uid, 'uid');
-        src['name']=name;
-        this.Slick.dataView.updateItem(src['id'], src);
-        return true;
+        var value = {'item': src, 'name': name};
+        if(this.hGridBeforeEdit.notify(value)){
+            src['name']=name;
+            this.Slick.dataView.updateItem(src['id'], src);
+            value['success']=true;
+            this.hGridAfterEdit.notify(value);
+            return true;
+        }
+        else{
+            value['success']=false;
+            this.hGridAfterEdit.notify(value);
+            return false;
+        }
     },
 
     getItemByValue: function(data, searchVal, searchProp) {
@@ -649,8 +691,17 @@ var HGrid = {
                 value['rows'].push(src_id[j]);
             }
             value['insertBefore']=args['insertBefore'];
-
-            _this.itemMover(value, "/sg_move", src, dest);
+            if(_this.hGridBeforeMove.notify(value, e)){
+                _this.itemMover(value, "/sg_move", src, dest);
+                value['success']=true;
+                _this.hGridAfterMove.notify(value, e);
+            }
+            else {
+                _this.removeDraggerGuide();
+                alert("Move failed");
+                value['success']=false;
+                _this.hGridAfterMove.notify(value, e);
+            }
         });
 
         grid.registerPlugin(moveRowsPlugin);

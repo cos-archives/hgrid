@@ -17,7 +17,6 @@
     <div id="slick-recycle" class="recycle-bin" style="width: 190px; height:90px; padding: 5px; float:right;">Recycle Bin</div>
 </div>
 <div id="myGrid" class="dropzone dz-Clickable" style="width:600px;height:500px;"></div>
-<div id="bucky" class="dropzone dz-Clickable" style="width:600px;height:500px;"></div>
 
 
 
@@ -43,20 +42,38 @@
 
 
 <script>
+    var TaskNameFormatter = function(row, cell, value, columnDef, dataContext) {
+        value = value.replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");
+        var spacer = "<span style='display:inline-block;height:1px;width:" + (15 * dataContext["indent"]) + "px'></span>";
+        if (dataContext['type']=='folder') {
+            if (dataContext._collapsed) {
+                return spacer + " <span class='toggle expand'></span><span class='folder'></span>&nbsp;" + value;
+            } else {
+                return spacer + " <span class='toggle collapse'></span><span class='folder'></span>&nbsp;" + value;
+            }
+        } else {
+            return spacer + " <span class='toggle spacer'></span>&nbsp;" + value;
+        }
+    }
     var myGrid = HGrid.create({
         container: "#myGrid",
         info: {{ info | safe }},
-        url: "/sg_move"
+        url: "/sg_move",
+        columns:[
+            {id: "#", name: "", width: 40, behavior: "selectAndMove", selectable: false, resizable: false, cssClass: "cell-reorder dnd"},
+            {id: "uid", name: "uid", width: 40, field: "uid"},
+            {id: "name", name: "Name", field: "name", width: 450, cssClass: "cell-title", formatter: TaskNameFormatter, editor: Slick.Editors.Text, sortable: true, defaultSortAsc: true}
+        ]
     });
+
 
     myGrid.hGridBeforeMove.subscribe(function(e, args){
         var insertBefore = myGrid.getItemByValue(myGrid.data, args.insertBefore, 'id')['parent_uid'];
         var new_parent = myGrid.getItemByValue(myGrid.data, insertBefore, 'uid')['name'];
-        if(new_parent==="soccer_players"){
+
             console.log("Moving " + myGrid.getItemByValue(myGrid.data, args.rows[0], 'uid')['name'] + " to " + new_parent);
             return true;
-        }
-        else return false;
+
     });
 
     myGrid.hGridAfterMove.subscribe(function(e, args){

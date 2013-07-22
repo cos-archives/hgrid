@@ -1,30 +1,31 @@
-function hGridDropInit(hGridContainer){// Turn off the discover option so the URL error is not thrown with custom configuration
+function hGridDropInit(hGrid){// Turn off the discover option so the URL error is not thrown with custom configuration
 Dropzone.autoDiscover = false;
+    var dropDestination;
 // Instantiate this Dropzone
-var myDropzone = new Dropzone(hGridContainer, {
+var myDropzone = new Dropzone(hGrid.options.container, {
     url: "/uploader",
     previewsContainer: "#drop-preview-panel"
 } );
 // Get the SlickGrid Row under the dragged file
 myDropzone.on("dragover", function(e){
-    currentDropCell = grid.getCellFromEvent(e);
+    currentDropCell = hGrid.Slick.grid.getCellFromEvent(e);
     currentDropCell.insertBefore = currentDropCell['row'];
 
-    if(data[currentDropCell['row']-1]['type']=='folder'){
-        dropDestination = data[currentDropCell['row']-1]['path'];
+    if(hGrid.data[currentDropCell['row']-1]['type']=='folder'){
+        dropDestination = hGrid.data[currentDropCell['row']-1]['uid'];
     }
     else{
-    dropDestination = data[currentDropCell['row']]['parent_path'];
+    dropDestination = hGrid.data[currentDropCell['row']]['parent_uid'];
     }
     dropHighlight = null;
-    if (data[currentDropCell['row']-1]){
-        dropHighlight = data[currentDropCell['row']-1];
+    if (hGrid.data[currentDropCell['row']-1]){
+        dropHighlight = hGrid.data[currentDropCell['row']-1];
     };
-    grid.draggerGuide(e, currentDropCell, dropHighlight);
+    hGrid.draggerGuide(dropHighlight);
 });
 
 myDropzone.on("dragleave", function(e){
-    grid.removeDraggerGuide();
+    hGrid.removeDraggerGuide();
 });
 // Pass the destination folder to the server
 myDropzone.on("sending", function(file, xhr, formData){
@@ -40,65 +41,64 @@ myDropzone.on("success", function(file) {
         // It is a new file
     } else {
         // Loop through the data and find the destination folder
-        for (var i = 0; i < data.length; i++) {
+        for (var i = 0; i < hGrid.data.length; i++) {
 //            if ((data[i]['name'] == "uploads") && (data[i]['parent'] == null)){
 //            if ((data[i]['name'] == dropDestination)){
 //                console.log(data[i]['name']);
-            if ((data[i]['path'] == dropDestination)){
-                console.log(data[i]['path']);
-                uploadsFolder['id'] = data[i]['id'];
+            if ((hGrid.data[i]['uid'] == dropDestination)){
+                console.log(hGrid.data[i]['uid']);
+                uploadsFolder['id'] = hGrid.data[i]['id'];
                 uploadsFolder['index'] = i;
-                uploadsFolder['indent'] = data[i]['indent'];
+                uploadsFolder['indent'] = hGrid.data[i]['indent'];
                 // Collapse the uploads folder to get rid of glitches in the view render
 //                data[i]._collapsed = true;
-                dataView.updateItem(data[i]['id'], data[i]);
+                hGrid.Slick.dataView.updateItem(hGrid.data[i]['id'], hGrid.data[i]);
             }
         }
         // Collect the JSON Response from the uploader
         var newSlickInfo = JSON.parse(file.xhr.response);
         // Assign response data to slickItem
         var slickTitle = newSlickInfo[0].name;
-        var slickId = data.length;
+        var slickId = hGrid.data.length;
         var slickIndent = uploadsFolder['indent'] + 1;
         var slickSize = newSlickInfo[0].size;
         var slickParent = uploadsFolder['id'];
-        var slickParentPath = newSlickInfo[0].parent_path;
-        var slickPath = newSlickInfo[0].path;
+        var slickParentUid = newSlickInfo[0].parent_uid;
+        var slickUid = newSlickInfo[0].uid;
         var slickItem = {
             name: slickTitle,
             size: slickSize,
-            parent_path: slickParentPath,
+            parent_uid: slickParentUid,
             parent: slickParent,
-            path: slickPath,
+            uid: slickUid,
             id: slickId,
             indent: slickIndent
         }
         // Splice in the new row after the uploads folder
-        data.splice(uploadsFolder['index'] + 1, 0, slickItem);
+        hGrid.data.splice(uploadsFolder['index'] + 1, 0, slickItem);
         var new_id = uploadsFolder['id']+1;
-        console.log(slickItem["path"]);
-        for(var x = uploadsFolder['index'] + 1; x<data.length; x++){
-            data[x]['id']=new_id;
+        console.log(slickItem["uid"]);
+        for(var x = uploadsFolder['index'] + 1; x<hGrid.data.length; x++){
+            hGrid.data[x]['id']=new_id;
             new_id+=1;
-            if(data[x]['parent_path']){
-                for(var i=0; i<data.length; i++){
-                    if(data[i]['path']==data[x]['parent_path']){
-                        data[x]['parent']=data[i]['id'];
+            if(hGrid.data[x]['parent_uid']){
+                for(var i=0; i<hGrid.data.length; i++){
+                    if(hGrid.data[i]['uid']==hGrid.data[x]['parent_uid']){
+                        hGrid.data[x]['parent']=hGrid.data[i]['id'];
                     }
                 }
             }
 
         }
-        console.log(data);
-        // Update the dataView
-        dataView.beginUpdate();
-        dataView.setItems(data);
-        dataView.setFilter(myFilter);
-        dataView.endUpdate();
+        console.log(hGrid.data);
+        // Update the hGrid.Slick.dataView
+        hGrid.Slick.dataView.beginUpdate();
+        hGrid.Slick.dataView.setItems(hGrid.data);
+        hGrid.Slick.dataView.endUpdate();
     }
     // Re-instantiate the grid
-    grid.updateRowCount();
-    grid.invalidate();
-    grid.render();
+    hGrid.Slick.grid.updateRowCount();
+    hGrid.Slick.grid.invalidate();
+    hGrid.Slick.grid.render();
 });
 };

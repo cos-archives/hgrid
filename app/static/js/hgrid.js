@@ -56,6 +56,7 @@ var HGrid = {
         }
         self.initialize();
         $.extend(this, {
+            nameFunction: new Slick.Event(),
             hGridBeforeMove: new Slick.Event(),
             hGridAfterMove: new Slick.Event(),
             hGridBeforeEdit: new Slick.Event(),
@@ -83,13 +84,13 @@ var HGrid = {
         this.Slick.dataView.endUpdate();
         this.Slick.grid = new Slick.Grid(hGridContainer, this.Slick.dataView, hGridColumns, this.options);
 
-        this.options.columns[this.Slick.grid.getColumnIndex('name')].formatter = this.TaskNameFormatter;
+//        this.options.columns[this.Slick.grid.getColumnIndex('name')].formatter = this.TaskNameFormatter;
         this.options.columns[this.Slick.grid.getColumnIndex('name')].validator = this.requiredFieldValidator;
         this.Slick.grid.invalidate();
         this.Slick.grid.render();
 
         this.setupListeners();
-        hGridDropInit(hGridContainer);
+        hGridDropInit(this);
     },
 
     requiredFieldValidator: function (value) {
@@ -97,20 +98,6 @@ var HGrid = {
             return {valid: false, msg: "This is a required field"};
         } else {
             return {valid: true, msg: null};
-        }
-    },
-
-    TaskNameFormatter: function (row, cell, value, columnDef, dataContext) {
-        value = value.replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");
-        var spacer = "<span style='display:inline-block;height:1px;width:" + (15 * dataContext["indent"]) + "px'></span>";
-        if (dataContext['type']=='folder') {
-            if (dataContext._collapsed) {
-                return spacer + " <span class='toggle expand'></span><span class='folder'></span>&nbsp;" + value;
-            } else {
-                return spacer + " <span class='toggle collapse'></span><span class='folder'></span>&nbsp;" + value;
-            }
-        } else {
-            return spacer + " <span class='toggle spacer'></span>&nbsp;" + value;
         }
     },
 
@@ -412,7 +399,7 @@ var HGrid = {
                 else {
                     indent = checker[sortedData[i]['parent_uid']];
                 }
-                //Make sure parent_path is in checker
+                //Make sure parent_uid is in checker
                 checker[sortedData[i]['parent_uid']]=indent;
             }
             //If no parent, set parent to null and indent to 0

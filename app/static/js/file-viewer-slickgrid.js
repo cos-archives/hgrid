@@ -169,7 +169,7 @@ function hGridSlickInit(grid, dataView, data){
 //                else {
 //                    indent = checker[sortedData[i]['parent_uid']];
 //                }
-//                //Make sure parent_path is in checker
+//                //Make sure parent_uid is in checker
 //                checker[sortedData[i]['parent_uid']]=indent;
 //            }
 //            //If no parent, set parent to null and indent to 0

@@ -176,21 +176,17 @@ var HGrid = {
         var src_id = [];
         var dest = _this.getItemByValue(_this.data, dest, 'uid');
         var dest_path = dest['path'];
-        for(var i=0; i<src_uid.length; i++){
-            if ($.inArray(src_uid[i], dest_path)!=-1){
-                return false;
-            }
-            src_id.push(_this.getItemByValue(_this.data, src_uid[i], 'uid')['id']);
-        }
-
         var url = _this.options.url;
 
         var value = {};
         value['rows']=[];
-        console.log(src_id);
-        for(var j=0; j<src_id.length; j++){
-            value['rows'].push(_this.Slick.dataView.getRowById(src_id[j]));
+        for(var i=0; i<src_uid.length; i++){
+            if ($.inArray(src_uid[i], dest_path)!=-1){
+                return false;
+            }
+            value['rows'].push(src_uid[i]);
         }
+
         value['insertBefore']=dest['id']+1;
 
         if(_this.itemMover(value, url, src_id, dest_path)){
@@ -404,13 +400,14 @@ var HGrid = {
         for(var y=0; y<args.rows.length; y++){
             var rows=[];
             //Make sure all children move as well
-            var j = args.rows[y];
+            var item = this.getItemByValue(this.data, args.rows[y], 'uid');
+            var j = item['id'];
             var stopRow;
             do{
                 rows.push(j);
                 j+=1;
                 stopRow = j;
-            }while(this.data[j] && this.data[j]['indent']>this.data[args.rows[y]]['indent']);
+            }while(this.data[j] && this.data[j]['indent']>item['indent']);
 
             //Update data
             var extractedRows = [], left, right;
@@ -485,8 +482,8 @@ var HGrid = {
 
     removeDraggerGuide: function() {
         var _this = this;
-        $(_this.options.container + ".dragger-guide").removeClass("dragger-guide");
-        $(_this.options.container + ".slick-viewport").removeClass("dragger-guide1");
+        $(_this.options.container).find(".dragger-guide").removeClass("dragger-guide");
+        $(_this.options.container).find(".slick-viewport").removeClass("dragger-guide1");
     },
 
     draggerGuide: function(inserter) {
@@ -495,7 +492,7 @@ var HGrid = {
         var dragParent=false;
         // If a target row exists
         if(inserter==null){
-            $(_this.options.container + " .slick-viewport").addClass("dragger-guide1");
+            $(_this.options.container).find(".slick-viewport").addClass("dragger-guide1");
         }
         else{
             if (inserter['uid']!="uploads"){
@@ -643,17 +640,17 @@ var HGrid = {
         moveRowsPlugin.onMoveRows.subscribe(function(e, args){
             var src_id = [];
             for(var i=0; i<src.length; i++){
-                src_id.unshift(src[i].pop());
+                src_id.push(src[i][src[i].length-1]);
             }
 
-//            var value = {};
-//            value['rows']=[];
-//            for(var j=0; j<src_id.length; j++){
-//                value['rows'].push(src_id[j]);
-//            }
-//            value['insertBefore']=args['insertBefore'];
+            var value = {};
+            value['rows']=[];
+            for(var j=0; j<src_id.length; j++){
+                value['rows'].push(src_id[j]);
+            }
+            value['insertBefore']=args['insertBefore'];
 
-            _this.itemMover(args, "/sg_move", src, dest);
+            _this.itemMover(value, "/sg_move", src, dest);
         });
 
         grid.registerPlugin(moveRowsPlugin);

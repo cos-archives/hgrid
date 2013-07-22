@@ -45,7 +45,7 @@ var HGrid = {
      * @return {HGrid} Returns a new HGrid object.
      */
     create: function(options) {
-        _this = this;
+        var _this = this;
         var self = Object.create(_this);
         self.options = $.extend({}, self.defaultOptions, options);
         var urls = ['urlAdd','urlMove','urlEdit','urlDelete']

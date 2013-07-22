@@ -157,7 +157,8 @@ var HGrid = {
 //        }
         var parent= _this.getItemByValue(_this.data, item['parent_uid'], 'uid');
         var value = {'item': item, 'parent':parent};
-        if(_this.hGridBeforeAdd.notify(value)){
+        var event_status = _this.hGridBeforeAdd.notify(value);
+        if(event_status || typeof(event_status)==='undefined'){
             if(item['parent_uid']!="null"){
                 var parent_path = parent['path'];
                 item['path']=[];
@@ -229,7 +230,8 @@ var HGrid = {
         for (var j=0; j<rowsToDelete.length; j++){
             value['items'].push(_this.getItemByValue(_this.data, rowsToDelete[i], 'uid'));
         }
-        if(_this.hGridBeforeDelete.notify(value)){
+        var event_status = _this.hGridBeforeDelete.notify(value);
+        if(event_status || typeof(event_status)==='undefined'){
             for(var i=0; i<rowsToDelete.length; i++){
                 var rows=[];
                 var check = _this.Slick.dataView.getRowById(_this.getItemByValue(_this.data, rowsToDelete[i], 'uid')['id']);
@@ -270,7 +272,8 @@ var HGrid = {
     editItem: function(src_uid, name) {
         var src = this.getItemByValue(this.data, src_uid, 'uid');
         var value = {'item': src, 'name': name};
-        if(this.hGridBeforeEdit.notify(value)){
+        var event_status = this.hGridBeforeEdit.notify(value);
+        if(event_status || typeof(event_status)==='undefined'){
             src['name']=name;
             this.Slick.dataView.updateItem(src['id'], src);
             value['success']=true;
@@ -691,7 +694,8 @@ var HGrid = {
                 value['rows'].push(src_id[j]);
             }
             value['insertBefore']=args['insertBefore'];
-            if(_this.hGridBeforeMove.notify(value, e)){
+            var event_status = _this.hGridBeforeMove.notify(value);
+            if(event_status || typeof(event_status)==='undefined'){
                 _this.itemMover(value, "/sg_move", src, dest);
                 value['success']=true;
                 _this.hGridAfterMove.notify(value, e);

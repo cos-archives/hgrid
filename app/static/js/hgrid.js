@@ -56,49 +56,49 @@ var HGrid = {
         }
         self.initialize();
         $.extend(this, {
-            nameFunction: new Slick.Event(),
-            hGridBeforeMove: new Slick.Event(),
-            hGridAfterMove: new Slick.Event(),
-            hGridBeforeEdit: new Slick.Event(),
-            hGridAfterEdit: new Slick.Event(),
-            hGridBeforeDelete: new Slick.Event(),
-            hGridAfterDelete: new Slick.Event(),
-            hGridBeforeAdd: new Slick.Event(),
-            hGridAfterAdd: new Slick.Event()
+            nameFunction: new self.Slick.Event(),
+            hGridBeforeMove: new self.Slick.Event(),
+            hGridAfterMove: new self.Slick.Event(),
+            hGridBeforeEdit: new self.Slick.Event(),
+            hGridAfterEdit: new self.Slick.Event(),
+            hGridBeforeDelete: new self.Slick.Event(),
+            hGridAfterDelete: new self.Slick.Event(),
+            hGridBeforeAdd: new self.Slick.Event(),
+            hGridAfterAdd: new self.Slick.Event()
         });
         console.log("Ending create");
         return self;
     },
 
     initialize: function() {
-        var _this = this;
-        var hGridContainer = _this.options.container;
-        var hGridInfo = _this.options.info;
-        var hGridColumns = _this.options.columns;
-        _this.data = _this.prep(hGridInfo);
-        _this.Slick = $.extend({}, Slick);
-        _this.Slick.dataView = _this.Slick.Data.DataView({ inlineFilters: true});
-//        _this.Slick.dataView = $.extend({},Slick.Data.DataView({ inlineFilters: true }));
-        _this.Slick.dataView.beginUpdate();
-        _this.Slick.dataView.setItems(_this.data);
-        var data = _this.data;
-        var dataView = _this.Slick.dataView;
-        _this.Slick.dataView.setFilterArgs([data, dataView, _this]);
-        _this.Slick.dataView.setFilter(_this.myFilter);
-        _this.Slick.dataView.endUpdate();
-        if(_this.options.dragDrop){
+        var hGridContainer = this.options.container;
+        var hGridInfo = this.options.info;
+        var hGridColumns = this.options.columns;
+        this.data = this.prep(hGridInfo);
+        this.Slick = $.extend({}, Slick)
+        this.Slick.dataView = new this.Slick.Data.DataView({ inlineFilters: true });
+//        this.Slick.dataView = $.extend({}, Slick.Data.DataView({ inlineFilters: true }));
+//        this.Slick.dataView = new Slick.Data.DataView({ inlineFilters: true });
+        this.Slick.dataView.beginUpdate();
+        this.Slick.dataView.setItems(this.data);
+        var data = this.data;
+        var dataView = this.Slick.dataView;
+        this.Slick.dataView.setFilterArgs([data, dataView, this]);
+        this.Slick.dataView.setFilter(this.myFilter);
+        this.Slick.dataView.endUpdate();
+        if(this.options.dragDrop){
             hGridColumns.unshift({id: "#", name: "", width: 40, behavior: "selectAndMove", selectable: false, resizable: false, cssClass: "cell-reorder dnd"});
         }
-        _this.Slick.grid = new Slick.Grid(hGridContainer, _this.Slick.dataView, hGridColumns, _this.options);
+        this.Slick.grid = new this.Slick.Grid(hGridContainer, this.Slick.dataView, hGridColumns, this.options);
 
-        if(_this.options.columns===_this.defaultOptions.columns) {
-            _this.options.columns[_this.Slick.grid.getColumnIndex('name')].formatter = _this.defaultTaskNameFormatter;
+        if(this.options.columns===this.defaultOptions.columns) {
+            this.options.columns[this.Slick.grid.getColumnIndex('name')].formatter = this.defaultTaskNameFormatter;
         }
-        _this.options.columns[_this.Slick.grid.getColumnIndex('name')].validator = _this.requiredFieldValidator;
-        _this.Slick.grid.invalidate();
-        _this.Slick.grid.render();
+        this.options.columns[this.Slick.grid.getColumnIndex('name')].validator = this.requiredFieldValidator;
+        this.Slick.grid.invalidate();
+        this.Slick.grid.render();
 
-        _this.setupListeners();
+        this.setupListeners();
         hGridDropInit(_this);
     },
 
@@ -557,7 +557,6 @@ var HGrid = {
             if (inserter['uid']!="uploads"){
                 if(inserter['type']=='folder'){
                     dragParent = _this.Slick.grid.getCellNode(_this.Slick.dataView.getRowById(inserter['id']), 0).parentNode;
-                    console.log(dragParent);
                 }
                 else{
                     try{

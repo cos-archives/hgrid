@@ -99,7 +99,7 @@ var HGrid = {
         this.Slick.grid.render();
 
         this.setupListeners();
-        hGridDropInit(_this);
+        hGridDropInit(this);
     },
 
     defaultTaskNameFormatter: function(row, cell, value, columnDef, dataContext) {

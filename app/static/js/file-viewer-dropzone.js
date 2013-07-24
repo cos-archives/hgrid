@@ -1,5 +1,6 @@
 function hGridDropInit(hGrid){// Turn off the discover option so the URL error is not thrown with custom configuration
-Dropzone.autoDiscover = false;
+var Dropzone = window.Dropzone;
+    Dropzone.autoDiscover = false;
     var dropDestination;
 // Instantiate this Dropzone
 var myDropzone = new Dropzone(hGrid.options.container, {
@@ -9,9 +10,14 @@ var myDropzone = new Dropzone(hGrid.options.container, {
 // Get the SlickGrid Row under the dragged file
 myDropzone.on("dragover", function(e){
     currentDropCell = hGrid.Slick.grid.getCellFromEvent(e);
+    if(currentDropCell===null){
+        dropHighlight = null;
+        dropDestination = null;
+    }
+    else{
     currentDropCell.insertBefore = currentDropCell['row'];
 
-    if(hGrid.data[currentDropCell['row']-1]['type']=='folder'){
+    if(hGrid.data[currentDropCell['row']-1] && hGrid.data[currentDropCell['row']-1]['type']=='folder'){
         dropDestination = hGrid.data[currentDropCell['row']-1]['uid'];
     }
     else{
@@ -21,6 +27,7 @@ myDropzone.on("dragover", function(e){
     if (hGrid.data[currentDropCell['row']-1]){
         dropHighlight = hGrid.data[currentDropCell['row']-1];
     };
+    }
     hGrid.draggerGuide(dropHighlight);
 });
 

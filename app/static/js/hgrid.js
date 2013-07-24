@@ -12,22 +12,21 @@ var HGrid = {
         url: null,
         info: null,
         columns: [
-            {id: "#", name: "", width: 40, behavior: "selectAndMove", selectable: false, resizable: false, cssClass: "cell-reorder dnd"},
             {id: "uid", name: "uid", width: 40, field: "uid"},
             {id: "name", name: "Name", field: "name", width: 450, cssClass: "cell-title", editor: Slick.Editors.Text, sortable: true, defaultSortAsc: true}
         ],
         editable: false,
         enableCellNavigation: true,
         asyncEditorLoading: false,
-        enableColumnReorder: true
+        enableColumnReorder: true,
+        sortAsc: true,
+        dragDrop: true
     },
 
     Slick: {
     },
 
     data: null,
-
-    sortAsc: true,
 
     /**
      * This function creates a new HGrid object and calls initialize()
@@ -82,6 +81,9 @@ var HGrid = {
         this.Slick.dataView.setFilterArgs([data, dataView, this]);
         this.Slick.dataView.setFilter(this.myFilter);
         this.Slick.dataView.endUpdate();
+        if(this.options.dragDrop){
+            hGridColumns.unshift({id: "#", name: "", width: 40, behavior: "selectAndMove", selectable: false, resizable: false, cssClass: "cell-reorder dnd"});
+        }
         this.Slick.grid = new Slick.Grid(hGridContainer, this.Slick.dataView, hGridColumns, this.options);
 
 //        this.options.columns[this.Slick.grid.getColumnIndex('name')].formatter = this.TaskNameFormatter;
@@ -90,7 +92,7 @@ var HGrid = {
         this.Slick.grid.render();
 
         this.setupListeners();
-//        hGridDropInit(this);
+        hGridDropInit(this);
     },
 
     requiredFieldValidator: function (value) {
@@ -187,12 +189,25 @@ var HGrid = {
         }
 
         value['insertBefore']=dest['id']+1;
-
-        if(_this.itemMover(value, url, src_id, dest_path)){
-            console.log("here");
-            return true;
+        var event_status = _this.hGridBeforeMove.notify(value);
+        if(event_status || typeof(event_status)==='undefined'){
+            if(_this.itemMover(value, url, src_id, dest_path)){
+                console.log("here");
+                value['success']=true;
+                _this.hGridAfterMove.notify(value);
+                return true;
+            }
+            else {
+                value['success']="There was an error with the grid";
+                _this.hGridAfterMove.notify(value);
+                return false;
+            }
         }
-        return false;
+        else{
+            value['success']=false;
+            _this.hGridAfterMove.notify(value);
+            return false;
+        }
     },
 
     /**
@@ -353,7 +368,7 @@ var HGrid = {
             if(x == y){
                 return 0;
             }
-            if(_this.sortAsc){
+            if(_this.options.sortAsc){
                 return x > y ? 1 : -1;
             }
             else{
@@ -539,7 +554,7 @@ var HGrid = {
 
     //Function called when sort is clicked
     onSort: function (e, args, grid, dataView, data){
-        this.sortAsc = !this.sortAsc;
+        this.options.sortAsc = !this.options.sortAsc;
         var sortingCol = args.sortCol.field;
         var sorted = this.sortHierarchy(data, sortingCol, dataView, grid);
         var new_data = this.prepJava(sorted);
@@ -558,7 +573,7 @@ var HGrid = {
             if(x == y){
                 return 0;
             }
-            if(_this.sortAsc){
+            if(_this.options.sortAsc){
                 return x > y ? 1 : -1;
             }
             else{

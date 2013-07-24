@@ -128,7 +128,7 @@ def index():
     ]
     randint = random.randint(0, 1000)
     print json.dumps(info)  # A test line to verify that the output is correct / in the correct format.
-    return render_template("index.html", info=json.dumps(info), randint=randint, infoBucky=json.dumps(tester))
+    return render_template("index.html", info=json.dumps(tester2), randint=randint, infoBucky=json.dumps(tester))
 
 
 # # The script to route all file calls to the proper walker and file manipulator

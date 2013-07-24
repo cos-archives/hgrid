@@ -90,7 +90,7 @@ var HGrid = {
         this.Slick.grid.render();
 
         this.setupListeners();
-        hGridDropInit(this);
+//        hGridDropInit(this);
     },
 
     requiredFieldValidator: function (value) {
@@ -115,14 +115,6 @@ var HGrid = {
             }
         }
         return true;
-    },
-
-    getData: function(){
-        return this.data;
-    },
-
-    setData: function(data) {
-        this.data = data;
     },
 
     /**

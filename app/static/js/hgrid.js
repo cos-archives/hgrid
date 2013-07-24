@@ -44,10 +44,11 @@ var HGrid = {
      * @return {HGrid} Returns a new HGrid object.
      */
     create: function(options) {
+        console.log("Starting create");
         var _this = this;
         var self = Object.create(_this);
         self.options = $.extend({}, self.defaultOptions, options);
-        var urls = ['urlAdd','urlMove','urlEdit','urlDelete']
+        var urls = ['urlAdd','urlMove','urlEdit','urlDelete'];
         for (var i = 0; i<urls.length; i++) {
             if (!self.options[urls[i]]) {
                 self.options[urls[i]] = self.options['url'];
@@ -65,6 +66,7 @@ var HGrid = {
             hGridBeforeAdd: new Slick.Event(),
             hGridAfterAdd: new Slick.Event()
         });
+        console.log("Ending create");
         return self;
     },
 
@@ -86,13 +88,29 @@ var HGrid = {
         }
         this.Slick.grid = new Slick.Grid(hGridContainer, this.Slick.dataView, hGridColumns, this.options);
 
-//        this.options.columns[this.Slick.grid.getColumnIndex('name')].formatter = this.TaskNameFormatter;
+        if(this.options.columns===this.defaultOptions.columns) {
+            this.options.columns[this.Slick.grid.getColumnIndex('name')].formatter = this.defaultTaskNameFormatter;
+        }
         this.options.columns[this.Slick.grid.getColumnIndex('name')].validator = this.requiredFieldValidator;
         this.Slick.grid.invalidate();
         this.Slick.grid.render();
 
         this.setupListeners();
         hGridDropInit(this);
+    },
+
+    defaultTaskNameFormatter: function(row, cell, value, columnDef, dataContext) {
+        value = value.replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");
+        var spacer = "<span style='display:inline-block;height:1px;width:" + (15 * dataContext["indent"]) + "px'></span>";
+        if (dataContext['type']=='folder') {
+            if (dataContext._collapsed) {
+                return spacer + " <span class='toggle expand'></span><span class='folder'></span>&nbsp;" + value;
+            } else {
+                return spacer + " <span class='toggle collapse'></span><span class='folder'></span>&nbsp;" + value;
+            }
+        } else {
+            return spacer + " <span class='toggle spacer'></span>&nbsp;" + value;
+        }
     },
 
     requiredFieldValidator: function (value) {
@@ -105,7 +123,6 @@ var HGrid = {
 
     myFilter: function (item, args) {
         var data = args[0];
-        var dataView = args[1];
         var _this = args[2];
         if (item.parent != null) {
             var parent = _this.getItemByValue(data, item.parent_uid, 'uid');
@@ -175,8 +192,8 @@ var HGrid = {
     moveItems: function(src_uid, dest) {
         var _this = this;
         var src_id = [];
-        var dest = _this.getItemByValue(_this.data, dest, 'uid');
-        var dest_path = dest['path'];
+        var destination = _this.getItemByValue(_this.data, dest, 'uid');
+        var dest_path = destination['path'];
         var url = _this.options.url;
 
         var value = {};
@@ -188,7 +205,7 @@ var HGrid = {
             value['rows'].push(src_uid[i]);
         }
 
-        value['insertBefore']=dest['id']+1;
+        value['insertBefore']=destination['id']+1;
         var event_status = _this.hGridBeforeMove.notify(value);
         if(event_status || typeof(event_status)==='undefined'){
             if(_this.itemMover(value, url, src_id, dest_path)){
@@ -731,7 +748,7 @@ var HGrid = {
                         counter+=1;
                         i+=1;
                     }
-                    while(data[i] && data[i]['indent']>data[args.row]['indent'])
+                    while(data[i] && data[i]['indent']>data[args.row]['indent']);
 
                     if (!item._collapsed) {
                         item._collapsed = true;
@@ -778,5 +795,5 @@ var HGrid = {
             }
         });
     }
-}
+};
 

@@ -1,5 +1,6 @@
 function hGridDropInit(hGrid){// Turn off the discover option so the URL error is not thrown with custom configuration
-Dropzone.autoDiscover = false;
+var Dropzone = window.Dropzone;
+    Dropzone.autoDiscover = false;
     var dropDestination;
 // Instantiate this Dropzone
 var myDropzone = new Dropzone(hGrid.options.container, {

@@ -66,14 +66,14 @@
     });
 
     var buckyGrid = HGrid.create({
-                container: "#buckyGrid",
+        container: "#buckyGrid",
         info: {{ infoBucky | safe }},
         url: "/sg_move",
         columns:[
             {id: "uid", name: "uid", width: 40, field: "uid"},
             {id: "name", name: "Name", field: "name", width: 450, cssClass: "cell-title", formatter: TaskNameFormatter, editor: Slick.Editors.Text, sortable: true, defaultSortAsc: true}
         ]
-    })
+    });
 
 
     myGrid.hGridBeforeMove.subscribe(function(e, args){

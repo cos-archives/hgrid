@@ -55,15 +55,15 @@ var HGrid = {
         }
         self.initialize();
         $.extend(this, {
-            nameFunction: new Slick.Event(),
-            hGridBeforeMove: new Slick.Event(),
-            hGridAfterMove: new Slick.Event(),
-            hGridBeforeEdit: new Slick.Event(),
-            hGridAfterEdit: new Slick.Event(),
-            hGridBeforeDelete: new Slick.Event(),
-            hGridAfterDelete: new Slick.Event(),
-            hGridBeforeAdd: new Slick.Event(),
-            hGridAfterAdd: new Slick.Event()
+            nameFunction: new self.Slick.Event(),
+            hGridBeforeMove: new self.Slick.Event(),
+            hGridAfterMove: new self.Slick.Event(),
+            hGridBeforeEdit: new self.Slick.Event(),
+            hGridAfterEdit: new self.Slick.Event(),
+            hGridBeforeDelete: new self.Slick.Event(),
+            hGridAfterDelete: new self.Slick.Event(),
+            hGridBeforeAdd: new self.Slick.Event(),
+            hGridAfterAdd: new self.Slick.Event()
         });
         return self;
     },
@@ -73,7 +73,10 @@ var HGrid = {
         var hGridInfo = this.options.info;
         var hGridColumns = this.options.columns;
         this.data = this.prep(hGridInfo);
-        this.Slick.dataView = new Slick.Data.DataView({ inlineFilters: true });
+        this.Slick = $.extend({}, Slick)
+        this.Slick.dataView = new this.Slick.Data.DataView({ inlineFilters: true });
+//        this.Slick.dataView = $.extend({}, Slick.Data.DataView({ inlineFilters: true }));
+//        this.Slick.dataView = new Slick.Data.DataView({ inlineFilters: true });
         this.Slick.dataView.beginUpdate();
         this.Slick.dataView.setItems(this.data);
         var data = this.data;
@@ -84,7 +87,7 @@ var HGrid = {
         if(this.options.dragDrop){
             hGridColumns.unshift({id: "#", name: "", width: 40, behavior: "selectAndMove", selectable: false, resizable: false, cssClass: "cell-reorder dnd"});
         }
-        this.Slick.grid = new Slick.Grid(hGridContainer, this.Slick.dataView, hGridColumns, this.options);
+        this.Slick.grid = new this.Slick.Grid(hGridContainer, this.Slick.dataView, hGridColumns, this.options);
 
 //        this.options.columns[this.Slick.grid.getColumnIndex('name')].formatter = this.TaskNameFormatter;
         this.options.columns[this.Slick.grid.getColumnIndex('name')].validator = this.requiredFieldValidator;

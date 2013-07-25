@@ -337,6 +337,9 @@ var HGrid = {
                 d['indent']=0;
                 d['id']=data_counter;
                 checker[d['uid']]=[d['indent'], data_counter];
+                if(d['type']==='folder'){
+                    d._collapsed=true;
+                }
                 output[data_counter]=d;
                 data_counter++;
                 info.splice(i, 1);
@@ -346,6 +349,9 @@ var HGrid = {
                 d['indent']=checker[d['parent_uid']][0]+1;
                 d['id']=data_counter;
                 checker[d['uid']]=[d['indent'], data_counter];
+                if(d['type']==='folder'){
+                    d._collapsed=true;
+                }
                 output[data_counter]=d;
                 data_counter++;
                 info.splice(i, 1);

@@ -65,7 +65,9 @@ var HGrid = {
             hGridBeforeDelete: new self.Slick.Event(),
             hGridAfterDelete: new self.Slick.Event(),
             hGridBeforeAdd: new self.Slick.Event(),
-            hGridAfterAdd: new self.Slick.Event()
+            hGridAfterAdd: new self.Slick.Event(),
+            hGridBeforeNavFilter: new self.Slick.Event(),
+            hGridAfterNavFilter: new self.Slick.Event()
         });
         console.log("Ending create");
         return self;
@@ -144,8 +146,10 @@ var HGrid = {
         }
         return true;
     },
-    navLevelFilter: function(item) {
+    navLevelFilter: function(itemUid) {
         var _this = this;
+        var item = _this.getItemByValue(_this.data, itemUid, "uid");
+        _this.hGridBeforeNavFilter.notify(item);
         var navReset = _this.options.navLevel;
         if (item) {
             try {
@@ -160,6 +164,7 @@ var HGrid = {
             _this.options.navLevel = "null";
         }
         _this.Slick.dataView.setFilter(_this.myFilter);
+        _this.hGridAfterNavFilter.notify(item);
     },
 
     /**

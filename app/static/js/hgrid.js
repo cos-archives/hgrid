@@ -144,6 +144,23 @@ var HGrid = {
         }
         return true;
     },
+    navLevelFilter: function(item) {
+        var _this = this;
+        var navReset = _this.options.navLevel;
+        if (item) {
+            try {
+                _this.options.navLevel = item["sortpath"];
+                if(!item["sortpath"]) throw "This item has no sort path";
+            } catch(e) {
+                console.error(e);
+                console.log("This is not a valid item");
+                _this.options.navLevel = navReset;
+            }
+        } else {
+            _this.options.navLevel = "null";
+        }
+        _this.Slick.dataView.setFilter(_this.myFilter);
+    },
 
     /**
      * Allows the user to add a new item to the grid

@@ -21,7 +21,8 @@ var HGrid = {
         enableColumnReorder: true,
         sortAsc: true,
         dragDrop: true,
-        navLevel: "null"
+        navLevel: "null",
+        breadcrumbBox: null
     },
 
     Slick: {
@@ -100,8 +101,8 @@ var HGrid = {
         this.options.columns[this.Slick.grid.getColumnIndex('name')].validator = this.requiredFieldValidator;
         this.Slick.grid.invalidate();
         this.Slick.grid.render();
-
         this.setupListeners();
+        this.updateBreadcrumbsBox();
         hGridDropInit(this);
     },
 
@@ -164,7 +165,38 @@ var HGrid = {
             _this.options.navLevel = "null";
         }
         _this.Slick.dataView.setFilter(_this.myFilter);
+        _this.updateBreadcrumbsBox(itemUid);
         _this.hGridAfterNavFilter.notify(item);
+    },
+    updateBreadcrumbsBox: function(itemUid) {
+        var _this = this;
+        var item = _this.getItemByValue(_this.data, itemUid, "uid");
+        var bcb = _this.options.breadcrumbBox;
+        $(bcb).addClass("hgrid-breadcrumb-box");
+        var spacer = " / ";
+        var crumbs = [];
+        var topCrumb = '<span class="hgrid-breadcrumb"><a href="#" data-hgrid-nav="">HGrid</a></span>';
+        crumbs.push(topCrumb);
+        $(bcb).empty();
+        var levels = [];
+        if (item) {
+            try {
+                levels = item["path"].slice();
+                if(!item["path"]) throw "This item has no path";
+            } catch(e) {
+                console.error(e);
+                console.log("This is not a valid item");
+                levels = [];
+            }
+        }
+        for (var i = 0; i<levels.length; i++) {
+            var crumb = '<span class="hgrid-breadcrumb"><a href="#" data-hgrid-nav="' + levels[i] + '">' + levels[i] + '</a></span>';
+            crumbs.push(crumb);
+        }
+        for (var i = 0; i<crumbs.length; i++) {
+            $(bcb).append(crumbs[i]);
+            $(bcb).append(spacer);
+        }
     },
 
     /**
@@ -831,6 +863,20 @@ var HGrid = {
                 grid.getOptions().editable=true;
             }
         });
+
+        // When a Breadcrumb is clicked, the grid filters
+        $(_this.options.breadcrumbBox).on("click", ".hgrid-breadcrumb>a", function() {
+            var navId = $(this).attr('data-hgrid-nav');
+            _this.navLevelFilter(navId);
+
+        });
+        // When an HGrid item is clicked, the grid filters
+        $(_this.options.container).on("click", ".nav-filter-item", function() {
+            var itemRow = $(this).attr('data-hgrid-nav');
+            var navId = _this.data[itemRow]["uid"];
+            _this.navLevelFilter(navId);
+        });
+
     }
 };
 

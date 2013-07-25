@@ -16,7 +16,9 @@
     </div>
     <div id="slick-recycle" class="recycle-bin" style="width: 190px; height:90px; padding: 5px; float:right;">Recycle Bin</div>
 </div>
+<div id="myGridBreadcrumbs"></div>
 <div id="myGrid" class="dropzone dz-Clickable" style="width:600px;height:500px;"></div>
+<div id="buckyGridBreadcrumbs"></div>
 <div id="buckyGrid" class="dropzone dz-Clickable" style="width:600px;height:500px;"></div>
 
 
@@ -48,9 +50,9 @@
         var spacer = "<span style='display:inline-block;height:1px;width:" + (15 * dataContext["indent"]) + "px'></span>";
         if (dataContext['type']=='folder') {
             if (dataContext._collapsed) {
-                return spacer + " <span class='toggle expand'></span><span class='folder'></span>&nbsp;" + value;
+                return spacer + " <span class='toggle expand'></span><span class='folder'></span>&nbsp;<a href='#' class='nav-filter-item' data-hgrid-nav='" + row + "'>" + value + "</a>";
             } else {
-                return spacer + " <span class='toggle collapse'></span><span class='folder'></span>&nbsp;" + value;
+                return spacer + " <span class='toggle collapse'></span><span class='folder'></span>&nbsp;<a href='#' class='nav-filter-item' data-hgrid-nav='" + row + "'>" + value + "</a>";
             }
         } else {
             return spacer + " <span class='toggle spacer'></span>&nbsp;" + value;
@@ -63,17 +65,19 @@
         columns:[
             {id: "uid", name: "uid", width: 40, field: "uid"},
             {id: "name", name: "Name", field: "name", width: 520, cssClass: "cell-title", formatter: TaskNameFormatter, editor: Slick.Editors.Text, sortable: true, defaultSortAsc: true}
-        ]
+        ],
+        breadcrumbBox: "#myGridBreadcrumbs"
     });
 
     var buckyGrid = HGrid.create({
-                container: "#buckyGrid",
+        container: "#buckyGrid",
         info: {{ infoBucky | safe }},
         url: "/sg_move",
         columns:[
             {id: "uid", name: "uid", width: 40, field: "uid"},
             {id: "name", name: "Name", field: "name", width: 450, cssClass: "cell-title", formatter: TaskNameFormatter, editor: Slick.Editors.Text, sortable: true, defaultSortAsc: true}
-        ]
+        ],
+        breadcrumbBox: "#buckyGridBreadcrumbs"
     });
 
 
@@ -82,8 +86,8 @@
         var insertBefore = myGrid.getItemByValue(myGrid.data, args.insertBefore, 'id')['parent_uid'];
         var new_parent = myGrid.getItemByValue(myGrid.data, insertBefore, 'uid')['name'];
 
-            console.log("Moving " + myGrid.getItemByValue(myGrid.data, args.rows[0], 'uid')['name'] + " to " + new_parent);
-            return true;
+        console.log("Moving " + myGrid.getItemByValue(myGrid.data, args.rows[0], 'uid')['name'] + " to " + new_parent);
+        return true;
 
     });
 

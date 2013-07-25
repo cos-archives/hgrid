@@ -20,7 +20,8 @@ var HGrid = {
         asyncEditorLoading: false,
         enableColumnReorder: true,
         sortAsc: true,
-        dragDrop: true
+        dragDrop: true,
+        navLevel: "null"
     },
 
     Slick: {
@@ -83,7 +84,7 @@ var HGrid = {
         this.Slick.dataView.setItems(this.data);
         var data = this.data;
         var dataView = this.Slick.dataView;
-        this.Slick.dataView.setFilterArgs([data, dataView, this]);
+        this.Slick.dataView.setFilterArgs([data, this]);
         this.Slick.dataView.setFilter(this.myFilter);
         this.Slick.dataView.endUpdate();
         if(this.options.dragDrop){
@@ -126,7 +127,12 @@ var HGrid = {
 
     myFilter: function (item, args) {
         var data = args[0];
-        var _this = args[2];
+        var _this = args[1];
+        if (_this.options.navLevel != "null") {
+            if (item["sortpath"].indexOf(_this.options.navLevel) != 0) {
+                return false;
+            }
+        }
         if (item.parent != null) {
             var parent = _this.getItemByValue(data, item.parent_uid, 'uid');
             while (parent) {

@@ -696,8 +696,8 @@ var HGrid = {
         var dataView = this.Slick.dataView;
         var src = [];
         var dest = "";
-        grid.setSelectionModel(new Slick.RowSelectionModel());
-        var moveRowsPlugin = new Slick.RowMoveManager({
+        grid.setSelectionModel(new _this.Slick.RowSelectionModel());
+        var moveRowsPlugin = new _this.Slick.RowMoveManager({
             cancelEditOnDrag: true
         });
 
@@ -872,6 +872,7 @@ var HGrid = {
         });
         // When an HGrid item is clicked, the grid filters
         $(_this.options.container).on("click", ".nav-filter-item", function() {
+            console.log(grid.getActiveCellNode());
             var itemRow = $(this).attr('data-hgrid-nav');
             var navId = _this.data[itemRow]["uid"];
             _this.navLevelFilter(navId);

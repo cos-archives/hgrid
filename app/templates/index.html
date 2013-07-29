@@ -26,19 +26,19 @@
 <script src="/static/js/jquery-ui-1.8.16.custom.min.js?{{ randint }}"></script>
 <script src="/static/js/jquery.event.drag-2.2.js?{{ randint }}"></script>
 <script src="/static/js/jquery.event.drop-2.2.js?{{ randint }}"></script>
-{#<script src="/static/js/dropzone.js?{{ randint }}"></script>#}
-{#<script src="/static/js/file-viewer-dropzone.js?{{ randint }}"></script>#}
+<script src="/static/js/dropzone.js?{{ randint }}"></script>
+<script src="/static/js/file-viewer-dropzone.js?{{ randint }}"></script>
 
-{#<script src="/static/js/slick-grid-dependencies/slick.core.js?{{ randint }}"></script>#}
-{#<script src="/static/js/slick-grid-dependencies/slick.formatters.js?{{ randint }}"></script>#}
-{#<script src="/static/js/slick-grid-dependencies/slick.editors.js?{{ randint }}"></script>#}
-{#<script src="/static/js/slick-grid-dependencies/slick.grid.js"></script>#}
-{#<script src="/static/js/slick-grid-dependencies/slick.dataview.js"></script>#}
-{#<script src="/static/js/slick-grid-dependencies/slick.cellrangeselector.js?{{ randint }}"></script>#}
-{#<script src="/static/js/slick-grid-dependencies/slick.cellselectionmodel.js?{{ randint }}"></script>#}
-{#<script src="/static/js/slick-grid-dependencies/slick.rowselectionmodel.js?{{ randint }}"></script>#}
-{#<script src="/static/js/slick-grid-dependencies/slick.rowmovemanager.js?{{ randint }}"></script>#}
-<script src="/static/js/hgrid-dependencies.min.js"></script>
+<script src="/static/js/slick-grid-dependencies/slick.core.js?{{ randint }}"></script>
+<script src="/static/js/slick-grid-dependencies/slick.formatters.js?{{ randint }}"></script>
+<script src="/static/js/slick-grid-dependencies/slick.editors.js?{{ randint }}"></script>
+<script src="/static/js/slick-grid-dependencies/slick.grid.js"></script>
+<script src="/static/js/slick-grid-dependencies/slick.dataview.js"></script>
+<script src="/static/js/slick-grid-dependencies/slick.cellrangeselector.js?{{ randint }}"></script>
+<script src="/static/js/slick-grid-dependencies/slick.cellselectionmodel.js?{{ randint }}"></script>
+<script src="/static/js/slick-grid-dependencies/slick.rowselectionmodel.js?{{ randint }}"></script>
+<script src="/static/js/slick-grid-dependencies/slick.rowmovemanager.js?{{ randint }}"></script>
+{#<script src="/static/js/hgrid-dependencies.min.js"></script>#}
 <script src="/static/js/hgrid.js"></script>
 
 
@@ -59,7 +59,7 @@
     var myGrid = HGrid.create({
         container: "#myGrid",
         info: {{ info | safe }},
-        url: "/sg_move",
+        urlAdd: "/uploader",
         columns:[
             {id: "uid", name: "uid", width: 40, field: "uid"},
             {id: "name", name: "Name", field: "name", width: 520, cssClass: "cell-title", formatter: TaskNameFormatter, editor: Slick.Editors.Text, sortable: true, defaultSortAsc: true}
@@ -69,7 +69,7 @@
     var buckyGrid = HGrid.create({
                 container: "#buckyGrid",
         info: {{ infoBucky | safe }},
-        url: "/sg_move",
+        urlAdd: "/sg_move",
         columns:[
             {id: "uid", name: "uid", width: 40, field: "uid"},
             {id: "name", name: "Name", field: "name", width: 450, cssClass: "cell-title", formatter: TaskNameFormatter, editor: Slick.Editors.Text, sortable: true, defaultSortAsc: true}

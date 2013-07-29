@@ -4,8 +4,8 @@ var Dropzone = window.Dropzone;
     var dropDestination;
 // Instantiate this Dropzone
 var myDropzone = new Dropzone(hGrid.options.container, {
-    url: "/uploader",
-    previewsContainer: "#drop-preview-panel"
+    url: hGrid.options['urlAdd']
+//    previewsContainer: "#drop-preview-panel"
 } );
 // Get the SlickGrid Row under the dragged file
 myDropzone.on("dragover", function(e){
@@ -40,6 +40,7 @@ myDropzone.on("sending", function(file, xhr, formData){
 });
 // Hook the drop success to the grid view update
 myDropzone.on("success", function(file) {
+    console.log(file);
     // Assign values to the uploads folder, so we can insert the file in the correct spot in the view
     var uploadsFolder = {};
     // Check if the server says that the file exists already

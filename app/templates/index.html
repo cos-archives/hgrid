@@ -43,6 +43,7 @@
 
 
 <script>
+    var info = {{ info | safe }};
     var TaskNameFormatter = function(row, cell, value, columnDef, dataContext) {
         value = value.replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");
         var spacer = "<span style='display:inline-block;height:1px;width:" + (15 * dataContext["indent"]) + "px'></span>";
@@ -55,7 +56,8 @@
         } else {
             return spacer + " <span class='toggle spacer'></span>&nbsp;" + value;
         }
-    }
+    };
+
     var myGrid = HGrid.create({
         container: "#myGrid",
         info: {{ info | safe }},

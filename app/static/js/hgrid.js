@@ -55,6 +55,9 @@ var HGrid = {
             if (!self.options[urls[i]]) {
                 self.options[urls[i]] = self.options['url'];
             }
+            if (typeof self.options[urls[i]] === "function") {
+                self.options[urls[i]] = self.options[urls[i]]();
+            }
         }
         self.initialize();
         $.extend(this, {
@@ -68,7 +71,9 @@ var HGrid = {
             hGridBeforeAdd: new self.Slick.Event(),
             hGridAfterAdd: new self.Slick.Event(),
             hGridBeforeNavFilter: new self.Slick.Event(),
-            hGridAfterNavFilter: new self.Slick.Event()
+            hGridAfterNavFilter: new self.Slick.Event(),
+            hGridBeforeUpload: new self.Slick.Event(),
+            hGridAfterUpload: new self.Slick.Event()
         });
         console.log("Ending create");
         return self;
@@ -234,6 +239,50 @@ var HGrid = {
             _this.Slick.grid.render();
             value['success'] = true;
             _this.hGridAfterAdd.notify(value);
+            return true;
+        }
+        else{
+            value['success'] = false;
+            _this.hGridAfterAdd.notify(value);
+            return false;
+        }
+    },
+
+     /**
+     * Allows the user to add a new item to the grid
+     * @method addItem
+     *
+     * @param {Object} item New item to be added
+     *  @param item.parent_uid Parent unique ID
+     *  @param item.uid Unique ID
+     *  @param item.name Name
+     *  @param {String} item.type Folder or file
+     * @return {Boolean}
+     */
+    uploadItem: function(item) {
+        var _this = this;
+//        if (!item['parent_uid'] || !item['uid'] || !item['name'] || !item['type'] || _this.getItemByValue(_this.data, item['uid'], 'uid')){
+//            alert("This is an invalid item.");
+//            return;
+//        }
+        var parent= _this.getItemByValue(_this.data, item['parent_uid'], 'uid');
+        var value = {'item': item, 'parent':parent};
+        var event_status = _this.hGridBeforeUpload.notify(value);
+        if(event_status || typeof(event_status)==='undefined'){
+            if(item['parent_uid']!="null"){
+                var parent_path = parent['path'];
+                item['path']=[];
+                item['path'].concat(parent_path, item['uid']);
+                item['sortpath']=item['path'].join('/');
+            }
+            _this.data.splice(parent['id']+1, 0,item);
+            _this.prepJava(_this.data);
+            _this.Slick.dataView.setItems(_this.data);
+            _this.Slick.grid.invalidate();
+            _this.Slick.grid.setSelectedRows([]);
+            _this.Slick.grid.render();
+            value['success'] = true;
+            _this.hGridAfterUpload.notify(value);
             return true;
         }
         else{
@@ -690,8 +739,8 @@ var HGrid = {
         var dataView = this.Slick.dataView;
         var src = [];
         var dest = "";
-        grid.setSelectionModel(new _this.Slick.RowSelectionModel());
-        var moveRowsPlugin = new _this.Slick.RowMoveManager({
+        grid.setSelectionModel(new Slick.RowSelectionModel());
+        var moveRowsPlugin = new Slick.RowMoveManager({
             cancelEditOnDrag: true
         });
 
@@ -857,23 +906,6 @@ var HGrid = {
                 grid.getOptions().editable=true;
             }
         });
-
-        // When a Breadcrumb is clicked, the grid filters
-        $(_this.options.breadcrumbBox).on("click", ".hgrid-breadcrumb>a", function(e) {
-            var navId = $(this).attr('data-hgrid-nav');
-            _this.navLevelFilter(navId);
-            e.preventDefault();
-
-        });
-        // When an HGrid item is clicked, the grid filters
-        $(_this.options.container).on("click", ".nav-filter-item", function(e) {
-            console.log(grid.getActiveCellNode());
-            var itemRow = $(this).attr('data-hgrid-nav');
-            var navId = _this.data[itemRow]["uid"];
-            _this.navLevelFilter(navId);
-            e.preventDefault();
-        });
-
     }
 };
 

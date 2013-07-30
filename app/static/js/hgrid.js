@@ -20,7 +20,8 @@ var HGrid = {
         asyncEditorLoading: false,
         enableColumnReorder: true,
         sortAsc: true,
-        dragDrop: true
+        dragDrop: true,
+        dropZone: true
     },
 
     Slick: {
@@ -44,7 +45,6 @@ var HGrid = {
      * @return {HGrid} Returns a new HGrid object.
      */
     create: function(options) {
-        console.log("Starting create");
         var _this = this;
         var self = Object.create(_this);
         self.options = $.extend({}, self.defaultOptions, options);
@@ -71,7 +71,6 @@ var HGrid = {
             hGridBeforeUpload: new self.Slick.Event(),
             hGridAfterUpload: new self.Slick.Event()
         });
-        console.log("Ending create");
         return self;
     },
 
@@ -80,7 +79,7 @@ var HGrid = {
         var hGridInfo = this.options.info;
         var hGridColumns = this.options.columns;
         this.data = this.prep(hGridInfo);
-        this.Slick = $.extend({}, Slick)
+        this.Slick = $.extend({}, Slick);
         this.Slick.dataView = new this.Slick.Data.DataView({ inlineFilters: true });
 //        this.Slick.dataView = $.extend({}, Slick.Data.DataView({ inlineFilters: true }));
 //        this.Slick.dataView = new Slick.Data.DataView({ inlineFilters: true });
@@ -104,7 +103,12 @@ var HGrid = {
         this.Slick.grid.render();
 
         this.setupListeners();
-        hGridDropInit(this);
+        if(this.options.dropZone){
+            this.dropZoneInit(this);
+        }
+        else{
+            Dropzone.autoDiscover = false;
+        }
     },
 
     defaultTaskNameFormatter: function(row, cell, value, columnDef, dataContext) {
@@ -140,8 +144,81 @@ var HGrid = {
                 }
                 parent = _this.getItemByValue(data, parent.parent_uid, 'uid');
             }
+        } else {
+            return true;
         }
-        return true;
+    },
+
+    dropZoneInit: function (hGrid){// Turn off the discover option so the URL error is not thrown with custom configuration
+        var Dropzone = window.Dropzone;
+        Dropzone.autoDiscover = false;
+        var dropDestination;
+        var url;
+        var bool = false;
+// Instantiate this Dropzone
+        if(typeof hGrid.options['urlAdd'] === "string"){
+            url = hGrid.options['urlAdd'];
+        }
+        else {
+            url = hGrid.options['url'];
+            bool = true;
+        }
+        var myDropzone = new Dropzone(hGrid.options.container, {
+            url: url,
+//    url: hGrid.options['urlAdd']
+            previewsContainer: "#drop-preview-panel",
+            addRemoveLinks: true
+        } );
+// Get the SlickGrid Row under the dragged file
+        myDropzone.on("dragover", function(e){
+
+            currentDropCell = hGrid.Slick.grid.getCellFromEvent(e);
+            if(currentDropCell===null){
+                dropHighlight = null;
+                dropDestination = null;
+            }
+            else{
+                currentDropCell.insertBefore = currentDropCell['row'];
+
+                if(hGrid.data[currentDropCell['row']-1] && hGrid.data[currentDropCell['row']-1]['type']=='folder'){
+                    dropDestination = hGrid.data[currentDropCell['row']-1]['uid'];
+                }
+                else{
+                    dropDestination = hGrid.data[currentDropCell['row']]['parent_uid'];
+                }
+                dropHighlight = null;
+                if (hGrid.data[currentDropCell['row']-1]){
+                    dropHighlight = hGrid.data[currentDropCell['row']-1];
+                };
+            }
+            if(bool){
+                myDropzone.options.url = hGrid.options['urlAdd'][dropDestination];
+            }
+            hGrid.draggerGuide(dropHighlight);
+        });
+
+        myDropzone.on("dragleave", function(e){
+            hGrid.removeDraggerGuide();
+        });
+// Pass the destination folder to the server
+        myDropzone.on("sending", function(file, xhr, formData){
+            formData.append("destination", dropDestination);
+        });
+// Hook the drop success to the grid view update
+        myDropzone.on("success", function(file) {
+            hGrid.removeDraggerGuide();
+            // Assign values to the uploads folder, so we can insert the file in the correct spot in the view
+            var uploadsFolder = {};
+            // Check if the server says that the file exists already
+            if (file.xhr.response == "Repeat") {
+                console.log("The File already exists!");
+                // It is a new file
+            } else{
+                // Collect the JSON Response from the uploader
+                var newSlickInfo = JSON.parse(file.xhr.response);
+                hGrid.uploadItem(newSlickInfo[0]);
+            }
+        });
     },
 
     /**
@@ -188,7 +265,7 @@ var HGrid = {
         }
     },
 
-     /**
+    /**
      * Allows the user to add a new item to the grid
      * @method addItem
      *
@@ -261,7 +338,6 @@ var HGrid = {
         var event_status = _this.hGridBeforeMove.notify(value);
         if(event_status || typeof(event_status)==='undefined'){
             if(_this.itemMover(value, url, src_id, dest_path)){
-                console.log("here");
                 value['success']=true;
                 _this.hGridAfterMove.notify(value);
                 return true;
@@ -406,7 +482,7 @@ var HGrid = {
                 i=0;
             }
             if(d['name']=="null"){
-                d['name']+=i
+                d['name']+=i;
             }
         }
 
@@ -428,7 +504,7 @@ var HGrid = {
             }
             path.reverse();
             output[l]['path']=path;
-            output[l]['sortpath']=path.join('/')
+            output[l]['sortpath']=path.join('/');
         }
         var sortingCol='sortpath';
         output.sort(function(a, b){
@@ -575,8 +651,9 @@ var HGrid = {
             this.data = left.concat(extractedRows.concat(right));
 
             var selectedRows = [];
-            for (var i = 0; i < rows.length; i++)
+            for (var i = 0; i < rows.length; i++){
                 selectedRows.push(left.length + i);
+            }
 
             var new_data = this.prepJava(this.data);
             this.data = new_data;
@@ -637,7 +714,8 @@ var HGrid = {
     sortHierarchy: function (data, sortingCol, dataView, grid){
         var _this = this;
         var sorted = data.sort(function(a, b){
-            var x = a[sortingCol], y = b[sortingCol];
+            var x = a[sortingCol];
+            var y = b[sortingCol];
 
             if(x == y){
                 return 0;
@@ -777,7 +855,6 @@ var HGrid = {
         grid.onCellChange.subscribe(function (e, args) {
             _this.options.editable=false;
             var src=args.item;
-            console.log(args);
             _this.Slick.dataView.updateItem(src.id, src);
 //            $.post('/sg_edit', {grid_item: JSON.stringify(src)}, function(new_title){
 //                if(new_title!="fail"){

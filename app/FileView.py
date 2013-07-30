@@ -126,9 +126,12 @@ def index():
         {'uid': 9, 'type': 'file', 'name': 'laura', 'parent_uid': 7},
         {'uid': 11, 'type': 'file', 'name': 'joe', 'parent_uid': 10}
     ]
+
+    tester3 = [{'uid': 'node-dJwsF', 'isComponent': 'true', 'name': 'Demo', 'uploadUrl': '/project/dJwsF/files/upload', 'type': 'folder', 'parent_uid': 'null', 'size': '--'}, {'uid': 'node-9fijQ', 'isComponent': 'true', 'name': 'check', 'uploadUrl': '/project/dJwsF/node/9fijQ/files/upload', 'type': 'folder', 'parent_uid': 'node-dJwsF', 'size': '--'}, {'name': 'test1.txt', 'isComponent': 'false', 'url': '/project/dJwsF/node/9fijQ/files/test1.txt', 'size': '17 bytes', 'type': 'file', 'parent_uid': 'node-9fijQ', 'uid': 'nodefile-51f7fe3b1fd21c2f3320f3cd'}, {'name': 'test3.txt', 'isComponent': 'false', 'url': '/project/dJwsF/node/9fijQ/files/test3.txt', 'size': '24 bytes', 'type': 'file', 'parent_uid': 'node-9fijQ', 'uid': 'nodefile-51f7fe3b1fd21c2f3320f3af'}, {'uid': 'node-Z7eW2', 'isComponent': 'true', 'name': 'another', 'uploadUrl': '/project/dJwsF/node/Z7eW2/files/upload', 'type': 'folder', 'parent_uid': 'node-dJwsF', 'size': '--'}, {'name': 'test1.txt', 'isComponent': 'false', 'url': '/project/dJwsF/files/test1.txt', 'size': '17 bytes', 'type': 'file', 'parent_uid': 'node-dJwsF', 'uid': 'nodefile-51f7fdad1fd21c2f3320f111'}, {'name': 'FileView.py', 'isComponent': 'false', 'url': '/project/dJwsF/files/FileView.py', 'size': '3 KB', 'type': 'file', 'parent_uid': 'node-dJwsF', 'uid': 'nodefile-51f7fdad1fd21c2f3320f0f9'}, {'name': 'test2.txt', 'isComponent': 'false', 'url': '/project/dJwsF/files/test2.txt', 'size': '17 bytes', 'type': 'file', 'parent_uid': 'node-dJwsF', 'uid': 'nodefile-51f7fdbc1fd21c2f3320f15f'}, {'name': 'test3.txt', 'isComponent': 'false', 'url': '/project/dJwsF/files/test3.txt', 'size': '24 bytes', 'type': 'file', 'parent_uid': 'node-dJwsF', 'uid': 'nodefile-51f7fdad1fd21c2f3320f129'}]
+
     randint = random.randint(0, 1000)
     print json.dumps(info)  # A test line to verify that the output is correct / in the correct format.
-    return render_template("index.html", info=json.dumps(info), randint=randint, infoBucky=json.dumps(tester))
+    return render_template("index.html", info=json.dumps(tester3), randint=randint, infoBucky=json.dumps(tester))
 
 
 # # The script to route all file calls to the proper walker and file manipulator

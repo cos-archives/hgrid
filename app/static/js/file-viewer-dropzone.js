@@ -9,13 +9,14 @@ function hGridDropInit(hGrid){// Turn off the discover option so the URL error i
         url = hGrid.options['urlAdd'];
     }
     else {
-        url = "null";
+        url = hGrid.options['url'];
         bool = true;
     }
     var myDropzone = new Dropzone(hGrid.options.container, {
-        url: url
+        url: url,
 //    url: hGrid.options['urlAdd']
-//    previewsContainer: "#drop-preview-panel"
+    previewsContainer: "#drop-preview-panel",
+        addRemoveLinks: true
     } );
 // Get the SlickGrid Row under the dragged file
     myDropzone.on("dragover", function(e){
@@ -66,22 +67,7 @@ function hGridDropInit(hGrid){// Turn off the discover option so the URL error i
         } else{
             // Collect the JSON Response from the uploader
             var newSlickInfo = JSON.parse(file.xhr.response);
-            // Assign response data to slickItem
-            var slickTitle = newSlickInfo[0].name;
-            var slickSize = newSlickInfo[0].size;
-            var slickParentUid = newSlickInfo[0].parent_uid;
-            if (slickParentUid===""){
-                slickParentUid="null";
-            }
-            var slickUid = newSlickInfo[0].uid;
-            var slickItem = {
-                name: slickTitle,
-                size: slickSize,
-                parent_uid: slickParentUid,
-                uid: slickUid,
-                type: "file"
-            }
-            hGrid.uploadItem(slickItem);
+            hGrid.uploadItem(newSlickInfo[0]);
         }
     });
 };

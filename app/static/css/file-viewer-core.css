@@ -7,7 +7,7 @@
     background: url('../images/drag-handle.png') no-repeat center center;
 }
 
-.toggle, .folder {
+.toggle, .folder, .file {
     height: 16px;
     width: 16px;
     display: inline-block;
@@ -21,6 +21,10 @@
 
 .folder {
     background: url('../images/folder.png') no-repeat left top;
+}
+
+.file {
+    background: url('../images/file.png') no-repeat left top;
 }
 
 .toggle.collapse {

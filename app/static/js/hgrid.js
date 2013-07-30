@@ -20,7 +20,9 @@ var HGrid = {
         asyncEditorLoading: false,
         enableColumnReorder: true,
         sortAsc: true,
-        dragDrop: true
+        dragDrop: true,
+        navLevel: "null",
+        breadcrumbBox: null
     },
 
     Slick: {
@@ -68,6 +70,8 @@ var HGrid = {
             hGridAfterDelete: new self.Slick.Event(),
             hGridBeforeAdd: new self.Slick.Event(),
             hGridAfterAdd: new self.Slick.Event(),
+            hGridBeforeNavFilter: new self.Slick.Event(),
+            hGridAfterNavFilter: new self.Slick.Event(),
             hGridBeforeUpload: new self.Slick.Event(),
             hGridAfterUpload: new self.Slick.Event()
         });
@@ -88,7 +92,7 @@ var HGrid = {
         this.Slick.dataView.setItems(this.data);
         var data = this.data;
         var dataView = this.Slick.dataView;
-        this.Slick.dataView.setFilterArgs([data, dataView, this]);
+        this.Slick.dataView.setFilterArgs([data, this]);
         this.Slick.dataView.setFilter(this.myFilter);
         this.Slick.dataView.endUpdate();
         if(this.options.dragDrop){
@@ -102,8 +106,8 @@ var HGrid = {
         this.options.columns[this.Slick.grid.getColumnIndex('name')].validator = this.requiredFieldValidator;
         this.Slick.grid.invalidate();
         this.Slick.grid.render();
-
         this.setupListeners();
+        this.updateBreadcrumbsBox();
         hGridDropInit(this);
     },
 
@@ -131,7 +135,20 @@ var HGrid = {
 
     myFilter: function (item, args) {
         var data = args[0];
-        var _this = args[2];
+        var _this = args[1];
+        if (_this.options.navLevel != "null") {
+//            if (item["sortpath"].indexOf(_this.options.navLevel) != 0) {
+            if ( item["sortpath"].indexOf(_this.options.navLevel) != 0 ) {
+                return false;
+            }
+            if ( (item["sortpath"] != _this.options.navLevel) && (item.parent == null) ) {
+                return false;
+            }
+            var navLevelChecker = _this.getItemByValue(data, _this.options.navLevel, 'sortpath')
+            if ( (item['uid'] != navLevelChecker['uid']) && (item['parent_uid'] == navLevelChecker['parent_uid'])){
+                return false;
+            }
+        }
         if (item.parent != null) {
             var parent = _this.getItemByValue(data, item.parent_uid, 'uid');
             while (parent) {
@@ -142,6 +159,57 @@ var HGrid = {
             }
         }
         return true;
+    },
+    navLevelFilter: function(itemUid) {
+        var _this = this;
+        var item = _this.getItemByValue(_this.data, itemUid, "uid");
+        _this.hGridBeforeNavFilter.notify(item);
+        var navReset = _this.options.navLevel;
+        if (item) {
+            try {
+                _this.options.navLevel = item["sortpath"];
+                if(!item["sortpath"]) throw "This item has no sort path";
+            } catch(e) {
+                console.error(e);
+                console.log("This is not a valid item");
+                _this.options.navLevel = navReset;
+            }
+        } else {
+            _this.options.navLevel = "null";
+        }
+        _this.Slick.dataView.setFilter(_this.myFilter);
+        _this.updateBreadcrumbsBox(itemUid);
+        _this.hGridAfterNavFilter.notify(item);
+    },
+    updateBreadcrumbsBox: function(itemUid) {
+        var _this = this;
+        var item = _this.getItemByValue(_this.data, itemUid, "uid");
+        var bcb = _this.options.breadcrumbBox;
+        $(bcb).addClass("hgrid-breadcrumb-box");
+        var spacer = " / ";
+        var crumbs = [];
+        var topCrumb = '<span class="hgrid-breadcrumb"><a href="#" data-hgrid-nav="">HGrid</a></span>';
+        crumbs.push(topCrumb);
+        $(bcb).empty();
+        var levels = [];
+        if (item) {
+            try {
+                levels = item["path"].slice();
+                if(!item["path"]) throw "This item has no path";
+            } catch(e) {
+                console.error(e);
+                console.log("This is not a valid item");
+                levels = [];
+            }
+        }
+        for (var i = 0; i<levels.length; i++) {
+            var crumb = '<span class="hgrid-breadcrumb"><a href="#" data-hgrid-nav="' + levels[i] + '">' + levels[i] + '</a></span>';
+            crumbs.push(crumb);
+        }
+        for (var i = 0; i<crumbs.length; i++) {
+            $(bcb).append(crumbs[i]);
+            $(bcb).append(spacer);
+        }
     },
 
     /**
@@ -188,7 +256,7 @@ var HGrid = {
         }
     },
 
-     /**
+    /**
      * Allows the user to add a new item to the grid
      * @method addItem
      *
@@ -551,6 +619,7 @@ var HGrid = {
             if (dest==null){
                 extractedRows[0]['path'] = [extractedRows[0]['uid']];
                 extractedRows[0]['parent_uid']="null";
+                extractedRows[0]['sortpath']=extractedRows[0]['path'].join('/');
             }
             else{
                 extractedRows[0]['parent_uid']=dest[dest.length-1];
@@ -716,7 +785,19 @@ var HGrid = {
                 }
             }
             else{
-                dest = null;
+                if (_this.options.navLevel == "null") {
+                    dest = null;
+                } else {
+                    dest = _this.getItemByValue(data, _this.options.navLevel, 'sortpath');
+                    console.log(dest);
+                    if (dest['parent_uid'] == "null") {
+                        dest = null
+                    } else {
+                        dest = _this.getItemByValue(data, dest['parent_uid'], 'uid')['path'];
+                        console.log(dest);
+                    }
+//                    dest = dest['path'].slice();
+                }
             }
 
             for (var i = 0; i < args.rows.length; i++) {
@@ -846,6 +927,22 @@ var HGrid = {
                 grid.getOptions().editable=true;
             }
         });
+
+        // When a Breadcrumb is clicked, the grid filters
+        $(_this.options.breadcrumbBox).on("click", ".hgrid-breadcrumb>a", function(e) {
+            var navId = $(this).attr('data-hgrid-nav');
+            _this.navLevelFilter(navId);
+            e.preventDefault();
+
+        });
+        // When an HGrid item is clicked, the grid filters
+        $(_this.options.container).on("click", ".nav-filter-item", function(e) {
+            console.log(grid.getActiveCellNode());
+            var navId = $(this).attr('data-hgrid-nav');
+            _this.navLevelFilter(navId);
+            e.preventDefault();
+        });
+
     }
 };
 

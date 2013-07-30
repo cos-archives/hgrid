@@ -859,17 +859,19 @@ var HGrid = {
         });
 
         // When a Breadcrumb is clicked, the grid filters
-        $(_this.options.breadcrumbBox).on("click", ".hgrid-breadcrumb>a", function() {
+        $(_this.options.breadcrumbBox).on("click", ".hgrid-breadcrumb>a", function(e) {
             var navId = $(this).attr('data-hgrid-nav');
             _this.navLevelFilter(navId);
+            e.preventDefault();
 
         });
         // When an HGrid item is clicked, the grid filters
-        $(_this.options.container).on("click", ".nav-filter-item", function() {
+        $(_this.options.container).on("click", ".nav-filter-item", function(e) {
             console.log(grid.getActiveCellNode());
             var itemRow = $(this).attr('data-hgrid-nav');
             var navId = _this.data[itemRow]["uid"];
             _this.navLevelFilter(navId);
+            e.preventDefault();
         });
 
     }

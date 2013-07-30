@@ -137,7 +137,15 @@ var HGrid = {
         var data = args[0];
         var _this = args[1];
         if (_this.options.navLevel != "null") {
-            if (item["sortpath"].indexOf(_this.options.navLevel) != 0) {
+//            if (item["sortpath"].indexOf(_this.options.navLevel) != 0) {
+            if ( item["sortpath"].indexOf(_this.options.navLevel) != 0 ) {
+                return false;
+            }
+            if ( (item["sortpath"] != _this.options.navLevel) && (item.parent == null) ) {
+                return false;
+            }
+            var navLevelChecker = _this.getItemByValue(data, _this.options.navLevel, 'sortpath')
+            if ( (item['uid'] != navLevelChecker['uid']) && (item['parent_uid'] == navLevelChecker['parent_uid'])){
                 return false;
             }
         }
@@ -611,6 +619,7 @@ var HGrid = {
             if (dest==null){
                 extractedRows[0]['path'] = [extractedRows[0]['uid']];
                 extractedRows[0]['parent_uid']="null";
+                extractedRows[0]['sortpath']=extractedRows[0]['path'].join('/');
             }
             else{
                 extractedRows[0]['parent_uid']=dest[dest.length-1];
@@ -776,7 +785,19 @@ var HGrid = {
                 }
             }
             else{
-                dest = null;
+                if (_this.options.navLevel == "null") {
+                    dest = null;
+                } else {
+                    dest = _this.getItemByValue(data, _this.options.navLevel, 'sortpath');
+                    console.log(dest);
+                    if (dest['parent_uid'] == "null") {
+                        dest = null
+                    } else {
+                        dest = _this.getItemByValue(data, dest['parent_uid'], 'uid')['path'];
+                        console.log(dest);
+                    }
+//                    dest = dest['path'].slice();
+                }
             }
 
             for (var i = 0; i < args.rows.length; i++) {
@@ -917,8 +938,7 @@ var HGrid = {
         // When an HGrid item is clicked, the grid filters
         $(_this.options.container).on("click", ".nav-filter-item", function(e) {
             console.log(grid.getActiveCellNode());
-            var itemRow = $(this).attr('data-hgrid-nav');
-            var navId = _this.data[itemRow]["uid"];
+            var navId = $(this).attr('data-hgrid-nav');
             _this.navLevelFilter(navId);
             e.preventDefault();
         });

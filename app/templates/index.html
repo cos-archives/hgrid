@@ -28,20 +28,20 @@
 <script src="/static/js/jquery-ui-1.8.16.custom.min.js?{{ randint }}"></script>
 <script src="/static/js/jquery.event.drag-2.2.js?{{ randint }}"></script>
 <script src="/static/js/jquery.event.drop-2.2.js?{{ randint }}"></script>
-<script src="/static/js/dropzone.js?{{ randint }}"></script>
-<script src="/static/js/file-viewer-dropzone.js?{{ randint }}"></script>
+{#<script src="/static/js/dropzone.js?{{ randint }}"></script>#}
+{#<script src="/static/js/file-viewer-dropzone.js?{{ randint }}"></script>#}
 
-<script src="/static/js/slick-grid-dependencies/slick.core.js?{{ randint }}"></script>
-<script src="/static/js/slick-grid-dependencies/slick.formatters.js?{{ randint }}"></script>
-<script src="/static/js/slick-grid-dependencies/slick.editors.js?{{ randint }}"></script>
-<script src="/static/js/slick-grid-dependencies/slick.grid.js"></script>
-<script src="/static/js/slick-grid-dependencies/slick.dataview.js"></script>
-<script src="/static/js/slick-grid-dependencies/slick.cellrangeselector.js?{{ randint }}"></script>
-<script src="/static/js/slick-grid-dependencies/slick.cellselectionmodel.js?{{ randint }}"></script>
-<script src="/static/js/slick-grid-dependencies/slick.rowselectionmodel.js?{{ randint }}"></script>
-<script src="/static/js/slick-grid-dependencies/slick.rowmovemanager.js?{{ randint }}"></script>
-{#<script src="/static/js/hgrid-dependencies.min.js"></script>#}
-<script src="/static/js/hgrid.js"></script>
+{#<script src="/static/js/slick-grid-dependencies/slick.core.js?{{ randint }}"></script>#}
+{#<script src="/static/js/slick-grid-dependencies/slick.formatters.js?{{ randint }}"></script>#}
+{#<script src="/static/js/slick-grid-dependencies/slick.editors.js?{{ randint }}"></script>#}
+{#<script src="/static/js/slick-grid-dependencies/slick.grid.js"></script>#}
+{#<script src="/static/js/slick-grid-dependencies/slick.dataview.js"></script>#}
+{#<script src="/static/js/slick-grid-dependencies/slick.cellrangeselector.js?{{ randint }}"></script>#}
+{#<script src="/static/js/slick-grid-dependencies/slick.cellselectionmodel.js?{{ randint }}"></script>#}
+{#<script src="/static/js/slick-grid-dependencies/slick.rowselectionmodel.js?{{ randint }}"></script>#}
+{#<script src="/static/js/slick-grid-dependencies/slick.rowmovemanager.js?{{ randint }}"></script>#}
+<script src="/static/js/hgrid-dependencies.js"></script>
+<script src="/static/js/hgrid.js"{{ randint }}></script>
 
 
 <script>
@@ -51,36 +51,37 @@
         var spacer = "<span style='display:inline-block;height:1px;width:" + (15 * dataContext["indent"]) + "px'></span>";
         if (dataContext['type']=='folder') {
             if (dataContext._collapsed) {
-                return spacer + " <span class='toggle expand'></span><span class='folder'></span>&nbsp;<a href='#' class='nav-filter-item' data-hgrid-nav='" + dataContext['uid'] + "'>" + value + "</a>";
+                return spacer + " <span class='toggle expand nav-filter-item' data-hgrid-nav=" + dataContext['uid'] + "></span><span class='folder'></span>&nbsp;" + value + "</a>";
             } else {
-                return spacer + " <span class='toggle collapse'></span><span class='folder'></span>&nbsp;<a href='#' class='nav-filter-item' data-hgrid-nav='" + dataContext['uid'] + "'>" + value + "</a>";
+                return spacer + " <span class='toggle collapse nav-filter-item' data-hgrid-nav=" + dataContext['uid'] + "></span><span class='folder'></span>&nbsp;" + value + "</a>";
             }
         } else {
-            return spacer + " <span class='toggle spacer'></span><span class='file'></span>&nbsp;" + value;
+            return spacer + " <span class='toggle'></span><span class='file'></span>&nbsp;" + value;
         }
     };
 
     var myGrid = HGrid.create({
         container: "#myGrid",
         info: {{ info | safe }},
-        urlAdd: "/uploader",
         columns:[
             {id: "uid", name: "uid", width: 40, field: "uid"},
             {id: "name", name: "Name", field: "name", width: 520, cssClass: "cell-title", formatter: TaskNameFormatter, editor: Slick.Editors.Text, sortable: true, defaultSortAsc: true}
         ],
-        breadcrumbBox: "#myGridBreadcrumbs"
+        breadcrumbBox: "#myGridBreadcrumbs",
+        dropZone: false,
+        enableCellNavigation: false
     });
 
-    var buckyGrid = HGrid.create({
-        container: "#buckyGrid",
-        info: {{ infoBucky | safe }},
-        urlAdd: "/sg_move",
-        columns:[
-            {id: "uid", name: "uid", width: 40, field: "uid"},
-            {id: "name", name: "Name", field: "name", width: 450, cssClass: "cell-title", formatter: TaskNameFormatter, editor: Slick.Editors.Text, sortable: true, defaultSortAsc: true}
-        ],
-        breadcrumbBox: "#buckyGridBreadcrumbs"
-    });
+{#    var buckyGrid = HGrid.create({#}
+{#        container: "#buckyGrid",#}
+{#        info: {{ infoBucky | safe }},#}
+{#        urlAdd: "/sg_move",#}
+{#        columns:[#}
+{#            {id: "uid", name: "uid", width: 40, field: "uid"},#}
+{#            {id: "name", name: "Name", field: "name", width: 450, cssClass: "cell-title", formatter: TaskNameFormatter, editor: Slick.Editors.Text, sortable: true, defaultSortAsc: true}#}
+{#        ],#}
+{#        breadcrumbBox: "#buckyGridBreadcrumbs"#}
+{#    });#}
 
 
 
@@ -88,8 +89,8 @@
         var insertBefore = myGrid.getItemByValue(myGrid.data, args.insertBefore, 'id')['parent_uid'];
         var new_parent = myGrid.getItemByValue(myGrid.data, insertBefore, 'uid')['name'];
 
-        console.log("Moving " + myGrid.getItemByValue(myGrid.data, args.rows[0], 'uid')['name'] + " to " + new_parent);
-        return true;
+            console.log("Moving " + myGrid.getItemByValue(myGrid.data, args.rows[0], 'uid')['name'] + " to " + new_parent);
+            return true;
 
     });
 

@@ -21,7 +21,7 @@ var HGrid = {
         enableColumnReorder: true,
         sortAsc: true,
         dragDrop: true,
-        dropZone: true
+        dropZone: true,
         navLevel: "null",
         breadcrumbBox: null
     },
@@ -162,6 +162,7 @@ var HGrid = {
                 }
                 parent = _this.getItemByValue(data, parent.parent_uid, 'uid');
             }
+            return true;
         } else {
             return true;
         }
@@ -171,7 +172,7 @@ var HGrid = {
         var item = _this.getItemByValue(_this.data, itemUid, "uid");
         _this.hGridBeforeNavFilter.notify(item);
         var navReset = _this.options.navLevel;
-        if (item) {
+        if (item && itemUid!=="") {
             try {
                 _this.options.navLevel = item["sortpath"];
                 if(!item["sortpath"]) throw "This item has no sort path";
@@ -198,7 +199,7 @@ var HGrid = {
         crumbs.push(topCrumb);
         $(bcb).empty();
         var levels = [];
-        if (item) {
+        if (item && itemUid!=="") {
             try {
                 levels = item["path"].slice();
                 if(!item["path"]) throw "This item has no path";
@@ -999,11 +1000,19 @@ var HGrid = {
             _this.onSort(e, args, grid, dataView, data);
         });
 
-        //When a cell is double clicked, make it editable (unless it's uploads)
+//        //When a cell is double clicked, make it editable (unless it's uploads)
+//        grid.onDblClick.subscribe(function (e, args) {
+//            if(data[grid.getActiveCell().row]['uid']!="uploads" && grid.getActiveCell().cell==grid.getColumnIndex('name')){
+//                grid.getOptions().editable=true;
+//            }
+//        });
+
         grid.onDblClick.subscribe(function (e, args) {
-            if(data[grid.getActiveCell().row]['uid']!="uploads" && grid.getActiveCell().cell==grid.getColumnIndex('name')){
-                grid.getOptions().editable=true;
+            var navId = $(e.target).find('span.nav-filter-item').attr('data-hgrid-nav');
+            if(navId){
+                _this.navLevelFilter(navId);
             }
+            e.preventDefault();
         });
 
         // When a Breadcrumb is clicked, the grid filters
@@ -1013,9 +1022,9 @@ var HGrid = {
             e.preventDefault();
 
         });
+
         // When an HGrid item is clicked, the grid filters
         $(_this.options.container).on("click", ".nav-filter-item", function(e) {
-            console.log(grid.getActiveCellNode());
             var navId = $(this).attr('data-hgrid-nav');
             _this.navLevelFilter(navId);
             e.preventDefault();

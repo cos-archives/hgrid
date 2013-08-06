@@ -22,8 +22,10 @@ var HGrid = {
         sortAsc: true,
         dragDrop: true,
         dropZone: true,
+        dropZonePreviewsContainer: null,
         navLevel: "null",
-        breadcrumbBox: null
+        breadcrumbBox: null,
+        largeGuide: true
     },
 
     Slick: {
@@ -73,7 +75,8 @@ var HGrid = {
             hGridBeforeNavFilter: new self.Slick.Event(),
             hGridAfterNavFilter: new self.Slick.Event(),
             hGridBeforeUpload: new self.Slick.Event(),
-            hGridAfterUpload: new self.Slick.Event()
+            hGridAfterUpload: new self.Slick.Event(),
+            hGridOnUpload: new self.Slick.Event()
         });
         return self;
     },
@@ -107,7 +110,7 @@ var HGrid = {
         this.Slick.grid.render();
 
         this.setupListeners();
-        this.updateBreadcrumbsBox();
+        this.updateBreadcrumbsBox(this.data[0]['uid']);
         if(this.options.dropZone){
             this.dropZoneInit(this);
         }
@@ -192,11 +195,9 @@ var HGrid = {
         var _this = this;
         var item = _this.getItemByValue(_this.data, itemUid, "uid");
         var bcb = _this.options.breadcrumbBox;
-        $(bcb).addClass("hgrid-breadcrumb-box");
+        $(bcb).addClass("breadcrumb");
         var spacer = " / ";
         var crumbs = [];
-        var topCrumb = '<span class="hgrid-breadcrumb"><a href="#" data-hgrid-nav="">HGrid</a></span>';
-        crumbs.push(topCrumb);
         $(bcb).empty();
         var levels = [];
         if (item && itemUid!=="") {
@@ -210,7 +211,7 @@ var HGrid = {
             }
         }
         for (var i = 0; i<levels.length; i++) {
-            var crumb = '<span class="hgrid-breadcrumb"><a href="#" data-hgrid-nav="' + levels[i] + '">' + levels[i] + '</a></span>';
+            var crumb = '<span class="hgrid-breadcrumb"><a href="#" data-hgrid-nav="' + levels[i] + '">' + _this.getItemByValue(_this.data, levels[i], 'uid')['name'] + '</a></span>';
             crumbs.push(crumb);
         }
         for (var i = 0; i<crumbs.length; i++) {
@@ -235,13 +236,12 @@ var HGrid = {
         }
         var myDropzone = new Dropzone(hGrid.options.container, {
             url: url,
-//    url: hGrid.options['urlAdd']
-            previewsContainer: "#drop-preview-panel",
+            clickable: "#clickable",
+            previewsContainer: hGrid.options.dropZonePreviewsContainer,
             addRemoveLinks: true
         } );
 // Get the SlickGrid Row under the dragged file
         myDropzone.on("dragover", function(e){
-
             currentDropCell = hGrid.Slick.grid.getCellFromEvent(e);
             if(currentDropCell===null){
                 dropHighlight = null;
@@ -250,16 +250,15 @@ var HGrid = {
             else{
                 currentDropCell.insertBefore = currentDropCell['row'];
 
-                if(hGrid.data[currentDropCell['row']-1] && hGrid.data[currentDropCell['row']-1]['type']=='folder'){
-                    dropDestination = hGrid.data[currentDropCell['row']-1]['uid'];
+                if(hGrid.Slick.dataView.getItem(currentDropCell['row'])['type']=='folder'){
+                    dropHighlight = hGrid.Slick.dataView.getItem(currentDropCell['row']);
+                    dropDestination = dropHighlight['uid'];
                 }
                 else{
-                    dropDestination = hGrid.data[currentDropCell['row']]['parent_uid'];
+                    var childDropHighlight = hGrid.Slick.dataView.getItem(currentDropCell['row']);
+                    dropHighlight = hGrid.getItemByValue(hGrid.data, childDropHighlight['parent_uid'], 'uid');
+                    dropDestination = dropHighlight['uid'];
                 }
-                dropHighlight = null;
-                if (hGrid.data[currentDropCell['row']-1]){
-                    dropHighlight = hGrid.data[currentDropCell['row']-1];
-                };
             }
             if(bool){
                 myDropzone.options.url = hGrid.options['urlAdd'][dropDestination];
@@ -267,26 +266,58 @@ var HGrid = {
             hGrid.draggerGuide(dropHighlight);
         });
 
+        myDropzone.on("addedfile", function(file){
+            $('.bar').css('width', "0%");
+            var parent;
+            if (dropDestination===null){
+                parent = hGrid.getItemByValue(hGrid.data, dropDestination, 'parent');
+            }
+            else{
+                parent = hGrid.getItemByValue(hGrid.data, dropDestination, 'uid');
+            }
+            var value = {item: file, parent: parent};
+            var event_status = hGrid.hGridBeforeUpload.notify(value);
+            if(event_status===false){
+                myDropzone.removeFile(file);
+                value['success'] = false;
+                hGrid.hGridAfterUpload.notify(value);
+            }
+        });
+
         myDropzone.on("dragleave", function(e){
             hGrid.removeDraggerGuide();
         });
 // Pass the destination folder to the server
         myDropzone.on("sending", function(file, xhr, formData){
+            $('#totalProgressActive').addClass('active progress-striped progress');
             formData.append("destination", dropDestination);
         });
+
+        myDropzone.on("uploadprogress", function(file, progress, bytesSent){
+            var ins = "#" + file.name.replace(/[\s\.#\'\"]/g, '');
+            $(ins).css('width', progress + "%");
+        });
+
+        myDropzone.on("totaluploadprogress", function(progress, totalBytes, totalBytesSent){
+            $('#totalProgress').css('width', progress + "%");
+            if (progress==100){
+                setTimeout(function(){
+                    $('#totalProgressActive').removeClass('active progress-striped progress');
+                },(1*1000));
+            }
+        })
 // Hook the drop success to the grid view update
         myDropzone.on("success", function(file) {
-            hGrid.removeDraggerGuide();
-            // Assign values to the uploads folder, so we can insert the file in the correct spot in the view
-            var uploadsFolder = {};
-            // Check if the server says that the file exists already
-            if (file.xhr.response == "Repeat") {
-                console.log("The File already exists!");
-                // It is a new file
-            } else{
-                // Collect the JSON Response from the uploader
-                var newSlickInfo = JSON.parse(file.xhr.response);
-                hGrid.uploadItem(newSlickInfo[0]);
+            var value;
+            var event_status = hGrid.hGridOnUpload.notify(file);
+            if (event_status || typeof(event_status)==undefined){
+                value = {item: JSON.parse(file.xhr.response)[0], success: true};
+                value['item']['name'] = file.name;
+                hGrid.hGridAfterUpload.notify(value);
+            }
+            else{
+                value = {item: file, success: false};
+                hGrid.hGridAfterUpload.notify(value);
             }
         });
     },
@@ -312,7 +343,7 @@ var HGrid = {
         var value = {'item': item, 'parent':parent};
         var event_status = _this.hGridBeforeAdd.notify(value);
         if(event_status || typeof(event_status)==='undefined'){
-            if(item['parent_uid']!="null"){
+            if(item['parent_uid']!="null" && !item['uploadBar']){
                 var parent_path = parent['path'];
                 item['path']=[];
                 item['path'].concat(parent_path, item['uid']);
@@ -337,7 +368,7 @@ var HGrid = {
 
     /**
      * Allows the user to add a new item to the grid
-     * @method addItem
+     * @method uploadItem
      *
      * @param {Object} item New item to be added
      *  @param item.parent_uid Parent unique ID
@@ -353,30 +384,26 @@ var HGrid = {
 //            return;
 //        }
         var parent= _this.getItemByValue(_this.data, item['parent_uid'], 'uid');
-        var value = {'item': item, 'parent':parent};
-        var event_status = _this.hGridBeforeUpload.notify(value);
-        if(event_status || typeof(event_status)==='undefined'){
-            if(item['parent_uid']!="null"){
-                var parent_path = parent['path'];
-                item['path']=[];
-                item['path'].concat(parent_path, item['uid']);
-                item['sortpath']=item['path'].join('/');
-            }
-            _this.data.splice(parent['id']+1, 0,item);
-            _this.prepJava(_this.data);
-            _this.Slick.dataView.setItems(_this.data);
-            _this.Slick.grid.invalidate();
-            _this.Slick.grid.setSelectedRows([]);
-            _this.Slick.grid.render();
-            value['success'] = true;
-            _this.hGridAfterUpload.notify(value);
-            return true;
+        if(item['parent_uid']!="null"){
+            var parent_path = parent['path'].slice();
+            parent_path.push(item['uid']);
+            item['path'] = parent_path;
+//                item['path'].concat(parent_path, item['uid']);
+            item['sortpath']=item['path'].join('/');
         }
-        else{
-            value['success'] = false;
-            _this.hGridAfterAdd.notify(value);
-            return false;
-        }
+        _this.data.splice(parent['id']+1, 0,item);
+        _this.prepJava(_this.data);
+        _this.Slick.dataView.setItems(_this.data);
+        _this.Slick.grid.invalidate();
+        _this.Slick.grid.setSelectedRows([]);
+        _this.Slick.grid.render();
+        return true;
+
+//        else{
+//            value['success'] = false;
+//            _this.hGridAfterAdd.notify(value);
+//            return false;
+//        }
     },
 
     /**
@@ -438,13 +465,14 @@ var HGrid = {
         //Splice data and delete all children if folder is dropped
         var value = {'items': []};
         for (var j=0; j<rowsToDelete.length; j++){
-            value['items'].push(_this.getItemByValue(_this.data, rowsToDelete[i], 'uid'));
+            value['items'].push(_this.getItemByValue(_this.data, rowsToDelete[j], 'uid'));
         }
         var event_status = _this.hGridBeforeDelete.notify(value);
         if(event_status || typeof(event_status)==='undefined'){
             for(var i=0; i<rowsToDelete.length; i++){
                 var rows=[];
-                var check = _this.Slick.dataView.getRowById(_this.getItemByValue(_this.data, rowsToDelete[i], 'uid')['id']);
+//                var check = _this.Slick.dataView.getRowById(_this.getItemByValue(_this.data, rowsToDelete[i], 'uid')['id']);
+                var check = _this.getItemByValue(_this.data, rowsToDelete[i], 'uid')['id'];
                 var j = check;
                 do{
                     rows.push(j);
@@ -749,7 +777,9 @@ var HGrid = {
         var dragParent=false;
         // If a target row exists
         if(inserter==null){
-            $(_this.options.container).find(".slick-viewport").addClass("dragger-guide1");
+            if(_this.options.largeGuide){
+                $(_this.options.container).find(".slick-viewport").addClass("dragger-guide1");
+            }
         }
         else{
             if (inserter['uid']!="uploads"){
@@ -1022,7 +1052,6 @@ var HGrid = {
             e.preventDefault();
 
         });
-
         // When an HGrid item is clicked, the grid filters
         $(_this.options.container).on("click", ".nav-filter-item", function(e) {
             var navId = $(this).attr('data-hgrid-nav');

@@ -75,7 +75,8 @@ var HGrid = {
             hGridBeforeNavFilter: new self.Slick.Event(),
             hGridAfterNavFilter: new self.Slick.Event(),
             hGridBeforeUpload: new self.Slick.Event(),
-            hGridAfterUpload: new self.Slick.Event()
+            hGridAfterUpload: new self.Slick.Event(),
+            hGridOnUpload: new self.Slick.Event()
         });
         return self;
     },
@@ -301,24 +302,21 @@ var HGrid = {
             $('#totalProgress').css('width', progress + "%");
             if (progress==100){
                 setTimeout(function(){
-                $('#totalProgressActive').removeClass('active progress-striped progress');
-                    },(1*1000));
+                    $('#totalProgressActive').removeClass('active progress-striped progress');
+                },(1*1000));
             }
         })
 // Hook the drop success to the grid view update
         myDropzone.on("success", function(file) {
-            // Assign values to the uploads folder, so we can insert the file in the correct spot in the view
-            var uploadsFolder = {};
-            // Check if the server says that the file exists already
-            if (file.xhr.response == "Repeat") {
-                console.log("The File already exists!");
-                // It is a new file
-            } else{
-                // Collect the JSON Response from the uploader
-                var newSlickInfo = JSON.parse(file.xhr.response);
-                hGrid.uploadItem(newSlickInfo[0]);
-                var value = {item: newSlickInfo[0], success: true};
+            var value;
+            var event_status = hGrid.hGridOnUpload.notify(file);
+            if (event_status || typeof(event_status)==undefined){
+                value = {item: JSON.parse(file.xhr.response)[0], success: true};
                 value['item']['name'] = file.name;
+                hGrid.hGridAfterUpload.notify(value);
+            }
+            else{
+                value = {item: file, success: false};
                 hGrid.hGridAfterUpload.notify(value);
             }
         });
@@ -386,20 +384,20 @@ var HGrid = {
 //            return;
 //        }
         var parent= _this.getItemByValue(_this.data, item['parent_uid'], 'uid');
-            if(item['parent_uid']!="null"){
-                var parent_path = parent['path'].slice();
-                parent_path.push(item['uid']);
-                item['path'] = parent_path;
+        if(item['parent_uid']!="null"){
+            var parent_path = parent['path'].slice();
+            parent_path.push(item['uid']);
+            item['path'] = parent_path;
 //                item['path'].concat(parent_path, item['uid']);
-                item['sortpath']=item['path'].join('/');
-            }
-            _this.data.splice(parent['id']+1, 0,item);
-            _this.prepJava(_this.data);
-            _this.Slick.dataView.setItems(_this.data);
-            _this.Slick.grid.invalidate();
-            _this.Slick.grid.setSelectedRows([]);
-            _this.Slick.grid.render();
-            return true;
+            item['sortpath']=item['path'].join('/');
+        }
+        _this.data.splice(parent['id']+1, 0,item);
+        _this.prepJava(_this.data);
+        _this.Slick.dataView.setItems(_this.data);
+        _this.Slick.grid.invalidate();
+        _this.Slick.grid.setSelectedRows([]);
+        _this.Slick.grid.render();
+        return true;
 
 //        else{
 //            value['success'] = false;

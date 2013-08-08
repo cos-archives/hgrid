@@ -223,7 +223,7 @@ var HGrid = {
     dropZoneInit: function (hGrid){// Turn off the discover option so the URL error is not thrown with custom configuration
         var Dropzone = window.Dropzone;
         Dropzone.autoDiscover = false;
-        var dropDestination;
+        var dropDestination=null;
         var url;
         var bool = false;
 // Instantiate this Dropzone

@@ -4,9 +4,11 @@ from app import app
 import os
 import json
 import random
-from flask import render_template, request
+from flask import Flask, render_template, request, jsonify
 from shutil import move, Error, rmtree
 from werkzeug.utils import secure_filename
+
+app=Flask(__name__)
 
 info = []
 # Sets the base file directories for the fileviewer
@@ -139,6 +141,12 @@ def index():
 # def routing():
 #
 
+@app.route('/json')
+def show_json():
+    del info[:]
+    walker_router()
+    return jsonify({"info": info})
+
 # The script to upload files from Dropzone.js
 @app.route('/uploader', methods=['GET', 'POST'])
 def uploader():
@@ -259,3 +267,6 @@ def sg_edit():
     except Error:
         return "fail"
     return new_path
+
+if __name__ == '__main__':
+    app.run(debug=True)

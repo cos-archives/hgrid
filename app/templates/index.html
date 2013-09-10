@@ -23,7 +23,6 @@
 
 
 
-<script src="/static/js/firebugx.js?{{ randint }}"></script>
 <script src="/static/js/jquery-1.7.min.js?{{ randint }}"></script>
 <script src="/static/js/jquery-ui-1.8.16.custom.min.js?{{ randint }}"></script>
 <script src="/static/js/jquery.event.drag-2.2.js?{{ randint }}"></script>
@@ -64,11 +63,12 @@
         container: "#myGrid",
         info: {{ info | safe }},
         columns:[
-            {id: "uid", name: "uid", width: 40, field: "uid"},
-            {id: "name", name: "Name", field: "name", width: 520, cssClass: "cell-title", formatter: TaskNameFormatter, editor: Slick.Editors.Text, sortable: true, defaultSortAsc: true}
+{#            {id: "uid", name: "uid", width: 40, field: "uid"},#}
+            {id: "name", name: "Name", field: "name", width: 520, cssClass: "cell-title", primary: true, sortable: true}
         ],
+        urlAdd: "/",
         breadcrumbBox: "#myGridBreadcrumbs",
-        dropZone: false,
+        dropZone: true,
         enableCellNavigation: false
     });
 
@@ -83,25 +83,66 @@
 {#        breadcrumbBox: "#buckyGridBreadcrumbs"#}
 {#    });#}
 
+    myGrid.updateBreadcrumbsBox();
 
-
-    myGrid.hGridBeforeMove.subscribe(function(e, args){
-        var insertBefore = myGrid.getItemByValue(myGrid.data, args.insertBefore, 'id')['parent_uid'];
-        var new_parent = myGrid.getItemByValue(myGrid.data, insertBefore, 'uid')['name'];
-
-            console.log("Moving " + myGrid.getItemByValue(myGrid.data, args.rows[0], 'uid')['name'] + " to " + new_parent);
-            return true;
-
+{#    myGrid.hGridBeforeMove.subscribe(function(e, args){#}
+{#        var insertBefore = myGrid.getItemByValue(myGrid.data, args.insertBefore, 'id')['parent_uid'];#}
+{#        var new_parent = myGrid.getItemByValue(myGrid.data, insertBefore, 'uid')['name'];#}
+{##}
+{#            console.log("Moving " + myGrid.getItemByValue(myGrid.data, args.rows[0], 'uid')['name'] + " to " + new_parent);#}
+{#            return true;#}
+{##}
+{#    });#}
+{##}
+{#    myGrid.hGridAfterMove.subscribe(function(e, args){#}
+{#        if(args.success){#}
+{#            console.log("Done moving");#}
+{#        }#}
+{#        else{#}
+{#            console.log("Try again");#}
+{#        }#}
+{#    });#}
+    
+    myGrid.hGridBeforeMove.subscribe(function (e, args) {
+        console.log(args);
+        return true;
+    });
+    myGrid.hGridAfterMove.subscribe(function (e, args) {
+        console.log(args);
+        return true;
+    });
+    myGrid.hGridBeforeEdit.subscribe(function (e, args) {
+        console.log(args); return true; });
+    myGrid.hGridAfterEdit.subscribe(function (e, args) {
+        console.log(args);
+        return true;
+    });
+    myGrid.hGridBeforeDelete.subscribe(function (e, args) {
+        console.log(args);
+        return true;
+    });
+    myGrid.hGridAfterDelete.subscribe(function (e, args) {
+        console.log(args);
+        return true;
+    });
+    myGrid.hGridBeforeAdd.subscribe(function (e, args) {
+        console.log(args);
+        return true;
+    });
+    myGrid.hGridAfterAdd.subscribe(function (e, args) {
+        console.log(args);
+        return true;
     });
 
-    myGrid.hGridAfterMove.subscribe(function(e, args){
-        if(args.success){
-            console.log("Done moving");
-        }
-        else{
-            console.log("Try again");
-        }
-    });
+    myGrid.hGridBeforeUpload.subscribe(function (e, args) {
+        console.log(args);
+        return true; });
+    myGrid.hGridAfterUpload.subscribe(function (e, args) {
+        console.log(args);
+        return true; });
+    myGrid.hGridOnUpload.subscribe(function (e, args) {
+        console.log(args);
+        return true; });
 
     {#    data = myGrid.data;#}
     {#    console.log(data);#}

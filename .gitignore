@@ -5,3 +5,5 @@ venv/*
 tree/*
 tree1/*
 out/*
+node_modules/*
+*~

@@ -2,11 +2,16 @@ module.exports = function(grunt) {
 grunt.initConfig({
 	uglify: {
 	    options: {
-		mangle: false
+		mangle: true
 	    },
 	    my_target: {
 		files: {
-		    'app/static/js/hgrid.min.js': ['app/static/js/dropzone.js', 'app/static/js/file-viewer-dropzone.js', 'app/static/js/slick-grid-dependencies/slick.core.js','app/static/js/slick-grid-dependencies/slick.formatters.js','app/static/js/slick-grid-dependencies/slick.editors.js','app/static/js/slick-grid-dependencies/slick.grid.js','app/static/js/slick-grid-dependencies/slick.dataview.js','app/static/js/slick-grid-dependencies/slick.cellrangeselector.js','app/static/js/slick-grid-dependencies/slick.cellselectionmodel.js','app/static/js/slick-grid-dependencies/slick.rowselectionmodel.js','app/static/js/slick-grid-dependencies/slick.rowmovemanager.js', 'app/static/js/hgrid.js']
+		    'build/slickgrid.custom.min.js': [
+                'vendor/hgrid_dependencies/slick.core.js',
+                'vendor/hgrid_dependencies/slick.grid.js',
+                'vendor/hgrid_dependencies/slick.dataview.js',
+                'vendor/hgrid_dependencies/slick.rowselectionmodel.js',
+                'vendor/hgrid_dependencies/slick.rowmovemanager.js']
 			}
 	    }
 	   }

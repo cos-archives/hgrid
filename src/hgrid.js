@@ -188,7 +188,7 @@ var HGrid = {
 
         var _this = this;
         $.each(this.options.columns, function(idx, elm) {
-            if (elm['primary']==true && !elm.formatter){
+            if (elm['primary']==true){
                 elm.formatter = _this.defaultTaskNameFormatter;
             }
         });
@@ -336,7 +336,7 @@ var HGrid = {
             }
         }
         if (_this.options.topCrumb){
-            var topCrumb = '<span class="hgrid-breadcrumb"><a href="#" data-hgrid-nav="">' + "HGrid" + '</a></span>';
+            var topCrumb = '<span class="hgrid-breadcrumb"><a href="#" data-hgrid-nav="null">' + "HGrid" + '</a></span>';
             crumbs.push(topCrumb);
         }
         for (var i = 0; i<levels.length; i++) {

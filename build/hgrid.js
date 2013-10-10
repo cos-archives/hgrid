@@ -7,16 +7,41 @@
  */
 var HGrid = {
     //Gives each div a class based on type (folder or file)
+    /**
+    Default options for HGrid
+
+    @property defaultOptions
+    @type {Object}
+    @param defaultOptions.container null
+    @param defaultOptions.url null
+    @param defaultOptions.info null
+    @param defaultOptions.columns Uid and Name columns
+    @param defaultOptions.editable false
+    @param defaultOptions.enableCellNavigation false
+    @param defaultOptions.asyncEditorLoading false
+    @param defaultOptions.enableColumnReorder true
+    @param defaultOptions.sortAsc true
+    @param defaultOptions.dragDrop true
+    @param defaultOptions.dropZone true
+    @param defaultOptions.dropZonePreviewsContainer null
+    @param defaultOptions.navLevel null
+    @param defaultOptions.breadcrumbBox null
+    @param defaultOptions.largeGuide true
+    @param defaultOptions.clickUploadElement true
+    @param defaultOptions.topCrumb true
+    @param defaultOptions.forceFitColumns true
+    @param defaultOptions.autoHeight true
+    **/
     defaultOptions: {
         container: null,
         url: null,
         info: null,
         columns: [
             {id: "uid", name: "uid", width: 40, field: "uid"},
-            {id: "name", name: "Name", field: "name", width: 450, cssClass: "cell-title", editor: Slick.Editors.Text, sortable: true, defaultSortAsc: true}
+            {id: "name", name: "Name", field: "name", width: 450, cssClass: "cell-title", sortable: true, defaultSortAsc: true}
         ],
         editable: false,
-        enableCellNavigation: true,
+        enableCellNavigation: false,
         asyncEditorLoading: false,
         enableColumnReorder: true,
         sortAsc: true,
@@ -27,17 +52,45 @@ var HGrid = {
         breadcrumbBox: null,
         largeGuide: true,
         clickUploadElement: true,
-        topCrumb: true
+        topCrumb: true,
+        forceFitColumns: true,
+        autoHeight: true,
     },
 
     Slick: {
     },
 
+    /**
+    Data for the HGrid
+
+    @property data
+    @type Array
+    @default null
+    **/
     data: null,
+    /**
+    Currently rendered rows
 
+    @property currentlyRendered
+    @type Array
+    @default []
+    **/
     currentlyRendered: [],
-    currentIndentShift: 0,
+    /**
+    Current indent shift
 
+    @property currentIndentShift
+    @type int
+    @default 0
+    **/
+    currentIndentShift: 0,
+    /**
+    Dropzone Object
+
+    @property dropZoneObj
+    @type {Object}
+    @default null
+    **/
     dropZoneObj: null,
 
     /**
@@ -74,91 +127,109 @@ var HGrid = {
              Fired before a move occurs
 
              @event hGridBeforeMove
+             @param {Object} e Event object
              @param {Object} args
+                @param args.rows Array of unique IDs of rows moving
+                @param args.insertBefore Row ID of destination row to insert before
              **/
             hGridBeforeMove: new self.Slick.Event(),
             /**
              Fired after a move occurs
 
              @event hGridAfterMove
-             @param {String} msg A description of...
+             @param {Object} e Event object
+             @param {Object} args
+                @param args.rows Array of unique IDs of rows moving
+                @param args.insertBefore Row ID of destination row to insert before
              **/
             hGridAfterMove: new self.Slick.Event(),
             /**
              Fired before an edit occurs
 
              @event hGridBeforeEdit
-             @param {String} msg A description of...
+             @param {Object} e Event object
+             @param {Object} args
+                @param args.item Item being changed
+                @param args.name New name
              **/
             hGridBeforeEdit: new self.Slick.Event(),
             /**
              Fired after an edit occurs
 
              @event hGridAfterEdit
-             @param {String} msg A description of...
+             @param {Object} e Event object
+             @param {Object} args
+                @param args.item Item being changed
+                @param args.name New name
+                @param args.success Boolean, whether or not the edit succeeded
              **/
             hGridAfterEdit: new self.Slick.Event(),
             /**
              Fired before a delete occurs
 
              @event hGridBeforeDelete
-             @param {String} msg A description of...
+             @param {Object} e Event object
+             @param {Object} args
+                @param args.items Array of unique IDs to be deleted
              **/
             hGridBeforeDelete: new self.Slick.Event(),
             /**
              Fired after a delete occurs
 
              @event hGridAfterDelete
-             @param {String} msg A description of...
+             @param {Object} e Event object
+             @param {Object} args
+                @param args.items Array of unique IDs to be deleted
+                @param args.success Boolean, whether or not the delete succeeded
              **/
             hGridAfterDelete: new self.Slick.Event(),
             /**
              Fired before an add occurs
 
              @event hGridBeforeAdd
-             @param {String} msg A description of...
+             @param {Object} e Event object
+             @param {Object} args
+                @param args.item Item to be added
+                @param args.parent Parent item for new item
              **/
             hGridBeforeAdd: new self.Slick.Event(),
             /**
              Fired after an add occurs
 
              @event hGridAfterAdd
-             @param {String} msg A description of...
+             @param {Object} e Event object
+             @param {Object} args
+                @param args.item Item to be added
+                @param args.parent Parent item for new item
+                @param args.success Boolean, whether or not the add succeeded
              **/
             hGridAfterAdd: new self.Slick.Event(),
-            /**
-             Fired before nav filter is called
-
-             @event hGridBeforeNavFilter
-             @param {String} msg A description of...
-             **/
-            hGridBeforeNavFilter: new self.Slick.Event(),
-            /**
-             Fired after nav filter is called
-
-             @event hGridAfterNavFilter
-             @param {String} msg A description of...
-             **/
-            hGridAfterNavFilter: new self.Slick.Event(),
             /**
              Fired before an upload occurs
 
              @event hGridBeforeUpload
-             @param {String} msg A description of...
+             @param {Object} e Event object
+             @param {Object} args
+                @param args.item File object being added
+                @param args.parent Parent item for new file
              **/
             hGridBeforeUpload: new self.Slick.Event(),
             /**
              Fired after an upload occurs
 
              @event hGridAfterUpload
-             @param {String} msg A description of...
+             @param {Object} e Event object
+             @param {Object} args
+                @param args.item File object being added
+                @param args.success Boolean, whether or not the upload succeeded
              **/
             hGridAfterUpload: new self.Slick.Event(),
             /**
              Fired on success response from server on upload
 
              @event hGridOnUpload
-             @param {String} msg A description of...
+             @param {Object} e Event object
+             @param {Object} args File object response
              **/
             hGridOnUpload: new self.Slick.Event()
         });
@@ -206,7 +277,9 @@ var HGrid = {
             this.dropZoneInit(this);
         }
         else{
-            Dropzone.autoDiscover = false;
+            if(typeof Dropzone !== 'undefined'){
+                Dropzone.autoDiscover = false;
+            }
         }
     },
 
@@ -235,7 +308,6 @@ var HGrid = {
     myFilter: function (item, args) {
         var data = args[0];
         var _this = args[1];
-        var indent = args[2];
         if (_this.options.navLevel != "null") {
 //            if (item["sortpath"].indexOf(_this.options.navLevel) != 0) {
             if ( item["sortpath"].indexOf(_this.options.navLevel) != 0 ) {
@@ -258,9 +330,11 @@ var HGrid = {
                 parent = _this.getItemByValue(data, parent.parent_uid, 'uid');
             }
 
+            item['indent'] = item['absoluteIndent'] - _this.currentIndentShift;
             _this.currentlyRendered.push(item);
             return true;
         } else {
+            item['indent'] = item['absoluteIndent'] - _this.currentIndentShift;
             _this.currentlyRendered.push(item);
             return true;
         }
@@ -277,9 +351,9 @@ var HGrid = {
         var _this = this;
         var item = _this.getItemByValue(_this.data, itemUid, "uid");
         var navReset = _this.options.navLevel;
-        var nextIndentShift = item['indent'];
-        var bool = false;
+        _this.currentlyRendered = [];
         if (item && itemUid!=="") {
+            _this.currentIndentShift = item['absoluteIndent'];
             try {
                 if(!item["sortpath"]) throw "This item has no sort path";
                 _this.options.navLevel = item["sortpath"];
@@ -292,20 +366,13 @@ var HGrid = {
             _this.options.navLevel = "null";
             _this.Slick.grid.invalidate();
             _this.updateBreadcrumbsBox(itemUid);
-            _this.Slick.dataView.setFilterArgs([_this.data, this, _this.currentIndentShift])
+            _this.Slick.dataView.setFilterArgs([_this.data, this])
             _this.Slick.dataView.setFilter(_this.myFilter);
             return;
         }
-        for(var i=0; i<_this.currentlyRendered.length; i++){
-            _this.currentlyRendered[i]['indent']+=_this.currentIndentShift;
-        }
-        _this.currentlyRendered = [];
-        _this.Slick.dataView.setFilterArgs([_this.data, this, _this.currentIndentShift])
+
+        _this.Slick.dataView.setFilterArgs([_this.data, this])
         _this.Slick.dataView.setFilter(_this.myFilter);
-        for(var i=0; i<_this.currentlyRendered.length; i++){
-            _this.currentlyRendered[i]['indent']-=nextIndentShift;
-        }
-        _this.currentIndentShift=nextIndentShift;
         _this.Slick.grid.invalidate();
         _this.updateBreadcrumbsBox(itemUid);
     },
@@ -325,7 +392,7 @@ var HGrid = {
         var crumbs = [];
         $(bcb).empty();
         var levels = [];
-        if (item && itemUid!=="") {
+        if (item && itemUid!=="" && itemUid!==false) {
             try {
                 levels = item["path"].slice();
                 if(!item["path"]) throw "This item has no path";
@@ -459,6 +526,24 @@ var HGrid = {
     },
 
     /**
+     * Allows the user to add a new column to the grid
+     * @method addColumn
+     *
+     * @param {Object} column New column to be added
+     *  @param item.id ID of column
+     *  @param item.name Name of column
+     *  @param item.field Field of items to be put in the columns
+     * @return {Boolean} True if setting columns works
+     */
+    addColumn: function(column) {
+        var _this = this;
+        var old_columns = _this.Slick.grid.getColumns();
+        old_columns.push(column);
+        _this.Slick.grid.setColumns(old_columns);
+        return true;
+    },
+
+    /**
      * Allows the user to add a new item to the grid
      * @method addItem
      *
@@ -477,6 +562,7 @@ var HGrid = {
 //        }
         var parent= _this.getItemByValue(_this.data, item['parent_uid'], 'uid');
         var value = {'item': item, 'parent':parent};
+        var valueAfter = {'item': item, 'parent':parent};
         var event_status = _this.hGridBeforeAdd.notify(value);
         if(event_status || typeof(event_status)==='undefined'){
             if(item['parent_uid']!="null" && !item['uploadBar']){
@@ -490,12 +576,12 @@ var HGrid = {
             _this.Slick.dataView.setItems(_this.data);
             _this.Slick.grid.setSelectedRows([]);
             _this.currentlyRendered=[];
-            value['success'] = true;
+            valueAfter['success'] = true;
             _this.hGridAfterAdd.notify(value);
             return true;
         }
         else{
-            value['success'] = false;
+            valueAfter['success'] = false;
             _this.updateNav();
             _this.hGridAfterAdd.notify(value);
             return false;
@@ -601,16 +687,16 @@ var HGrid = {
      */
     deleteItems: function(rowsToDelete) {
         var _this = this;
-        //Splice data and delete all children if folder is dropped
         var value = {'items': []};
+        var valueAfter = {'items':[]};
         for (var j=0; j<rowsToDelete.length; j++){
             value['items'].push(_this.getItemByValue(_this.data, rowsToDelete[j], 'uid'));
+            valueAfter['items'].push(_this.getItemByValue(_this.data, rowsToDelete[j], 'uid'));
         }
         var event_status = _this.hGridBeforeDelete.notify(value);
         if(event_status || typeof(event_status)==='undefined'){
             for(var i=0; i<rowsToDelete.length; i++){
                 var rows=[];
-//                var check = _this.Slick.dataView.getRowById(_this.getItemByValue(_this.data, rowsToDelete[i], 'uid')['id']);
                 var check = _this.getItemByValue(_this.data, rowsToDelete[i], 'uid')['id'];
                 var j = check;
                 do{
@@ -627,15 +713,15 @@ var HGrid = {
             _this.Slick.grid.setSelectedRows([]);
             _this.currentlyRendered=[];
             _this.Slick.grid.render();
-            value['success']=true;
+            valueAfter['success']=true;
             _this.updateNav();
-            _this.hGridAfterDelete.notify(value);
+            _this.hGridAfterDelete.notify(valueAfter);
             return true;
         }
         else{
-            value['success']=false;
+            valueAfter['success']=false;
             _this.updateNav();
-            _this.hGridAfterDelete.notify(value);
+            _this.hGridAfterDelete.notify(valueAfter);
             return false;
         }
     },
@@ -652,17 +738,18 @@ var HGrid = {
     editItem: function(src_uid, name) {
         var src = this.getItemByValue(this.data, src_uid, 'uid');
         var value = {'item': src, 'name': name};
+        var valueAfter = {'item': src, 'name': name};
         var event_status = this.hGridBeforeEdit.notify(value);
         if(event_status || typeof(event_status)==='undefined'){
             src['name']=name;
             this.Slick.dataView.updateItem(src['id'], src);
-            value['success']=true;
-            this.hGridAfterEdit.notify(value);
+            valueAfter['success']=true;
+            this.hGridAfterEdit.notify(valueAfter);
             return true;
         }
         else{
-            value['success']=false;
-            this.hGridAfterEdit.notify(value);
+            valueAfter['success']=false;
+            this.hGridAfterEdit.notify(valueAfter);
             return false;
         }
     },
@@ -784,7 +871,15 @@ var HGrid = {
         return this.prepJava(output);
     },
 
-    prepJava: function(sortedData) {
+    prepJava: function(sortedData, options) {
+        var _this = this;
+        var settings = {
+            sorting: false,
+        };
+
+        settings = $.extend(settings, options);
+
+
         var output = [];
         var checker = {};
         var indent = 0;
@@ -825,7 +920,10 @@ var HGrid = {
             }
             //Set other values
             d["id"] = i;
-            d["indent"] = indent;
+            if (!settings['sorting']){
+                d["indent"] = indent;
+                d["absoluteIndent"] = indent;
+            }
             d = $.extend(true, sortedData[i], d);
             output[i]=d;
         }
@@ -971,7 +1069,7 @@ var HGrid = {
             sortingCol="size";
         }
         var sorted = this.sortHierarchy(data, sortingCol, dataView, grid);
-        var new_data = this.prepJava(sorted);
+        var new_data = this.prepJava(sorted, {'sorting': true});
         this.data = new_data;
         dataView.setItems(new_data);
         this.currentlyRendered=[];

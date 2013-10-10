@@ -1,0 +1,786 @@
+{
+    "project": {},
+    "files": {
+        "build/hgrid.js": {
+            "name": "build/hgrid.js",
+            "modules": {},
+            "classes": {
+                "HGrid": 1
+            },
+            "fors": {},
+            "namespaces": {}
+        }
+    },
+    "modules": {},
+    "classes": {
+        "HGrid": {
+            "name": "HGrid",
+            "shortname": "HGrid",
+            "classitems": [],
+            "plugins": [],
+            "extensions": [],
+            "plugin_for": [],
+            "extension_for": [],
+            "file": "build/hgrid.js",
+            "line": 1,
+            "description": "Prototype for creating a Hierarchical Grid Structure",
+            "author": "Alexander Ferguson"
+        }
+    },
+    "classitems": [
+        {
+            "file": "build/hgrid.js",
+            "line": 10,
+            "description": "Default options for HGrid",
+            "itemtype": "property",
+            "name": "defaultOptions",
+            "type": "{Object}",
+            "class": "HGrid",
+            "subprops": [
+                {
+                    "name": "container",
+                    "description": "null"
+                },
+                {
+                    "name": "url",
+                    "description": "null"
+                },
+                {
+                    "name": "info",
+                    "description": "null"
+                },
+                {
+                    "name": "columns",
+                    "description": "Uid and Name columns"
+                },
+                {
+                    "name": "editable",
+                    "description": "false"
+                },
+                {
+                    "name": "enableCellNavigation",
+                    "description": "false"
+                },
+                {
+                    "name": "asyncEditorLoading",
+                    "description": "false"
+                },
+                {
+                    "name": "enableColumnReorder",
+                    "description": "true"
+                },
+                {
+                    "name": "sortAsc",
+                    "description": "true"
+                },
+                {
+                    "name": "dragDrop",
+                    "description": "true"
+                },
+                {
+                    "name": "dropZone",
+                    "description": "true"
+                },
+                {
+                    "name": "dropZonePreviewsContainer",
+                    "description": "null"
+                },
+                {
+                    "name": "navLevel",
+                    "description": "null"
+                },
+                {
+                    "name": "breadcrumbBox",
+                    "description": "null"
+                },
+                {
+                    "name": "largeGuide",
+                    "description": "true"
+                },
+                {
+                    "name": "clickUploadElement",
+                    "description": "true"
+                },
+                {
+                    "name": "topCrumb",
+                    "description": "true"
+                },
+                {
+                    "name": "forceFitColumns",
+                    "description": "true"
+                },
+                {
+                    "name": "autoHeight",
+                    "description": "true"
+                }
+            ]
+        },
+        {
+            "file": "build/hgrid.js",
+            "line": 63,
+            "description": "Data for the HGrid",
+            "itemtype": "property",
+            "name": "data",
+            "type": "Array",
+            "default": "null",
+            "class": "HGrid"
+        },
+        {
+            "file": "build/hgrid.js",
+            "line": 71,
+            "description": "Currently rendered rows",
+            "itemtype": "property",
+            "name": "currentlyRendered",
+            "type": "Array",
+            "default": "[]",
+            "class": "HGrid"
+        },
+        {
+            "file": "build/hgrid.js",
+            "line": 79,
+            "description": "Current indent shift",
+            "itemtype": "property",
+            "name": "currentIndentShift",
+            "type": "int",
+            "default": "0",
+            "class": "HGrid"
+        },
+        {
+            "file": "build/hgrid.js",
+            "line": 87,
+            "description": "Dropzone Object",
+            "itemtype": "property",
+            "name": "dropZoneObj",
+            "type": "{Object}",
+            "default": "null",
+            "class": "HGrid"
+        },
+        {
+            "file": "build/hgrid.js",
+            "line": 96,
+            "description": "This function creates a new HGrid object and calls initialize()",
+            "is_constructor": 1,
+            "itemtype": "method",
+            "name": "create",
+            "params": [
+                {
+                    "name": "options",
+                    "description": "Data to be passed to grid",
+                    "type": "Object",
+                    "props": [
+                        {
+                            "name": "url",
+                            "description": "Url to post to",
+                            "type": "String"
+                        },
+                        {
+                            "name": "info",
+                            "description": "Information dictionary",
+                            "type": "Object",
+                            "props": [
+                                {
+                                    "name": "parent_uid",
+                                    "description": "Parent unique ID"
+                                },
+                                {
+                                    "name": "uid",
+                                    "description": "Unique ID"
+                                },
+                                {
+                                    "name": "name",
+                                    "description": "Name"
+                                },
+                                {
+                                    "name": "type",
+                                    "description": "Folder or file",
+                                    "type": "String"
+                                }
+                            ]
+                        },
+                        {
+                            "name": "container",
+                            "description": "Div ID of container for HGrid",
+                            "type": "String"
+                        }
+                    ]
+                }
+            ],
+            "return": {
+                "description": "Returns a new HGrid object.",
+                "type": "HGrid"
+            },
+            "class": "HGrid"
+        },
+        {
+            "file": "build/hgrid.js",
+            "line": 126,
+            "description": "Fired before a move occurs",
+            "itemtype": "event",
+            "name": "hGridBeforeMove",
+            "params": [
+                {
+                    "name": "e",
+                    "description": "Event object",
+                    "type": "Object"
+                },
+                {
+                    "name": "args",
+                    "description": "",
+                    "type": "Object",
+                    "props": [
+                        {
+                            "name": "rows",
+                            "description": "Array of unique IDs of rows moving"
+                        },
+                        {
+                            "name": "insertBefore",
+                            "description": "Row ID of destination row to insert before"
+                        }
+                    ]
+                }
+            ],
+            "class": "HGrid"
+        },
+        {
+            "file": "build/hgrid.js",
+            "line": 136,
+            "description": "Fired after a move occurs",
+            "itemtype": "event",
+            "name": "hGridAfterMove",
+            "params": [
+                {
+                    "name": "e",
+                    "description": "Event object",
+                    "type": "Object"
+                },
+                {
+                    "name": "args",
+                    "description": "",
+                    "type": "Object",
+                    "props": [
+                        {
+                            "name": "rows",
+                            "description": "Array of unique IDs of rows moving"
+                        },
+                        {
+                            "name": "insertBefore",
+                            "description": "Row ID of destination row to insert before"
+                        }
+                    ]
+                }
+            ],
+            "class": "HGrid"
+        },
+        {
+            "file": "build/hgrid.js",
+            "line": 146,
+            "description": "Fired before an edit occurs",
+            "itemtype": "event",
+            "name": "hGridBeforeEdit",
+            "params": [
+                {
+                    "name": "e",
+                    "description": "Event object",
+                    "type": "Object"
+                },
+                {
+                    "name": "args",
+                    "description": "",
+                    "type": "Object",
+                    "props": [
+                        {
+                            "name": "item",
+                            "description": "Item being changed"
+                        },
+                        {
+                            "name": "name",
+                            "description": "New name"
+                        }
+                    ]
+                }
+            ],
+            "class": "HGrid"
+        },
+        {
+            "file": "build/hgrid.js",
+            "line": 156,
+            "description": "Fired after an edit occurs",
+            "itemtype": "event",
+            "name": "hGridAfterEdit",
+            "params": [
+                {
+                    "name": "e",
+                    "description": "Event object",
+                    "type": "Object"
+                },
+                {
+                    "name": "args",
+                    "description": "",
+                    "type": "Object",
+                    "props": [
+                        {
+                            "name": "item",
+                            "description": "Item being changed"
+                        },
+                        {
+                            "name": "name",
+                            "description": "New name"
+                        },
+                        {
+                            "name": "success",
+                            "description": "Boolean, whether or not the edit succeeded"
+                        }
+                    ]
+                }
+            ],
+            "class": "HGrid"
+        },
+        {
+            "file": "build/hgrid.js",
+            "line": 167,
+            "description": "Fired before a delete occurs",
+            "itemtype": "event",
+            "name": "hGridBeforeDelete",
+            "params": [
+                {
+                    "name": "e",
+                    "description": "Event object",
+                    "type": "Object"
+                },
+                {
+                    "name": "args",
+                    "description": "",
+                    "type": "Object",
+                    "props": [
+                        {
+                            "name": "items",
+                            "description": "Array of unique IDs to be deleted"
+                        }
+                    ]
+                }
+            ],
+            "class": "HGrid"
+        },
+        {
+            "file": "build/hgrid.js",
+            "line": 176,
+            "description": "Fired after a delete occurs",
+            "itemtype": "event",
+            "name": "hGridAfterDelete",
+            "params": [
+                {
+                    "name": "e",
+                    "description": "Event object",
+                    "type": "Object"
+                },
+                {
+                    "name": "args",
+                    "description": "",
+                    "type": "Object",
+                    "props": [
+                        {
+                            "name": "items",
+                            "description": "Array of unique IDs to be deleted"
+                        },
+                        {
+                            "name": "success",
+                            "description": "Boolean, whether or not the delete succeeded"
+                        }
+                    ]
+                }
+            ],
+            "class": "HGrid"
+        },
+        {
+            "file": "build/hgrid.js",
+            "line": 186,
+            "description": "Fired before an add occurs",
+            "itemtype": "event",
+            "name": "hGridBeforeAdd",
+            "params": [
+                {
+                    "name": "e",
+                    "description": "Event object",
+                    "type": "Object"
+                },
+                {
+                    "name": "args",
+                    "description": "",
+                    "type": "Object",
+                    "props": [
+                        {
+                            "name": "item",
+                            "description": "Item to be added"
+                        },
+                        {
+                            "name": "parent",
+                            "description": "Parent item for new item"
+                        }
+                    ]
+                }
+            ],
+            "class": "HGrid"
+        },
+        {
+            "file": "build/hgrid.js",
+            "line": 196,
+            "description": "Fired after an add occurs",
+            "itemtype": "event",
+            "name": "hGridAfterAdd",
+            "params": [
+                {
+                    "name": "e",
+                    "description": "Event object",
+                    "type": "Object"
+                },
+                {
+                    "name": "args",
+                    "description": "",
+                    "type": "Object",
+                    "props": [
+                        {
+                            "name": "item",
+                            "description": "Item to be added"
+                        },
+                        {
+                            "name": "parent",
+                            "description": "Parent item for new item"
+                        },
+                        {
+                            "name": "success",
+                            "description": "Boolean, whether or not the add succeeded"
+                        }
+                    ]
+                }
+            ],
+            "class": "HGrid"
+        },
+        {
+            "file": "build/hgrid.js",
+            "line": 207,
+            "description": "Fired before an upload occurs",
+            "itemtype": "event",
+            "name": "hGridBeforeUpload",
+            "params": [
+                {
+                    "name": "e",
+                    "description": "Event object",
+                    "type": "Object"
+                },
+                {
+                    "name": "args",
+                    "description": "",
+                    "type": "Object",
+                    "props": [
+                        {
+                            "name": "item",
+                            "description": "File object being added"
+                        },
+                        {
+                            "name": "parent",
+                            "description": "Parent item for new file"
+                        }
+                    ]
+                }
+            ],
+            "class": "HGrid"
+        },
+        {
+            "file": "build/hgrid.js",
+            "line": 217,
+            "description": "Fired after an upload occurs",
+            "itemtype": "event",
+            "name": "hGridAfterUpload",
+            "params": [
+                {
+                    "name": "e",
+                    "description": "Event object",
+                    "type": "Object"
+                },
+                {
+                    "name": "args",
+                    "description": "",
+                    "type": "Object",
+                    "props": [
+                        {
+                            "name": "item",
+                            "description": "File object being added"
+                        },
+                        {
+                            "name": "success",
+                            "description": "Boolean, whether or not the upload succeeded"
+                        }
+                    ]
+                }
+            ],
+            "class": "HGrid"
+        },
+        {
+            "file": "build/hgrid.js",
+            "line": 227,
+            "description": "Fired on success response from server on upload",
+            "itemtype": "event",
+            "name": "hGridOnUpload",
+            "params": [
+                {
+                    "name": "e",
+                    "description": "Event object",
+                    "type": "Object"
+                },
+                {
+                    "name": "args",
+                    "description": "File object response",
+                    "type": "Object"
+                }
+            ],
+            "class": "HGrid"
+        },
+        {
+            "file": "build/hgrid.js",
+            "line": 380,
+            "description": "This function updates the breadcrumbs element on the page during navigation of directories",
+            "itemtype": "method",
+            "name": "updateBreadcrumbsBox",
+            "params": [
+                {
+                    "name": "itemUid",
+                    "description": "uid of the new item to display as breadcrumbs parent",
+                    "type": "String"
+                }
+            ],
+            "class": "HGrid"
+        },
+        {
+            "file": "build/hgrid.js",
+            "line": 528,
+            "description": "Allows the user to add a new column to the grid",
+            "itemtype": "method",
+            "name": "addColumn",
+            "params": [
+                {
+                    "name": "column",
+                    "description": "New column to be added",
+                    "type": "Object"
+                },
+                {
+                    "name": "item.id",
+                    "description": "ID of column"
+                },
+                {
+                    "name": "item.name",
+                    "description": "Name of column"
+                },
+                {
+                    "name": "item.field",
+                    "description": "Field of items to be put in the columns"
+                }
+            ],
+            "return": {
+                "description": "True if setting columns works",
+                "type": "Boolean"
+            },
+            "class": "HGrid"
+        },
+        {
+            "file": "build/hgrid.js",
+            "line": 546,
+            "description": "Allows the user to add a new item to the grid",
+            "itemtype": "method",
+            "name": "addItem",
+            "params": [
+                {
+                    "name": "item",
+                    "description": "New item to be added",
+                    "type": "Object",
+                    "props": [
+                        {
+                            "name": "parent_uid",
+                            "description": "Parent unique ID"
+                        },
+                        {
+                            "name": "uid",
+                            "description": "Unique ID"
+                        },
+                        {
+                            "name": "name",
+                            "description": "Name"
+                        },
+                        {
+                            "name": "type",
+                            "description": "Folder or file",
+                            "type": "String"
+                        }
+                    ]
+                }
+            ],
+            "return": {
+                "description": "",
+                "type": "Boolean"
+            },
+            "class": "HGrid"
+        },
+        {
+            "file": "build/hgrid.js",
+            "line": 591,
+            "description": "Allows the user to add a new item to the grid",
+            "itemtype": "method",
+            "name": "uploadItem",
+            "params": [
+                {
+                    "name": "item",
+                    "description": "New item to be added",
+                    "type": "Object",
+                    "props": [
+                        {
+                            "name": "parent_uid",
+                            "description": "Parent unique ID"
+                        },
+                        {
+                            "name": "uid",
+                            "description": "Unique ID"
+                        },
+                        {
+                            "name": "name",
+                            "description": "Name"
+                        },
+                        {
+                            "name": "type",
+                            "description": "Folder or file",
+                            "type": "String"
+                        }
+                    ]
+                }
+            ],
+            "return": {
+                "description": "",
+                "type": "Boolean"
+            },
+            "class": "HGrid"
+        },
+        {
+            "file": "build/hgrid.js",
+            "line": 632,
+            "description": "Allows the user to move items and all of their children to another place on the grid",
+            "itemtype": "method",
+            "name": "moveItems",
+            "params": [
+                {
+                    "name": "src_uid",
+                    "description": "Unique IDs of each item that should move",
+                    "type": "Array"
+                },
+                {
+                    "name": "dest",
+                    "description": "Unique ID of the destination parent",
+                    "type": "Int"
+                }
+            ],
+            "return": {
+                "description": "True if success, false if failure",
+                "type": "Boolean"
+            },
+            "class": "HGrid"
+        },
+        {
+            "file": "build/hgrid.js",
+            "line": 681,
+            "description": "Allows the user to delete items and all of their children",
+            "itemtype": "method",
+            "name": "deleteItems",
+            "params": [
+                {
+                    "name": "rowsToDelete",
+                    "description": "Array of unique IDs of rows to delete",
+                    "type": "Array"
+                }
+            ],
+            "return": {
+                "description": "",
+                "type": "Boolean"
+            },
+            "class": "HGrid"
+        },
+        {
+            "file": "build/hgrid.js",
+            "line": 729,
+            "description": "Allows the user to edit the name of the item passed",
+            "itemtype": "method",
+            "name": "editItem",
+            "params": [
+                {
+                    "name": "src_uid",
+                    "description": "Unique ID of the item to change"
+                },
+                {
+                    "name": "name",
+                    "description": "New name for the item being changed",
+                    "type": "String"
+                }
+            ],
+            "return": {
+                "description": "",
+                "type": "Boolean"
+            },
+            "class": "HGrid"
+        },
+        {
+            "file": "build/hgrid.js",
+            "line": 757,
+            "description": "This function searches through the data and returns the first object with the correct value",
+            "itemtype": "method",
+            "name": "getItemByValue",
+            "params": [
+                {
+                    "name": "data",
+                    "description": "Dataset to loop through",
+                    "type": "Array"
+                },
+                {
+                    "name": "searchVal",
+                    "description": "Value to search for",
+                    "type": "Object"
+                },
+                {
+                    "name": "searchProp",
+                    "description": "Property of target value",
+                    "type": "String"
+                }
+            ],
+            "return": {
+                "description": "Item with searchValue or false if not in dataset",
+                "type": "Object"
+            },
+            "class": "HGrid"
+        },
+        {
+            "file": "build/hgrid.js",
+            "line": 778,
+            "description": "This function searches through the data and returns a list of objects with the correct value",
+            "itemtype": "method",
+            "name": "getItemsByValue",
+            "params": [
+                {
+                    "name": "data",
+                    "description": "Dataset to loop through",
+                    "type": "Array"
+                },
+                {
+                    "name": "searchVal",
+                    "description": "Value to search for",
+                    "type": "Object"
+                },
+                {
+                    "name": "searchProp",
+                    "description": "Property of target value",
+                    "type": "String"
+                }
+            ],
+            "return": {
+                "description": "Array of items with searchValue",
+                "type": "Object"
+            },
+            "class": "HGrid"
+        }
+    ],
+    "warnings": []
+}

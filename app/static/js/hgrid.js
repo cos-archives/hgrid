@@ -188,7 +188,7 @@ var HGrid = {
 
         var _this = this;
         $.each(this.options.columns, function(idx, elm) {
-            if (elm['primary']==true){
+            if (elm['primary']==true && !elm.formatter){
                 elm.formatter = _this.defaultTaskNameFormatter;
             }
         });

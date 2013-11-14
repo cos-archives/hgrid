@@ -11,5 +11,9 @@
     },
     "scripts": {
         "test": "grunt travis --verbose"
+    },
+    "repository": {
+        "type" : "git",
+        "url" : "http://github.com/jakerose27/HGrid.git"
     }
 }

@@ -27,13 +27,18 @@ grunt.initConfig({
 
     qunit: {
         all: ['examples/example.html']
+    },
+
+    yuidoc: {
+        options: {
+            paths: 'src/'
+        }
     }
     });
 // Load the plugin that provides the "uglify" task.
 grunt.loadNpmTasks('grunt-contrib-uglify');
 grunt.loadNpmTasks('grunt-contrib-copy');
 grunt.loadNpmTasks('grunt-contrib-qunit');
-//grunt.loadNpmTasks('grunt-contrib-cssmin')
 
 // Default task(s).
 grunt.registerTask('default', ['uglify' , 'copy', 'qunit']);

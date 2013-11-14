@@ -3,5 +3,5 @@ test( "Create", function() {
 });
 
 test( "Data Length in Grid", function(){
-    equal( myGrid.data.length, data, "pass");
+    equal( myGrid.data.length, data.length+1, "pass");
 })

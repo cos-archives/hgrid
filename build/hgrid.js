@@ -1167,10 +1167,10 @@ var HGrid = {
         var sorted = data.sort(function(a, b){
             var x = a[sortingCol], y = b[sortingCol];
             if(_this.options.sortAsc){
-                return _this.compare(x,y);
+                return -(_this.compare(x,y));
             }
             else{
-                return -(_this.compare(x,y));
+                return _this.compare(x,y);
             }
         });
         var hierarchical = [];

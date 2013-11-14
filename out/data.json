@@ -1,8 +1,8 @@
 {
     "project": {},
     "files": {
-        "build/hgrid.js": {
-            "name": "build/hgrid.js",
+        "src/hgrid.js": {
+            "name": "src/hgrid.js",
             "modules": {},
             "classes": {
                 "HGrid": 1
@@ -21,7 +21,7 @@
             "extensions": [],
             "plugin_for": [],
             "extension_for": [],
-            "file": "build/hgrid.js",
+            "file": "src/hgrid.js",
             "line": 1,
             "description": "Prototype for creating a Hierarchical Grid Structure",
             "author": "Alexander Ferguson"
@@ -29,7 +29,7 @@
     },
     "classitems": [
         {
-            "file": "build/hgrid.js",
+            "file": "src/hgrid.js",
             "line": 10,
             "description": "Default options for HGrid",
             "itemtype": "property",
@@ -112,12 +112,16 @@
                 {
                     "name": "autoHeight",
                     "description": "true"
+                },
+                {
+                    "name": "navigation",
+                    "description": "true"
                 }
             ]
         },
         {
-            "file": "build/hgrid.js",
-            "line": 63,
+            "file": "src/hgrid.js",
+            "line": 65,
             "description": "Data for the HGrid",
             "itemtype": "property",
             "name": "data",
@@ -126,8 +130,8 @@
             "class": "HGrid"
         },
         {
-            "file": "build/hgrid.js",
-            "line": 71,
+            "file": "src/hgrid.js",
+            "line": 73,
             "description": "Currently rendered rows",
             "itemtype": "property",
             "name": "currentlyRendered",
@@ -136,8 +140,8 @@
             "class": "HGrid"
         },
         {
-            "file": "build/hgrid.js",
-            "line": 79,
+            "file": "src/hgrid.js",
+            "line": 81,
             "description": "Current indent shift",
             "itemtype": "property",
             "name": "currentIndentShift",
@@ -146,8 +150,8 @@
             "class": "HGrid"
         },
         {
-            "file": "build/hgrid.js",
-            "line": 87,
+            "file": "src/hgrid.js",
+            "line": 89,
             "description": "Dropzone Object",
             "itemtype": "property",
             "name": "dropZoneObj",
@@ -156,8 +160,8 @@
             "class": "HGrid"
         },
         {
-            "file": "build/hgrid.js",
-            "line": 96,
+            "file": "src/hgrid.js",
+            "line": 98,
             "description": "This function creates a new HGrid object and calls initialize()",
             "is_constructor": 1,
             "itemtype": "method",
@@ -212,8 +216,8 @@
             "class": "HGrid"
         },
         {
-            "file": "build/hgrid.js",
-            "line": 126,
+            "file": "src/hgrid.js",
+            "line": 132,
             "description": "Fired before a move occurs",
             "itemtype": "event",
             "name": "hGridBeforeMove",
@@ -242,8 +246,8 @@
             "class": "HGrid"
         },
         {
-            "file": "build/hgrid.js",
-            "line": 136,
+            "file": "src/hgrid.js",
+            "line": 142,
             "description": "Fired after a move occurs",
             "itemtype": "event",
             "name": "hGridAfterMove",
@@ -272,8 +276,8 @@
             "class": "HGrid"
         },
         {
-            "file": "build/hgrid.js",
-            "line": 146,
+            "file": "src/hgrid.js",
+            "line": 152,
             "description": "Fired before an edit occurs",
             "itemtype": "event",
             "name": "hGridBeforeEdit",
@@ -302,8 +306,8 @@
             "class": "HGrid"
         },
         {
-            "file": "build/hgrid.js",
-            "line": 156,
+            "file": "src/hgrid.js",
+            "line": 162,
             "description": "Fired after an edit occurs",
             "itemtype": "event",
             "name": "hGridAfterEdit",
@@ -336,8 +340,8 @@
             "class": "HGrid"
         },
         {
-            "file": "build/hgrid.js",
-            "line": 167,
+            "file": "src/hgrid.js",
+            "line": 173,
             "description": "Fired before a delete occurs",
             "itemtype": "event",
             "name": "hGridBeforeDelete",
@@ -362,8 +366,8 @@
             "class": "HGrid"
         },
         {
-            "file": "build/hgrid.js",
-            "line": 176,
+            "file": "src/hgrid.js",
+            "line": 182,
             "description": "Fired after a delete occurs",
             "itemtype": "event",
             "name": "hGridAfterDelete",
@@ -392,8 +396,8 @@
             "class": "HGrid"
         },
         {
-            "file": "build/hgrid.js",
-            "line": 186,
+            "file": "src/hgrid.js",
+            "line": 192,
             "description": "Fired before an add occurs",
             "itemtype": "event",
             "name": "hGridBeforeAdd",
@@ -422,8 +426,8 @@
             "class": "HGrid"
         },
         {
-            "file": "build/hgrid.js",
-            "line": 196,
+            "file": "src/hgrid.js",
+            "line": 202,
             "description": "Fired after an add occurs",
             "itemtype": "event",
             "name": "hGridAfterAdd",
@@ -456,8 +460,8 @@
             "class": "HGrid"
         },
         {
-            "file": "build/hgrid.js",
-            "line": 207,
+            "file": "src/hgrid.js",
+            "line": 213,
             "description": "Fired before an upload occurs",
             "itemtype": "event",
             "name": "hGridBeforeUpload",
@@ -486,8 +490,8 @@
             "class": "HGrid"
         },
         {
-            "file": "build/hgrid.js",
-            "line": 217,
+            "file": "src/hgrid.js",
+            "line": 223,
             "description": "Fired after an upload occurs",
             "itemtype": "event",
             "name": "hGridAfterUpload",
@@ -516,8 +520,8 @@
             "class": "HGrid"
         },
         {
-            "file": "build/hgrid.js",
-            "line": 227,
+            "file": "src/hgrid.js",
+            "line": 233,
             "description": "Fired on success response from server on upload",
             "itemtype": "event",
             "name": "hGridOnUpload",
@@ -536,8 +540,28 @@
             "class": "HGrid"
         },
         {
-            "file": "build/hgrid.js",
-            "line": 380,
+            "file": "src/hgrid.js",
+            "line": 241,
+            "description": "Fired on success response from server on upload",
+            "itemtype": "event",
+            "name": "hGridAfterNav",
+            "params": [
+                {
+                    "name": "e",
+                    "description": "Event object",
+                    "type": "Object"
+                },
+                {
+                    "name": "args",
+                    "description": "nav level",
+                    "type": "Object"
+                }
+            ],
+            "class": "HGrid"
+        },
+        {
+            "file": "src/hgrid.js",
+            "line": 396,
             "description": "This function updates the breadcrumbs element on the page during navigation of directories",
             "itemtype": "method",
             "name": "updateBreadcrumbsBox",
@@ -551,8 +575,8 @@
             "class": "HGrid"
         },
         {
-            "file": "build/hgrid.js",
-            "line": 528,
+            "file": "src/hgrid.js",
+            "line": 556,
             "description": "Allows the user to add a new column to the grid",
             "itemtype": "method",
             "name": "addColumn",
@@ -582,8 +606,8 @@
             "class": "HGrid"
         },
         {
-            "file": "build/hgrid.js",
-            "line": 546,
+            "file": "src/hgrid.js",
+            "line": 574,
             "description": "Allows the user to add a new item to the grid",
             "itemtype": "method",
             "name": "addItem",
@@ -620,8 +644,8 @@
             "class": "HGrid"
         },
         {
-            "file": "build/hgrid.js",
-            "line": 591,
+            "file": "src/hgrid.js",
+            "line": 660,
             "description": "Allows the user to add a new item to the grid",
             "itemtype": "method",
             "name": "uploadItem",
@@ -658,8 +682,8 @@
             "class": "HGrid"
         },
         {
-            "file": "build/hgrid.js",
-            "line": 632,
+            "file": "src/hgrid.js",
+            "line": 702,
             "description": "Allows the user to move items and all of their children to another place on the grid",
             "itemtype": "method",
             "name": "moveItems",
@@ -682,8 +706,8 @@
             "class": "HGrid"
         },
         {
-            "file": "build/hgrid.js",
-            "line": 681,
+            "file": "src/hgrid.js",
+            "line": 753,
             "description": "Allows the user to delete items and all of their children",
             "itemtype": "method",
             "name": "deleteItems",
@@ -701,8 +725,8 @@
             "class": "HGrid"
         },
         {
-            "file": "build/hgrid.js",
-            "line": 729,
+            "file": "src/hgrid.js",
+            "line": 803,
             "description": "Allows the user to edit the name of the item passed",
             "itemtype": "method",
             "name": "editItem",
@@ -724,8 +748,8 @@
             "class": "HGrid"
         },
         {
-            "file": "build/hgrid.js",
-            "line": 757,
+            "file": "src/hgrid.js",
+            "line": 834,
             "description": "This function searches through the data and returns the first object with the correct value",
             "itemtype": "method",
             "name": "getItemByValue",
@@ -753,8 +777,8 @@
             "class": "HGrid"
         },
         {
-            "file": "build/hgrid.js",
-            "line": 778,
+            "file": "src/hgrid.js",
+            "line": 855,
             "description": "This function searches through the data and returns a list of objects with the correct value",
             "itemtype": "method",
             "name": "getItemsByValue",

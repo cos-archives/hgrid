@@ -23,13 +23,13 @@
 
 
 
-<script src="../vendor/js/jquery-1.7.min.js"></script>
-<script src="../vendor/js/jquery-ui-1.8.16.custom.min.js"></script>
-<script src="../vendor/js/jquery.event.drag-2.2.js"></script>
-<script src="../vendor/js/jquery.event.drop-2.2.js"></script>
-<script src="../vendor/hgrid_dependencies/dropzone.js"></script>
-<script src="../build/hgrid-dependencies.js"></script>
-<script src="../../build/hgrid.js"></script>
+<script src="/static/js/jquery-1.7.min.js"></script>
+<script src="/static/js/jquery-ui-1.8.16.custom.min.js"></script>
+<script src="/static/js/jquery.event.drag-2.2.js"></script>
+<script src="/static/js/jquery.event.drop-2.2.js"></script>
+<script src="/static/js/dropzone.js"></script>
+<script src="/static/js/slickgrid.custom.min.js"></script>
+<script src="/static/js/hgrid.js"></script>
 
 <script>
     var info = {{ info | safe }};
@@ -71,7 +71,6 @@
 {#        breadcrumbBox: "#buckyGridBreadcrumbs"#}
 {#    });#}
 
-    //myGrid.updateBreadcrumbsBox();
 
 {#    myGrid.hGridBeforeMove.subscribe(function(e, args){#}
 {#        var insertBefore = myGrid.getItemByValue(myGrid.data, args.insertBefore, 'id')['parent_uid'];#}
@@ -90,59 +89,7 @@
 {#            console.log("Try again");#}
 {#        }#}
 {#    });#}
-    
-    myGrid.hGridBeforeMove.subscribe(function (e, args) {
-        console.log(args);
-        return true;
-    });
-    myGrid.hGridAfterMove.subscribe(function (e, args) {
-        console.log(args);
-        return true;
-    });
-    myGrid.hGridBeforeEdit.subscribe(function (e, args) {
-        console.log(args); return true; });
-    myGrid.hGridAfterEdit.subscribe(function (e, args) {
-        console.log(args);
-        return true;
-    });
-    myGrid.hGridBeforeDelete.subscribe(function (e, args) {
-        console.log(args);
-        return true;
-    });
-    myGrid.hGridAfterDelete.subscribe(function (e, args) {
-        console.log(args);
-        return true;
-    });
-    myGrid.hGridBeforeAdd.subscribe(function (e, args) {
-        console.log(args);
-        return true;
-    });
-    myGrid.hGridAfterAdd.subscribe(function (e, args) {
-        console.log(args);
-        return true;
-    });
 
-    myGrid.hGridBeforeUpload.subscribe(function (e, args) {
-        console.log(args);
-        return true; });
-    myGrid.hGridAfterUpload.subscribe(function (e, args) {
-        console.log(args);
-        return true; });
-    myGrid.hGridOnUpload.subscribe(function (e, args) {
-        console.log(args);
-        return true; });
-
-    myGrid.Slick.grid.onMouseEnter.subscribe(function(e, args){
-       console.log("yo");
-    });
-
-    myGrid.Slick.grid.onMouseLeave.unsubscribe(function(e, args){
-        console.log("bye");
-    });
-
-    {#    data = myGrid.data;#}
-    {#    console.log(data);#}
-    {#    dataView = myGrid.Slick.dataView;#}
 </script>
 
 </body>

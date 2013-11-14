@@ -1,5 +1,14 @@
 module.exports = function(grunt) {
 grunt.initConfig({
+    copy: {
+        main: {
+            files: [
+                {expand: true, flatten: true, src: ['src/hgrid.js'], dest: 'build/', filter: 'isFile'},
+                {expand: true, flatten: true, src: ['src/tests.js'], dest: 'build/', filter: 'isFile'}
+            ]
+        }
+    },
+
 	uglify: {
 	    options: {
 		mangle: true
@@ -14,27 +23,19 @@ grunt.initConfig({
                 'vendor/hgrid_dependencies/slick.rowmovemanager.js']
 			}
 	    }
-	   }
-//	cssmin: {
-//		minify: {
-//			expand: true,
-//			cwd: 'app/static/css/',
-//			src: ['*.css'],
-//			dest: 'app/static/css/',
-//			ext: '.min.css'
-//	},
-//	combine: {
-//		files: {
-//			'app/static/css/hgrid.min.css': ['app/static/css/slick.min.css', 'app/static/css/jquery-ui-1.min.css', 'app/static/css/examples.min.css', 'app/static/css/file-viewer-core.min.css']
-//		}
-//	}
-//}
+	   },
+
+    qunit: {
+        all: ['examples/example.html']
+    }
     });
 // Load the plugin that provides the "uglify" task.
 grunt.loadNpmTasks('grunt-contrib-uglify');
+grunt.loadNpmTasks('grunt-contrib-copy');
+grunt.loadNpmTasks('grunt-contrib-qunit');
 //grunt.loadNpmTasks('grunt-contrib-cssmin')
 
 // Default task(s).
-grunt.registerTask('default', ['uglify']);//, 'cssmin']);
+grunt.registerTask('default', ['uglify' , 'copy', 'qunit']);
 
 };

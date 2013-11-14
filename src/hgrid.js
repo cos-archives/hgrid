@@ -872,13 +872,14 @@ var HGrid = {
         return propArray;
     },
 
-    prep: function(info){
+    prep: function(hGridInfo){
         var indent = 0;
         var checker = {};
         var i = 0;
         var data_counter=0;
         var output = [];
         var _this = this;
+        var info = hGridInfo.slice();
         while (info.length>=1){
 
             var d = info[i];

@@ -43,4 +43,8 @@ grunt.loadNpmTasks('grunt-contrib-qunit');
 // Default task(s).
 grunt.registerTask('default', ['uglify' , 'copy', 'qunit']);
 
+// Travis tasks
+grunt.registerTask('travis', ['copy', 'qunit']);
+
+
 };

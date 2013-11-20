@@ -6,3 +6,4 @@ app = Flask(__name__)
 
 # The ViewModel
 # from app import FileView
+from app import main

@@ -718,7 +718,37 @@ var HGrid = {
         while (info.length>=1){
 
             var d = info[i];
+
             /* We need a way to remove repeat UIDs and to give an error */
+            /* Bundle the loop in a function for recursive purposes */
+            function removeDuplicates() {
+                /* Loop through the data that has been indexed */
+                for ( z = 0; z < output.length; z++ ) {
+                    var _duplicate = [];
+                    if ( output[z]['uid'] == d['uid'] ) {
+                        var _theError = 'You have two items with the unique id of ' + d['uid'] + '. The second item has been removed. Please check your data for duplicates and try again.';
+                        console.error(_theError);
+//                        console.error('The first error object: ' + output[z]);
+//                        console.error('The second error object: ' + info[i]);
+                        console.error( output[z], d );
+                        alert(_theError);
+                        /* Remove item */
+                        info.splice(i, 1);
+                        /* Insure that we check the next item as well */
+                        if ( info.length > 0 ) {
+                            removeDuplicates();
+                        }
+                        break;
+                    }
+                }
+            }
+
+            removeDuplicates();
+            /* If removing duplicates removed the last item in info, break the while loop */
+            if ( info.length <= i ) {
+                break;
+            }
+
             if (info[i]['parent_uid']=="null"){
                 d['parent']=null;
                 d['indent']=0;

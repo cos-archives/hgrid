@@ -8,8 +8,6 @@ from flask import Flask, render_template, request, jsonify
 from shutil import move, Error, rmtree
 from werkzeug.utils import secure_filename
 
-app=Flask(__name__)
-
 info = []
 # Sets the base file directories for the fileviewer
 dir_root = os.path.abspath('tree')
@@ -126,7 +124,7 @@ def index():
         {'uid': 6, 'type': 'file', 'name': 'messi', 'parent_uid': 4},
         {'uid': 8, 'type': 'file', 'name': 'jake', 'parent_uid': 7},
         {'uid': 9, 'type': 'file', 'name': 'laura', 'parent_uid': 7},
-        {'uid': 11, 'type': 'file', 'name': 'joe', 'parent_uid': 10}
+        {'uid': 10, 'type': 'file', 'name': 'joe', 'parent_uid': 1}
     ]
 
     tester3 = [{'uid': 'node-dJwsF', 'isComponent': 'true', 'name': 'Demo', 'uploadUrl': '/project/dJwsF/files/upload', 'type': 'folder', 'parent_uid': 'null', 'size': '--'}, {'uid': 'node-9fijQ', 'isComponent': 'true', 'name': 'check', 'uploadUrl': '/project/dJwsF/node/9fijQ/files/upload', 'type': 'folder', 'parent_uid': 'node-dJwsF', 'size': '--'}, {'name': 'test1.txt', 'isComponent': 'false', 'url': '/project/dJwsF/node/9fijQ/files/test1.txt', 'size': '17 bytes', 'type': 'file', 'parent_uid': 'node-9fijQ', 'uid': 'nodefile-51f7fe3b1fd21c2f3320f3cd'}, {'name': 'test3.txt', 'isComponent': 'false', 'url': '/project/dJwsF/node/9fijQ/files/test3.txt', 'size': '24 bytes', 'type': 'file', 'parent_uid': 'node-9fijQ', 'uid': 'nodefile-51f7fe3b1fd21c2f3320f3af'}, {'uid': 'node-Z7eW2', 'isComponent': 'true', 'name': 'another', 'uploadUrl': '/project/dJwsF/node/Z7eW2/files/upload', 'type': 'folder', 'parent_uid': 'node-dJwsF', 'size': '--'}, {'name': 'test1.txt', 'isComponent': 'false', 'url': '/project/dJwsF/files/test1.txt', 'size': '17 bytes', 'type': 'file', 'parent_uid': 'node-dJwsF', 'uid': 'nodefile-51f7fdad1fd21c2f3320f111'}, {'name': 'FileView.py', 'isComponent': 'false', 'url': '/project/dJwsF/files/FileView.py', 'size': '3 KB', 'type': 'file', 'parent_uid': 'node-dJwsF', 'uid': 'nodefile-51f7fdad1fd21c2f3320f0f9'}, {'name': 'test2.txt', 'isComponent': 'false', 'url': '/project/dJwsF/files/test2.txt', 'size': '17 bytes', 'type': 'file', 'parent_uid': 'node-dJwsF', 'uid': 'nodefile-51f7fdbc1fd21c2f3320f15f'}, {'name': 'test3.txt', 'isComponent': 'false', 'url': '/project/dJwsF/files/test3.txt', 'size': '24 bytes', 'type': 'file', 'parent_uid': 'node-dJwsF', 'uid': 'nodefile-51f7fdad1fd21c2f3320f129'}]
@@ -267,6 +265,8 @@ def sg_edit():
     except Error:
         return "fail"
     return new_path
+
+app=Flask(__name__)
 
 if __name__ == '__main__':
     app.run(debug=True)

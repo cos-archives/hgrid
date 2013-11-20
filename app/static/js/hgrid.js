@@ -718,6 +718,7 @@ var HGrid = {
         while (info.length>=1){
 
             var d = info[i];
+            /* We need a way to remove repeat UIDs and to give an error */
             if (info[i]['parent_uid']=="null"){
                 d['parent']=null;
                 d['indent']=0;

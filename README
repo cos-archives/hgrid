@@ -3,7 +3,7 @@ HGrid is a web based data management system integrating DropzoneJS and SlickGrid
 #### Installation
 
 To install HGrid on your web page, simply copy the /static/ folder to a directory, and copy the following CSS and JS file calls to the page where you intend to have HGrid:
-```html
+``` html
         <link rel="stylesheet" href="/static/css/slick.grid.css" type="text/css"/>
         <link rel="stylesheet" href="/static/css/jquery-ui-1.8.16.custom.css" type="text/css"/>
         <link rel="stylesheet" href="/static/css/examples.css" type="text/css"/>

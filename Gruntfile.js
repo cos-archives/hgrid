@@ -35,7 +35,7 @@ grunt.initConfig({
         }
     }
     });
-// Load the plugin that provides the "uglify" task.
+// Load the plugin that provides the tasks.
 grunt.loadNpmTasks('grunt-contrib-uglify');
 grunt.loadNpmTasks('grunt-contrib-copy');
 grunt.loadNpmTasks('grunt-contrib-qunit');

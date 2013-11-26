@@ -4,6 +4,7 @@
  * @class HGrid
  * @author Jake Rosenberg
  * @author Alexander Ferguson
+ *
  */
 var HGrid = {
     //Gives each div a class based on type (folder or file)

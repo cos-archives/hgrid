@@ -4,16 +4,13 @@ HGrid is a web based data management system integrating DropzoneJS and SlickGrid
 
 To install HGrid on your web page, simply copy the /static/ folder to a directory, and copy the following CSS and JS file calls to the page where you intend to have HGrid:
 ``` html
-        <link rel="stylesheet" href="/static/css/slick.grid.css" type="text/css"/>
-        <link rel="stylesheet" href="/static/css/jquery-ui-1.8.16.custom.css" type="text/css"/>
-        <link rel="stylesheet" href="/static/css/examples.css" type="text/css"/>
-        <link rel="stylesheet" href="/static/css/file-viewer-core.css" type="text/css" />
+        <link rel="stylesheet" href="../vendor/css/hgrid-base.css" type="text/css" />
 
         <script src="/static/js/jquery-1.7.min.js"></script>
         <script src="/static/js/jquery-ui-1.8.16.custom.min.js"></script>
         <script src="/static/js/jquery.event.drag-2.2.js"></script>
         <script src="/static/js/jquery.event.drop-2.2.js"></script>
-        <script src="/static/js/hgrid-dependencies.js"></script>
+        <script src="/static/js/slickgrid.custom.min.js"></script>
         <script src="/static/js/hgrid.js"></script>
 ```        
 This is currently a lot of files for dependencies, and future versions will have condensed this.
@@ -55,3 +52,37 @@ An example of a javascript call to initiate the grid using the example data abov
           ]
         });
 ```
+
+#### Testing
+
+On the page that has the js to be tested, include qunit and your testing file:
+<script src="../vendor/js/qunit-1.12.0.js"></script>
+<script src="../build/tests.js"></script>
+
+Tests look like this:
+test( "Create", function() {
+    ok( myGrid, "pass");
+});
+
+test( "Data Length in Grid", function(){
+    equal( myGrid.data.length, data.length, "pass");
+});
+
+A full testing API can be found at http://qunitjs.com/
+
+Tests are run using grunt
+Gruntfile contains a qunit option in the initConfig:
+
+    qunit: {
+        all: ['examples/example.html']
+    }
+
+Load and register the tasks in the Gruntfile as well:
+
+grunt.loadNpmTasks('grunt-contrib-qunit');
+grunt.registerTask('travis', ['copy', 'qunit']);
+
+For HGrid this is called "travis" so that Travis-CI will call the copy and qunit tasks when a pull request is created
+
+To run tests before pushing, install phantomjs to run tests without having to open a browser:
+npm install -g phantomjs

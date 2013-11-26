@@ -60,6 +60,7 @@ On the page that has the js to be tested, include qunit and your testing file:
 <script src="../build/tests.js"></script>
 
 Tests look like this:
+```js
 test( "Create", function() {
     ok( myGrid, "pass");
 });
@@ -67,21 +68,21 @@ test( "Create", function() {
 test( "Data Length in Grid", function(){
     equal( myGrid.data.length, data.length, "pass");
 });
-
+```
 A full testing API can be found at http://qunitjs.com/
 
 Tests are run using grunt
 Gruntfile contains a qunit option in the initConfig:
-
+```js
     qunit: {
         all: ['examples/example.html']
     }
-
+```
 Load and register the tasks in the Gruntfile as well:
-
+```js
 grunt.loadNpmTasks('grunt-contrib-qunit');
 grunt.registerTask('travis', ['copy', 'qunit']);
-
+```
 For HGrid this is called "travis" so that Travis-CI will call the copy and qunit tasks when a pull request is created
 
 To run tests before pushing, install phantomjs to run tests without having to open a browser:

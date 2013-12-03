@@ -26,7 +26,12 @@ grunt.initConfig({
 	   },
 
     qunit: {
-        all: ['examples/example.html']
+        all: {
+            options: {
+                urls:['examples/example.html'],
+                force: true
+            }
+        }
     },
 
     yuidoc: {

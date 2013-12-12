@@ -298,6 +298,7 @@ var HGrid = {
         }
     },
 
+    // TODO: columnDef unused. Remove?
     defaultTaskNameFormatter: function(row, cell, value, columnDef, dataContext) {
         value = value.replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");
         var spacer = "<span style='display:inline-block;height:1px;width:" + (15 * dataContext["indent"]) + "px'></span>";
@@ -313,7 +314,9 @@ var HGrid = {
     },
 
     requiredFieldValidator: function (value) {
-        if (value == null || value == undefined || !value.length) {
+        if (value == null || value == undefined || ((typeof value === "string" ||
+                                                    typeof value === "object" ) &&
+                                                    !value.length)){
             return {valid: false, msg: "This is a required field"};
         } else {
             return {valid: true, msg: null};

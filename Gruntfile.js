@@ -4,7 +4,6 @@ grunt.initConfig({
         main: {
             files: [
                 {expand: true, flatten: true, src: ['src/hgrid.js'], dest: 'build/', filter: 'isFile'},
-                {expand: true, flatten: true, src: ['src/tests.js'], dest: 'build/', filter: 'isFile'}
             ]
         }
     },
@@ -26,7 +25,7 @@ grunt.initConfig({
 	   },
 
     qunit: {
-        all: ['examples/example.html']
+        all: ['tests/test-hgrid.html']
     },
 
     yuidoc: {

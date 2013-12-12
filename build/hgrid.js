@@ -442,7 +442,7 @@ var HGrid = {
         Dropzone.autoDiscover = false;
         var url;
         var bool = false;
-// Instantiate this Dropzone
+        // Instantiate this Dropzone
         if(typeof hGrid.options['urlAdd'] === "string"){
             url = hGrid.options['urlAdd'];
         }
@@ -459,7 +459,7 @@ var HGrid = {
         } );
 
         hGrid.dropZoneObj = myDropzone;
-// Get the SlickGrid Row under the dragged file
+        // Get the SlickGrid Row under the dragged file
         myDropzone.on("dragover", function(e){
             currentDropCell = hGrid.Slick.grid.getCellFromEvent(e);
             if(currentDropCell===null){
@@ -534,7 +534,7 @@ var HGrid = {
                 },(1*1000));
             }
         })
-// Hook the drop success to the grid view update
+        // Hook the drop success to the grid view update
         myDropzone.on("success", function(file) {
             var value;
             var promise = $.when(hGrid.hGridOnUpload.notify(file));

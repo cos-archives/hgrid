@@ -19,7 +19,7 @@ This is currently a lot of files for dependencies, and future versions will have
 
 #### Creating the Grid
 
-Creating the grid requires two things, the data, and a DIV to display the data.
+Creating the grid requires three things: the data, the column specifications, and the DIV to display the data.
 
 The data is a JSON String that must be composed as an array of objects with 4 properties: 
 

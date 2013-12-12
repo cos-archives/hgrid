@@ -73,6 +73,14 @@
         var $elem = $(ret);
         var expandable = $elem.eq(2).hasClass("expand");
         equal(expandable, true);
-    })
+    });
 
+
+    test("Grid has dropzone object", function() {
+        ok(myGrid.dropZoneObj);
+    });
+
+    test("addColumn", function() {
+        ok(myGrid.addColumn({id:'id', name:'id', field:'id'}));
+    });
 })(jQuery);

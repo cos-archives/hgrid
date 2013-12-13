@@ -64,17 +64,18 @@
     test("defaultTaskNameFormatter", function(){
         var ret = myGrid.defaultTaskNameFormatter(0, 0, "Sort", null,
                                                 {'uid': 2, 'type': 'folder', 'name': 'skaters', 'parent_uid': 'null'});
-        var $elem = $(ret).eq(2);  // The second span element
+        var $elem = $(ret).eq(2);
         var collapsible = $elem.hasClass("collapse");
         equal(collapsible, true, "Element is collapsible");
+        equal($elem.attr("data-hgrid-nav"), 2, "has data-hgrid-nav attribute");
         var ret = myGrid.defaultTaskNameFormatter(0, 0, "Sort", null,
-                                                {'uid': 0, 'type': 'folder', 'name': 'skaters',
+                                                {'uid': 2, 'type': 'folder', 'name': 'skaters',
                                                 'parent_uid': 'null', "_collapsed": true});
-        var $elem = $(ret);
+        var $elem = $(ret).eq(2);
         var expandable = $elem.hasClass("expand");
         equal(expandable, true, "Element is expandable");
 
-        equal($elem.attr("data-hgrid-nav"), 2);
+        equal($elem.attr("data-hgrid-nav"), 2, "has data-hgrid-nav attribute");
     });
 
 

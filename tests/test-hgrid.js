@@ -61,18 +61,20 @@
         };
     });
 
-    test("defaultTaskNameFormatter returns collapsible span", function(){
+    test("defaultTaskNameFormatter", function(){
         var ret = myGrid.defaultTaskNameFormatter(0, 0, "Sort", null,
-                                                {'uid': 0, 'type': 'folder', 'name': 'skaters', 'parent_uid': 'null'});
-        var $elem = $(ret);
-        var collapsible = $elem.eq(2).hasClass("collapse");  // Second span element has collapse class
-        equal(collapsible, true);
+                                                {'uid': 2, 'type': 'folder', 'name': 'skaters', 'parent_uid': 'null'});
+        var $elem = $(ret).eq(2);  // The second span element
+        var collapsible = $elem.hasClass("collapse");
+        equal(collapsible, true, "Element is collapsible");
         var ret = myGrid.defaultTaskNameFormatter(0, 0, "Sort", null,
                                                 {'uid': 0, 'type': 'folder', 'name': 'skaters',
                                                 'parent_uid': 'null', "_collapsed": true});
         var $elem = $(ret);
-        var expandable = $elem.eq(2).hasClass("expand");
-        equal(expandable, true);
+        var expandable = $elem.hasClass("expand");
+        equal(expandable, true, "Element is expandable");
+
+        equal($elem.attr("data-hgrid-nav"), 2);
     });
 
 
@@ -83,4 +85,10 @@
     test("addColumn", function() {
         ok(myGrid.addColumn({id:'id', name:'id', field:'id'}));
     });
+
+    test("retrieveUrl is null by default", function() {
+        equal(myGrid.options.retrieveUrl, null);
+    });
+
+
 })(jQuery);

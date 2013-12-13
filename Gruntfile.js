@@ -25,7 +25,7 @@ grunt.initConfig({
 	   },
 
     qunit: {
-        all: ['tests/test-hgrid.html']
+        all: ['tests/index.html']
     },
 
     yuidoc: {

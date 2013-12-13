@@ -120,5 +120,67 @@
         // TODO: finish me
     });
 
+    var rootData, skaters, lazyGrid;
+    function noErrorCallbackExpected(xhr, textStatus, errorThrown) {
+        ok( false, 'Error callback executed: ' + errorThrown);
+    }
+    // Assertion for checking json respsonses from the mock server
+    // e.g. responseEqual("/hello/", {"msg": "Hello world"});
+    function responseEqual (url, expected) {
+        $.ajax({
+            url: url, dataType: "json",
+            success: function(json) {
+                deepEqual(json, expected);
+            },
+            error: noErrorCallbackExpected,
+            complete: function(xhr) {
+                start();
+            }
+        });
+    }
+    module("Async", {
+        setup: function(){
+            rootData = [{'uid': 0, 'type': 'folder', 'name': 'skaters'},
+                            {'uid': 1, 'type': 'folder', 'name': 'soccer_players'},
+                            {"uid": 2, "type": "file", "name": "foo.txt"}];
+
+            skaters = [
+                    {'uid': 1, 'type': 'file', 'name': 'tony', 'parent_uid': 0},
+                    {'uid': 2, 'type': 'file', 'name': 'bucky', 'parent_uid': 0}
+            ];
+            // Set up fake json endpoints which return the data
+            $.mockjax({
+                url: "/files/",
+                contentType: "application/json",
+                responseText: rootData
+            });
+
+            $.mockjax({
+                url: "/files/0",
+                contentType: "aplication/json",
+                responseText: skaters
+            });
+
+            lazyGrid = HGrid.create({
+                container: "#myGrid",
+                ajaxRoot: "/files/",
+                breadcrumbBox: "#myGridBreadcrumbs",
+                dropZone: true,
+                url: '/',
+            });
+
+        }
+    });
+
+    asyncTest("test root response", function(){
+        responseEqual("/files/", rootData);
+    });
+    asyncTest("test folder response", function() {
+        responseEqual("/files/0", skaters);
+    });
+
+    test("Hgrid with asynchronous loading", function() {
+        equal(lazyGrid.ajaxRoot, "/files/");
+    })
 
 })(jQuery);

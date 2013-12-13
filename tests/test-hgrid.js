@@ -4,7 +4,7 @@
 
     var data, myGrid;
 
-    module("Hgrid", {
+    module("Basic", {
         setup: function(){
             data = [
                 {'uid': 0, 'type': 'folder', 'name': 'skaters', 'parent_uid': 'null'},
@@ -42,7 +42,13 @@
     test("requiredFieldValidator", function(){
         // Custom assertion for the method
         function valid(value, expected, msg){
-            equal(myGrid.requiredFieldValidator(value).valid, expected, msg);
+            var invalid = {valid: false, msg: "This is a required field"};
+            var valid = {valid: true, msg: null}
+            if (expected) {
+                deepEqual(myGrid.requiredFieldValidator(value), valid, msg);
+            } else {
+                deepEqual(myGrid.requiredFieldValidator(value), invalid, msg);
+            };
         }
         valid(1, true, "1 is valid");
         valid(0, true, "0 is valid");
@@ -61,13 +67,16 @@
         };
     });
 
-    test("defaultTaskNameFormatter", function(){
+    test("defaultTaskNameFormatter is collapsible", function(){
         var ret = myGrid.defaultTaskNameFormatter(0, 0, "Sort", null,
                                                 {'uid': 2, 'type': 'folder', 'name': 'skaters', 'parent_uid': 'null'});
         var $elem = $(ret).eq(2);
         var collapsible = $elem.hasClass("collapse");
         equal(collapsible, true, "Element is collapsible");
         equal($elem.attr("data-hgrid-nav"), 2, "has data-hgrid-nav attribute");
+    });
+
+    test("defaultTaskNameFormatter is expandable", function() {
         var ret = myGrid.defaultTaskNameFormatter(0, 0, "Sort", null,
                                                 {'uid': 2, 'type': 'folder', 'name': 'skaters',
                                                 'parent_uid': 'null', "_collapsed": true});
@@ -89,6 +98,26 @@
 
     test("retrieveUrl is null by default", function() {
         equal(myGrid.options.retrieveUrl, null);
+    });
+
+    test("getItemByValue", function(){
+        var item = data[1]; // The item to retrieve
+        // Retrieve item by its uid
+        var ret = myGrid.getItemByValue(data, item.uid, "uid")
+        equal(ret.uid, item.uid);
+        equal(ret.id, item.id);
+        equal(ret.absoluteIndent, 0);
+        equal(ret.name, item.name);
+        equal(ret.type, item.type);
+        equal(ret.parent, item.parent);
+        equal(ret.parent_uid, item.parent_uid);
+    });
+
+    test("navLevelFilter", function() {
+        var item = data[2];
+        myGrid.navLevelFilter(item.uid);
+        equal(myGrid.currentIndentShift, item.absoluteIndent, "indent shift is updated");
+        // TODO: finish me
     });
 
 

@@ -371,7 +371,7 @@ var HGrid = {
         var navReset = _this.options.navLevel;
         _this.currentlyRendered = [];
         if (item && itemUid!=="") {
-            _this.currentIndentShift = item['absoluteIndent'];
+            _this.currentIndentShift = item.absoluteIndent;
             try {
                 if(!item["sortpath"]) throw "This item has no sort path";
                 _this.options.navLevel = item["sortpath"];

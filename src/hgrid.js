@@ -6,6 +6,7 @@
  * @author Alexander Ferguson
  * test
  */
+"use strict";
 var HGrid = {
     //Gives each div a class based on type (folder or file)
     /**
@@ -16,6 +17,8 @@ var HGrid = {
     @param defaultOptions.container null
     @param defaultOptions.url null
     @param defaultOptions.info null
+    @param defaultOptions.ajaxRoot null
+    @param defaultOptions.ajaxOnSuccess null
     @param defaultOptions.columns Uid and Name columns
     @param defaultOptions.editable false
     @param defaultOptions.enableCellNavigation false
@@ -38,6 +41,14 @@ var HGrid = {
         container: null,
         url: null,
         info: null,
+        // Root URL to get data at
+        ajaxRoot: null,
+        // Callback on AJAX success
+        ajaxOnSuccess: null,
+        // Callback on AJAX error
+        ajaxOnError: null,
+        // Callback on AJAX complete
+        ajaxOnComplete: null,
         columns: [
             {id: "uid", name: "uid", width: 40, field: "uid"},
             {id: "name", name: "Name", field: "name", width: 450, cssClass: "cell-title", sortable: true, defaultSortAsc: true}
@@ -124,133 +135,26 @@ var HGrid = {
                 self.options[urls[i]] = self.options[urls[i]]();
             }
         }
-        self.initialize();
-        $.extend(this, {
-
-            hGridOnMouseEnter: new self.Slick.Event(),
-            hGridOnMouseLeave: new self.Slick.Event(),
-            hGridOnClick: new self.Slick.Event(),
-            /**
-             Fired before a move occurs
-
-             @event hGridBeforeMove
-             @param {Object} e Event object
-             @param {Object} args
-                @param args.rows Array of unique IDs of rows moving
-                @param args.insertBefore Row ID of destination row to insert before
-             **/
-            hGridBeforeMove: new self.Slick.Event(),
-            /**
-             Fired after a move occurs
-
-             @event hGridAfterMove
-             @param {Object} e Event object
-             @param {Object} args
-                @param args.rows Array of unique IDs of rows moving
-                @param args.insertBefore Row ID of destination row to insert before
-             **/
-            hGridAfterMove: new self.Slick.Event(),
-            /**
-             Fired before an edit occurs
-
-             @event hGridBeforeEdit
-             @param {Object} e Event object
-             @param {Object} args
-                @param args.item Item being changed
-                @param args.name New name
-             **/
-            hGridBeforeEdit: new self.Slick.Event(),
-            /**
-             Fired after an edit occurs
-
-             @event hGridAfterEdit
-             @param {Object} e Event object
-             @param {Object} args
-                @param args.item Item being changed
-                @param args.name New name
-                @param args.success Boolean, whether or not the edit succeeded
-             **/
-            hGridAfterEdit: new self.Slick.Event(),
-            /**
-             Fired before a delete occurs
-
-             @event hGridBeforeDelete
-             @param {Object} e Event object
-             @param {Object} args
-                @param args.items Array of unique IDs to be deleted
-             **/
-            hGridBeforeDelete: new self.Slick.Event(),
-            /**
-             Fired after a delete occurs
-
-             @event hGridAfterDelete
-             @param {Object} e Event object
-             @param {Object} args
-                @param args.items Array of unique IDs to be deleted
-                @param args.success Boolean, whether or not the delete succeeded
-             **/
-            hGridAfterDelete: new self.Slick.Event(),
-            /**
-             Fired before an add occurs
-
-             @event hGridBeforeAdd
-             @param {Object} e Event object
-             @param {Object} args
-                @param args.item Item to be added
-                @param args.parent Parent item for new item
-             **/
-            hGridBeforeAdd: new self.Slick.Event(),
-            /**
-             Fired after an add occurs
-
-             @event hGridAfterAdd
-             @param {Object} e Event object
-             @param {Object} args
-                @param args.item Item to be added
-                @param args.parent Parent item for new item
-                @param args.success Boolean, whether or not the add succeeded
-             **/
-            hGridAfterAdd: new self.Slick.Event(),
-            /**
-             Fired before an upload occurs
-
-             @event hGridBeforeUpload
-             @param {Object} e Event object
-             @param {Object} args
-                @param args.item File object being added
-                @param args.parent Parent item for new file
-             **/
-            hGridBeforeUpload: new self.Slick.Event(),
-            /**
-             Fired after an upload occurs
-
-             @event hGridAfterUpload
-             @param {Object} e Event object
-             @param {Object} args
-                @param args.item File object being added
-                @param args.success Boolean, whether or not the upload succeeded
-             **/
-            hGridAfterUpload: new self.Slick.Event(),
-            /**
-             Fired on success response from server on upload
-
-             @event hGridOnUpload
-             @param {Object} e Event object
-             @param {Object} args File object response
-             **/
-            hGridOnUpload: new self.Slick.Event(),
-             /**
-             Fired on success response from server on upload
-
-             @event hGridAfterNav
-             @param {Object} e Event object
-             @param {Object} args nav level
-             **/
-            hGridAfterNav: new self.Slick.Event()
-        });
-        return self;
+        if (self.options.ajaxRoot) { // Get data from server
+            $.ajax({
+                url: self.options.ajaxRoot, dataType: "json",
+                success: function(json)  {
+                    self.options.info = json;
+                    // Initialize the grid
+                    var grid = self.initialize.call(self);
+                    return self.options.ajaxOnSuccess && self.options.ajaxOnSuccess(grid);
+                },
+                error: function(xhr, textstatus, error) {
+                    return self.options.ajaxOnError && self.options.ajaxOnError(xhr, textstatus, error);
+                },
+                complete: function(xhr){
+                    return self.options.ajaxOnComplete && self.options.ajaxOnComplete(xhr);
+                }
+            })
+        } else {  // Data were passed in directly as an array
+            return self.initialize.call(self);
+        }
     },
-
     initialize: function() {
         var hGridContainer = this.options.container;
         var hGridInfo = this.options.info;
@@ -296,6 +200,130 @@ var HGrid = {
                 Dropzone.autoDiscover = false;
             }
         }
+        $.extend(this, {
+
+            hGridOnMouseEnter: new this.Slick.Event(),
+            hGridOnMouseLeave: new this.Slick.Event(),
+            hGridOnClick: new this.Slick.Event(),
+            /**
+             Fired before a move occurs
+
+             @event hGridBeforeMove
+             @param {Object} e Event object
+             @param {Object} args
+                @param args.rows Array of unique IDs of rows moving
+                @param args.insertBefore Row ID of destination row to insert before
+             **/
+            hGridBeforeMove: new this.Slick.Event(),
+            /**
+             Fired after a move occurs
+
+             @event hGridAfterMove
+             @param {Object} e Event object
+             @param {Object} args
+                @param args.rows Array of unique IDs of rows moving
+                @param args.insertBefore Row ID of destination row to insert before
+             **/
+            hGridAfterMove: new this.Slick.Event(),
+            /**
+             Fired before an edit occurs
+
+             @event hGridBeforeEdit
+             @param {Object} e Event object
+             @param {Object} args
+                @param args.item Item being changed
+                @param args.name New name
+             **/
+            hGridBeforeEdit: new this.Slick.Event(),
+            /**
+             Fired after an edit occurs
+
+             @event hGridAfterEdit
+             @param {Object} e Event object
+             @param {Object} args
+                @param args.item Item being changed
+                @param args.name New name
+                @param args.success Boolean, whether or not the edit succeeded
+             **/
+            hGridAfterEdit: new this.Slick.Event(),
+            /**
+             Fired before a delete occurs
+
+             @event hGridBeforeDelete
+             @param {Object} e Event object
+             @param {Object} args
+                @param args.items Array of unique IDs to be deleted
+             **/
+            hGridBeforeDelete: new this.Slick.Event(),
+            /**
+             Fired after a delete occurs
+
+             @event hGridAfterDelete
+             @param {Object} e Event object
+             @param {Object} args
+                @param args.items Array of unique IDs to be deleted
+                @param args.success Boolean, whether or not the delete succeeded
+             **/
+            hGridAfterDelete: new this.Slick.Event(),
+            /**
+             Fired before an add occurs
+
+             @event hGridBeforeAdd
+             @param {Object} e Event object
+             @param {Object} args
+                @param args.item Item to be added
+                @param args.parent Parent item for new item
+             **/
+            hGridBeforeAdd: new this.Slick.Event(),
+            /**
+             Fired after an add occurs
+
+             @event hGridAfterAdd
+             @param {Object} e Event object
+             @param {Object} args
+                @param args.item Item to be added
+                @param args.parent Parent item for new item
+                @param args.success Boolean, whether or not the add succeeded
+             **/
+            hGridAfterAdd: new this.Slick.Event(),
+            /**
+             Fired before an upload occurs
+
+             @event hGridBeforeUpload
+             @param {Object} e Event object
+             @param {Object} args
+                @param args.item File object being added
+                @param args.parent Parent item for new file
+             **/
+            hGridBeforeUpload: new this.Slick.Event(),
+            /**
+             Fired after an upload occurs
+
+             @event hGridAfterUpload
+             @param {Object} e Event object
+             @param {Object} args
+                @param args.item File object being added
+                @param args.success Boolean, whether or not the upload succeeded
+             **/
+            hGridAfterUpload: new this.Slick.Event(),
+            /**
+             Fired on success response from server on upload
+
+             @event hGridOnUpload
+             @param {Object} e Event object
+             @param {Object} args File object response
+             **/
+            hGridOnUpload: new this.Slick.Event(),
+             /**
+             Fired after a nav filter is clicked.
+
+             @event hGridAfterNav
+             @param {Object} e Event object
+             @param {Object} args nav level
+             **/
+            hGridAfterNav: new this.Slick.Event()
+        });
+        return this;
     },
 
     // TODO: columnDef unused. Remove?
@@ -885,9 +913,8 @@ var HGrid = {
         var _this = this;
         var info = hGridInfo.slice();
         while (info.length>=1){
-
             var d = info[i];
-            if (info[i]['parent_uid']=="null"){
+            if (info[i]['parent_uid'] === "null"){
                 d['parent']=null;
                 d['indent']=0;
                 d['id']=data_counter;

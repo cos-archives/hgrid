@@ -140,13 +140,13 @@
     }
     module("Async", {
         setup: function(){
-            rootData = [{'uid': 0, 'type': 'folder', 'name': 'skaters'},
-                            {'uid': 1, 'type': 'folder', 'name': 'soccer_players'},
-                            {"uid": 2, "type": "file", "name": "foo.txt"}];
+            rootData = [{'uid': 0, 'type': 'folder', 'name': 'skaters', "parent_uid": "null"},
+                            {'uid': 1, 'type': 'folder', 'name': 'soccer_players', "parent_uid": "null"},
+                            {"uid": 2, "type": "file", "name": "foo.txt", "parent_uid": "null"}];
 
             skaters = [
-                    {'uid': 1, 'type': 'file', 'name': 'tony', 'parent_uid': 0},
-                    {'uid': 2, 'type': 'file', 'name': 'bucky', 'parent_uid': 0}
+                    {'uid': 3, 'type': 'file', 'name': 'tony', 'parent_uid': 0},
+                    {'uid': 4, 'type': 'file', 'name': 'bucky', 'parent_uid': 0}
             ];
             // Set up fake json endpoints which return the data
             $.mockjax({
@@ -157,16 +157,8 @@
 
             $.mockjax({
                 url: "/files/0",
-                contentType: "aplication/json",
+                contentType: "application/json",
                 responseText: skaters
-            });
-
-            lazyGrid = HGrid.create({
-                container: "#myGrid",
-                ajaxRoot: "/files/",
-                breadcrumbBox: "#myGridBreadcrumbs",
-                dropZone: true,
-                url: '/',
             });
 
         }
@@ -179,8 +171,31 @@
         responseEqual("/files/0", skaters);
     });
 
-    test("Hgrid with asynchronous loading", function() {
-        equal(lazyGrid.ajaxRoot, "/files/");
+
+    asyncTest("Creating Hgrid with asynchronous loading", function() {
+        var lazyGrid;
+        HGrid.create({
+            container: "#myGrid",
+            ajaxRoot: "/files/",
+            ajaxOnSuccess: function(grid){
+                lazyGrid = grid;
+                equal(lazyGrid.options.ajaxRoot, "/files/", "ajaxRoot is correct");
+                // each data item has the correct properties
+                for (var i = lazyGrid.data.length - 1; i >= 0; i--) {
+                    var item = lazyGrid.data[i];
+                    equal(item.uid, rootData[i].uid);
+                    equal(item.type, rootData[i].type);
+                    equal(item.name, rootData[i].name);
+                };
+            },
+            ajaxOnComplete: function(xhr) {
+                start();
+            },
+            ajaxOnError: noErrorCallbackExpected,
+            breadcrumbBox: "#myGridBreadcrumbs",
+            dropZone: true,
+            url: '/upload/',
+        });
     })
 
 })(jQuery);

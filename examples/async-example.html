@@ -20,14 +20,27 @@
 
 <script>
     // OUR FAKE SERVER
-    var rootData = [{'uid': 0, 'type': 'folder', 'name': 'skaters', "parent_uid": "null"},
-                    {'uid': 1, 'type': 'folder', 'name': 'soccer_players', "parent_uid": "null"},
-                    {"uid": 2, "type": "file", "name": "foo.txt", "parent_uid": "null"}];
+    var rootData = [{'uid': 0, 'type': 'folder',
+                        'name': 'Skaters', "parent_uid": "null"},
+                    {'uid': 1, 'type': 'folder',
+                        'name': 'Soccer Players', "parent_uid": "null"},
+                    {"uid": 2, "type": "file",
+                        "name": "foo.txt", "parent_uid": "null"}];
 
     var skaters = [
             {'uid': 3, 'type': 'file', 'name': 'tony', 'parent_uid': 0},
             {'uid': 4, 'type': 'file', 'name': 'bucky', 'parent_uid': 0}
     ];
+
+    var soccerPlayers = [
+        {'uid': 5, 'type': 'folder', 'name': 'Pro', 'parent_uid': 1},
+        {'uid': 7, 'type': 'folder', 'name': 'Amateur', 'parent_uid': 1},
+    ];
+
+    var soccerPros = [
+        {'uid': 6, 'type': 'file', 'name': 'messi', 'parent_uid': 5},
+        {'uid': 5, 'type': 'file', 'name': 'ronaldo', 'parent_uid': 5},
+    ]
     // Set up fake json endpoints which return the data
     $.mockjax({
         url: "/files/",
@@ -39,6 +52,17 @@
         contentType: "application/json",
         responseText: skaters
     });
+    $.mockjax({
+        url: "/files/1",
+        contentType: "application/json",
+        responseText: soccerPlayers
+    });
+    $.mockjax({
+        url: "/files/5",
+        contentType: "application/json",
+        responseText: soccerPros
+    });
+
     // END FAKE SERVER
 
     // Initialize Hgrid with AJAX endpoint
@@ -49,7 +73,7 @@
         ajaxOnSuccess: function(grid){
             // Assign the grid
             lazyGrid = grid;
-            lazyGrid.addColumn({id:'id', name:'id', field:'id'})
+            lazyGrid.addColumn({id:'id', name:'id', field:'id'});
         },
         breadcrumbBox: "#myGridBreadcrumbs",
         dropZone: true,

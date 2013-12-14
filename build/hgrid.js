@@ -323,6 +323,8 @@ var HGrid = {
              **/
             hGridAfterNav: new this.Slick.Event()
         });
+        this.Slick.dataView.collapseAllGroups();
+
         return this;
     },
 
@@ -932,8 +934,13 @@ var HGrid = {
         var info = hGridInfo.slice();
         while (info.length>=1){
             var d = info[i];
-            if (info[i]['parent_uid'] === "null"){
-                d['parent']=null;
+            // If using async mode, collapse folders by default
+            if (d.type === "folder" && this.options.ajaxRoot) {
+                d._collapsed = true;
+            };
+            if (d.parent_uid === "null" || d.parent_uid === null){
+
+                d['parent'] = null;
                 d['indent']=0;
                 d['id']=data_counter;
                 checker[d['uid']]=[d['indent'], data_counter];
@@ -964,9 +971,9 @@ var HGrid = {
         for(var l=0; l<output.length; l++){
             var path = [];
             path.push(output[l]['uid']);
-            if(output[l]['parent_uid']!="null"){
+            if(output[l]['parent_uid']!=="null"){
                 for(var m=0; m<l; m++){
-                    if(output[m]['uid']==output[l]['parent_uid']){
+                    if(output[m]['uid']===output[l]['parent_uid']){
 //                        var x = m;
                         while(output[m]['parent_uid']!="null"){
                             path.push(output[m]['uid']);
@@ -1021,7 +1028,7 @@ var HGrid = {
             //Check if item has a parent
             if (sortedData[i]['parent_uid']!="null"){
                 for(var j=0; j<sortedData.length; j++){
-                    if (sortedData[j]['uid']==d['parent_uid'] && !d["parent"]){
+                    if (sortedData[j]['uid'] === d['parent_uid'] && !d["parent"]){
                         d["parent"]= j;
                         break;
                     }
@@ -1039,11 +1046,11 @@ var HGrid = {
             }
             //If no parent, set parent to null and indent to 0
             else {
-                indent=0;
-                d["parent"]=null;
+                indent = 0;
+                d.parent = null;
             }
             if (sortedData[i]._collapsed){
-                d._collapsed=sortedData[i]._collapsed;
+                d._collapsed = sortedData[i]._collapsed;
             }
             //Set other values
             d["id"] = i;
@@ -1264,7 +1271,7 @@ var HGrid = {
     /**
      * Expand a collapsed item. Makes an AJAX call to the item if ajaxRoot is set.
      * @param  {Object}   item The data item (folder) to expand.
-     * @param  {Function} done Optional AJAX callback
+     * @param  {Function} done Optional AJAX callback that takes the dataset as its only argument.
      */
     expandItem: function(item, done) {
         var _this = this;
@@ -1272,6 +1279,10 @@ var HGrid = {
             this.getItemsFromServer(item.uid, function(data){
                 if (data) {
                     data.forEach(function(item){
+                        // Collapse folders by default
+                        if (item.type === "folder") {
+                            item._collapsed = true;
+                        };
                         _this.addItem(item);
                     });
                 };
@@ -1279,12 +1290,12 @@ var HGrid = {
                 done && done(_this.data);
             });
         };
-        item._collapsed = true;
+        item._collapsed = false;
         this.Slick.dataView.updateItem(item.id, item);
     },
 
     collapseItem: function(item) {
-        item._collapsed = false;
+        item._collapsed = true;
         this.Slick.dataView.updateItem(item.id, item);
     },
 
@@ -1428,9 +1439,9 @@ var HGrid = {
                 if (item) {
                     _this.currentlyRendered = [];
                     if (!item._collapsed) {
-                        _this.expandItem(item);
-                    } else {
                         _this.collapseItem(item);
+                    } else {
+                        _this.expandItem(item);
                     }
                 }
                 e.stopImmediatePropagation();

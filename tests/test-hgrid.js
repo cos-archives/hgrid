@@ -138,6 +138,29 @@
             }
         });
     }
+
+    // Custom test case that injects a lazy-loading Hgrid into the test
+    function testLazyGrid (description, testFn){
+        asyncTest("getItemUrl", function() {
+            var lazyGrid;
+            HGrid.create({
+                container: "#myGrid",
+                ajaxRoot: "/files/",
+                ajaxOnComplete: function(xhr) {
+                    start(); // Start the tests
+                },
+                ajaxOnSuccess: function(grid){
+                    testFn(grid);
+
+                },
+                ajaxOnError: noErrorCallbackExpected,
+                breadcrumbBox: "#myGridBreadcrumbs",
+                dropZone: true,
+                url: '/upload/',
+            });
+        });
+        return;
+    }
     module("Async", {
         setup: function(){
             rootData = [{'uid': 0, 'type': 'folder', 'name': 'skaters', "parent_uid": "null"},
@@ -160,7 +183,6 @@
                 contentType: "application/json",
                 responseText: skaters
             });
-
         }
     });
 
@@ -177,6 +199,9 @@
         HGrid.create({
             container: "#myGrid",
             ajaxRoot: "/files/",
+            ajaxOnComplete: function(xhr) {
+                start(); // Start the tests
+            },
             ajaxOnSuccess: function(grid){
                 lazyGrid = grid;
                 equal(lazyGrid.options.ajaxRoot, "/files/", "ajaxRoot is correct");
@@ -188,14 +213,52 @@
                     equal(item.name, rootData[i].name);
                 };
             },
+            ajaxOnError: noErrorCallbackExpected,
+            breadcrumbBox: "#myGridBreadcrumbs",
+            dropZone: true,
+            url: '/upload/',
+        });
+    });
+
+    asyncTest("getItemUrl", function() {
+        var lazyGrid;
+        HGrid.create({
+            container: "#myGrid",
+            ajaxRoot: "/files/",
             ajaxOnComplete: function(xhr) {
-                start();
+                start(); // Start the tests
+            },
+            ajaxOnSuccess: function(grid){
+                equal(grid.getItemUrl(1), "/files/1");
+                equal(grid.getItemUrl(2), "/files/2");
+                equal(grid.getItemUrl("foo"), "/files/foo");
+                equal(grid.getItemUrl(), "/files/");
             },
             ajaxOnError: noErrorCallbackExpected,
             breadcrumbBox: "#myGridBreadcrumbs",
             dropZone: true,
             url: '/upload/',
         });
-    })
+    });
+
+    asyncTest("getDataFromServer", function() {
+        var lazyGrid;
+        HGrid.create({
+            container: "#myGrid",
+            ajaxRoot: "/files/",
+            ajaxOnSuccess: function(grid){
+                // Get the data for item 0 (the skaters folder)
+                grid.getItemsFromServer("0", function(data){
+                    start();
+                    deepEqual(data, skaters);
+                });
+            },
+            ajaxOnError: noErrorCallbackExpected,
+            breadcrumbBox: "#myGridBreadcrumbs",
+            dropZone: true,
+            url: '/upload/',
+        });
+    });
+
 
 })(jQuery);

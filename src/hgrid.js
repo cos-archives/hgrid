@@ -351,6 +351,23 @@ var HGrid = {
         }
     },
 
+    /**
+     * Get the data for a folder from the server
+     * @param  uid  The folder's uid.
+     * @param  {Function} done Optional callback that takes the returned data as its argument.
+     */
+    getItemsFromServer: function(uid, done) {
+        $.ajax({
+            url: this.getItemUrl(uid), dataType: "json",
+            success: function(json) {
+                done && done(json);
+            },
+            error: function(xhr, textStatus, error) {
+                done && done(null, error);
+            }
+        });
+    },
+
     myFilter: function (item, args) {
         var data = args[0];
         var _this = args[1];
@@ -1228,6 +1245,19 @@ var HGrid = {
                 }
             }
         }
+    },
+
+    /**
+     * Return the URL where to send the AJAX request for an item's contents.
+     * @param  uid The ite's UID.
+     * @return {String}     URL where to
+     */
+    getItemUrl: function(uid) {
+        if (uid) {
+            return this.options.ajaxRoot + uid;
+        } else {
+            return this.options.ajaxRoot;
+        };
     },
 
     setupListeners: function(){

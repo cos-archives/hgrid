@@ -150,7 +150,7 @@ var HGrid = {
                 complete: function(xhr){
                     return self.options.ajaxOnComplete && self.options.ajaxOnComplete(xhr);
                 }
-            })
+            });
         } else {  // Data were passed in directly as an array
             return self.initialize.call(self);
         }
@@ -178,11 +178,11 @@ var HGrid = {
 
         var _this = this;
         $.each(this.options.columns, function(idx, elm) {
-            if (elm['primary']==true && !elm.formatter){
+            if (elm['primary'] === true && !elm.formatter){
                 elm.formatter = _this.defaultTaskNameFormatter;
             }
         });
-        if(this.options.columns===this.defaultOptions.columns) {
+        if(this.options.columns === this.defaultOptions.columns) {
             this.options.columns[this.Slick.grid.getColumnIndex('name')].formatter = this.defaultTaskNameFormatter;
         }
         this.options.columns[this.Slick.grid.getColumnIndex('name')].validator = this.requiredFieldValidator;
@@ -367,6 +367,7 @@ var HGrid = {
             }
         });
     },
+
 
     myFilter: function (item, args) {
         var data = args[0];
@@ -1253,14 +1254,41 @@ var HGrid = {
      * @return {String}     URL where to
      */
     getItemUrl: function(uid) {
-        if (uid) {
-            return this.options.ajaxRoot + uid;
-        } else {
+        if(uid === null || uid === undefined){
             return this.options.ajaxRoot;
+        } else {
+            return this.options.ajaxRoot + uid;
         };
     },
 
-    setupListeners: function(){
+    /**
+     * Expand a collapsed item. Makes an AJAX call to the item if ajaxRoot is set.
+     * @param  {Object}   item The data item (folder) to expand.
+     * @param  {Function} done Optional AJAX callback
+     */
+    expandItem: function(item, done) {
+        var _this = this;
+        if (this.options.ajaxRoot && !item._loaded) {
+            this.getItemsFromServer(item.uid, function(data){
+                if (data) {
+                    data.forEach(function(item){
+                        _this.addItem(item);
+                    });
+                };
+                item._loaded = true;
+                done && done(_this.data);
+            });
+        };
+        item._collapsed = true;
+        this.Slick.dataView.updateItem(item.id, item);
+    },
+
+    collapseItem: function(item) {
+        item._collapsed = false;
+        this.Slick.dataView.updateItem(item.id, item);
+    },
+
+    setupListeners: function() {
         var _this = this;
         var grid = this.Slick.grid;
         var data = this.data;
@@ -1394,16 +1422,16 @@ var HGrid = {
 
         grid.onClick.subscribe(function (e, args) {
             _this.hGridOnClick.notify({e: e, args: args});
+            // TODO: Pyramid of DOOOM!!! Refactor me.
             if ($(e.target).hasClass("toggle") || $(e.target).hasClass("folder")) {
                 var item = dataView.getItem(args.row);
                 if (item) {
                     _this.currentlyRendered = [];
                     if (!item._collapsed) {
-                        item._collapsed = true;
+                        _this.expandItem(item);
                     } else {
-                        item._collapsed = false;
+                        _this.collapseItem(item);
                     }
-                    dataView.updateItem(item.id, item);
                 }
                 e.stopImmediatePropagation();
             }
@@ -1469,7 +1497,6 @@ var HGrid = {
             _this.navLevelFilter(navId);
             e.preventDefault();
         });
-
     }
 };
 

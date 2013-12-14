@@ -184,6 +184,7 @@
                 responseText: skaters
             });
         }
+
     });
 
     asyncTest("test root response", function(){
@@ -218,6 +219,7 @@
             dropZone: true,
             url: '/upload/',
         });
+        $.mockjaxClear();
     });
 
     asyncTest("getItemUrl", function() {
@@ -230,19 +232,22 @@
             },
             ajaxOnSuccess: function(grid){
                 equal(grid.getItemUrl(1), "/files/1");
+                equal(grid.getItemUrl("1"), "/files/1");
                 equal(grid.getItemUrl(2), "/files/2");
                 equal(grid.getItemUrl("foo"), "/files/foo");
                 equal(grid.getItemUrl(), "/files/");
+                equal(grid.getItemUrl(0), "/files/0");
             },
             ajaxOnError: noErrorCallbackExpected,
             breadcrumbBox: "#myGridBreadcrumbs",
             dropZone: true,
             url: '/upload/',
         });
+        $.mockjaxClear();
+
     });
 
-    asyncTest("getDataFromServer", function() {
-        var lazyGrid;
+    asyncTest("getItemsFromServer", function() {
         HGrid.create({
             container: "#myGrid",
             ajaxRoot: "/files/",
@@ -259,6 +264,5 @@
             url: '/upload/',
         });
     });
-
 
 })(jQuery);

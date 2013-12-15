@@ -646,7 +646,7 @@ var HGrid = {
         var promise = $.when(_this.hGridBeforeAdd.notify(value));
         promise.always(function(event_status){
             if(event_status || typeof(event_status)==='undefined'){
-                if(item['parent_uid']!="null" && !item['uploadBar']){
+                if(item['parent_uid'] !== "null" && !item['uploadBar']){
                     var parent_path = parent['path'];
                     item['path']=[];
                     item['path']=item['path'].concat(parent_path, item['uid']);
@@ -1257,8 +1257,8 @@ var HGrid = {
 
     /**
      * Return the URL where to send the AJAX request for an item's contents.
-     * @param  uid The ite's UID.
-     * @return {String}     URL where to
+     * @param  uid The item's UID.
+     * @return {String}     Endpoint URL that returns the item's contents.
      */
     getItemUrl: function(uid) {
         if(uid === null || uid === undefined){
@@ -1269,6 +1269,28 @@ var HGrid = {
     },
 
     /**
+     * Fetches a folder's items and adds them to the dataset.
+     * @param {Object} parentItem The item whose contents will be added.
+     * @param {Function} done Optional callback that takes the new dataset as its argument.
+     */
+    addItemsFromServer: function(parentItem, done) {
+        var _this = this;
+        this.getItemsFromServer(parentItem.uid, function(data){
+            if (data) {
+                data.forEach(function(item){
+                    // Collapse folders by default
+                    if (item.type === "folder") {
+                        item._collapsed = true;
+                    };
+                    _this.addItem(item);
+                });
+            };
+            parentItem._loaded = true;
+            done && done(_this.data);
+        });
+    },
+
+    /**
      * Expand a collapsed item. Makes an AJAX call to the item if ajaxRoot is set.
      * @param  {Object}   item The data item (folder) to expand.
      * @param  {Function} done Optional AJAX callback that takes the dataset as its only argument.
@@ -1276,24 +1298,16 @@ var HGrid = {
     expandItem: function(item, done) {
         var _this = this;
         if (this.options.ajaxRoot && !item._loaded) {
-            this.getItemsFromServer(item.uid, function(data){
-                if (data) {
-                    data.forEach(function(item){
-                        // Collapse folders by default
-                        if (item.type === "folder") {
-                            item._collapsed = true;
-                        };
-                        _this.addItem(item);
-                    });
-                };
-                item._loaded = true;
-                done && done(_this.data);
-            });
+            _this.addItemsFromServer(item, done)
         };
         item._collapsed = false;
         this.Slick.dataView.updateItem(item.id, item);
     },
 
+    /**
+     * Collapse a folder
+     * @param  {Object} item The folder item to collapse.
+     */
     collapseItem: function(item) {
         item._collapsed = true;
         this.Slick.dataView.updateItem(item.id, item);

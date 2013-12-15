@@ -120,7 +120,6 @@
         // TODO: finish me
     });
 
-    var rootData, skaters, lazyGrid;
     function noErrorCallbackExpected(xhr, textStatus, errorThrown) {
         ok( false, 'Error callback executed: ' + errorThrown);
     }
@@ -161,6 +160,7 @@
         });
         return;
     }
+    var rootData, skaters, soccerPlayers, soccerPros, lazyGrid;
     module("Async", {
         setup: function(){
             rootData = [{'uid': 0, 'type': 'folder', 'name': 'skaters', "parent_uid": "null"},
@@ -171,6 +171,16 @@
                     {'uid': 3, 'type': 'file', 'name': 'tony', 'parent_uid': 0},
                     {'uid': 4, 'type': 'file', 'name': 'bucky', 'parent_uid': 0}
             ];
+
+            soccerPlayers = [
+                {'uid': 5, 'type': 'folder', 'name': 'Pro', 'parent_uid': 1},
+                {'uid': 7, 'type': 'folder', 'name': 'Amateur', 'parent_uid': 1},
+            ];
+
+            soccerPros = [
+                {'uid': 6, 'type': 'file', 'name': 'messi', 'parent_uid': 5},
+                {'uid': 5, 'type': 'file', 'name': 'ronaldo', 'parent_uid': 5},
+            ]
             // Set up fake json endpoints which return the data
             $.mockjax({
                 url: "/files/",
@@ -183,17 +193,34 @@
                 contentType: "application/json",
                 responseText: skaters
             });
+
+            $.mockjax({
+                url: "/files/1",
+                contentType: "application/json",
+                responseText: soccerPlayers
+            });
+            $.mockjax({
+                url: "/files/5",
+                contentType: "application/json",
+                responseText: soccerPros
+            });
         }
 
     });
 
+    // Test the mock server
     asyncTest("test root response", function(){
         responseEqual("/files/", rootData);
     });
-    asyncTest("test folder response", function() {
+    asyncTest("test skaters endpoint", function() {
         responseEqual("/files/0", skaters);
     });
-
+    asyncTest("test soccerPlayers endpoint", function() {
+        responseEqual("/files/1", soccerPlayers);
+    });
+    asyncTest("test soccerPros endpoint", function() {
+        responseEqual("/files/5", soccerPros);
+    });
 
     asyncTest("Creating Hgrid with asynchronous loading", function() {
         var lazyGrid;
@@ -212,6 +239,10 @@
                     equal(item.uid, rootData[i].uid);
                     equal(item.type, rootData[i].type);
                     equal(item.name, rootData[i].name);
+                    // folders are collapsed
+                    if (item.type === "folder") {
+                        ok(item._collapsed, "folder is collapsed");
+                    };
                 };
             },
             ajaxOnError: noErrorCallbackExpected,
@@ -257,6 +288,31 @@
                     start();
                     deepEqual(data, skaters);
                 });
+            },
+            ajaxOnError: noErrorCallbackExpected,
+            breadcrumbBox: "#myGridBreadcrumbs",
+            dropZone: true,
+            url: '/upload/',
+        });
+    });
+
+    asyncTest("addItemsFromServer", function() {
+        HGrid.create({
+            container: "#myGrid",
+            ajaxRoot: "/files/",
+            ajaxOnSuccess: function(grid){
+                // Add the data from item 1 (the soccer players folder)
+                var parentItem = grid.getItemByValue(grid.data, "1", "uid");
+                grid.addItemsFromServer(parentItem, function(data) {
+                    start();
+                    equal(data.length, rootData.length + soccerPlayers.length);
+                    data.forEach(function(item) {
+                        // Foldrs are collapsed
+                        if (item.type === "folder") {
+                            ok(item._collapsed,"folder " + item.name + " is collapsed");
+                        };
+                    })
+                })
             },
             ajaxOnError: noErrorCallbackExpected,
             breadcrumbBox: "#myGridBreadcrumbs",

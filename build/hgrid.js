@@ -355,12 +355,13 @@ var HGrid = {
 
     /**
      * Get the data for a folder from the server
-     * @param  uid  The folder's uid.
+     * @param  {Object} parentItem  The folder item.
      * @param  {Function} done Optional callback that takes the returned data as its argument.
      */
-    getItemsFromServer: function(uid, done) {
+    getItemsFromServer: function(parentItem, done) {
+        var _this = this
         $.ajax({
-            url: this.getItemUrl(uid), dataType: "json",
+            url: _this.getItemUrl(parentItem), dataType: "json",
             success: function(json) {
                 done && done(json);
             },
@@ -1260,11 +1261,11 @@ var HGrid = {
      * @param  uid The item's UID.
      * @return {String}     Endpoint URL that returns the item's contents.
      */
-    getItemUrl: function(uid) {
-        if(uid === null || uid === undefined){
+    getItemUrl: function(item) {
+        if(item === null || item === undefined){
             return this.options.ajaxRoot;
         } else {
-            return this.options.ajaxRoot + uid;
+            return this.options.ajaxRoot + item.uid;
         };
     },
 
@@ -1275,7 +1276,7 @@ var HGrid = {
      */
     addItemsFromServer: function(parentItem, done) {
         var _this = this;
-        this.getItemsFromServer(parentItem.uid, function(data){
+        this.getItemsFromServer(parentItem, function(data){
             if (data) {
                 data.forEach(function(item){
                     // Collapse folders by default
@@ -1297,6 +1298,7 @@ var HGrid = {
      */
     expandItem: function(item, done) {
         var _this = this;
+        // Fetch and add datafrom server if in async mode
         if (this.options.ajaxRoot && !item._loaded) {
             _this.addItemsFromServer(item, done)
         };

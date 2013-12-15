@@ -262,12 +262,12 @@
                 start(); // Start the tests
             },
             ajaxOnSuccess: function(grid){
-                equal(grid.getItemUrl(1), "/files/1");
-                equal(grid.getItemUrl("1"), "/files/1");
-                equal(grid.getItemUrl(2), "/files/2");
-                equal(grid.getItemUrl("foo"), "/files/foo");
+                var item;
+                item = grid.getItemByValue(grid.data, 1, "uid");
+                equal(grid.getItemUrl(item), "/files/1");
+                item = grid.getItemByValue(grid.data, 2, "uid");
+                equal(grid.getItemUrl(item), "/files/2");
                 equal(grid.getItemUrl(), "/files/");
-                equal(grid.getItemUrl(0), "/files/0");
             },
             ajaxOnError: noErrorCallbackExpected,
             breadcrumbBox: "#myGridBreadcrumbs",
@@ -275,7 +275,6 @@
             url: '/upload/',
         });
         $.mockjaxClear();
-
     });
 
     asyncTest("getItemsFromServer", function() {
@@ -284,7 +283,8 @@
             ajaxRoot: "/files/",
             ajaxOnSuccess: function(grid){
                 // Get the data for item 0 (the skaters folder)
-                grid.getItemsFromServer("0", function(data){
+                var item = grid.getItemByValue(grid.data, "0", "uid");
+                grid.getItemsFromServer(item, function(data){
                     start();
                     deepEqual(data, skaters);
                 });
@@ -320,5 +320,6 @@
             url: '/upload/',
         });
     });
+
 
 })(jQuery);

@@ -52,6 +52,7 @@ var HGrid = {
         ajaxOnError: null,
         // Callback on AJAX complete
         ajaxOnComplete: null,
+        lazyLoad: false,
         columns: [
             {id: "uid", name: "uid", width: 40, field: "uid"},
             {id: "name", name: "Name", field: "name", width: 450, cssClass: "cell-title", sortable: true, defaultSortAsc: true}
@@ -938,8 +939,8 @@ var HGrid = {
         var info = hGridInfo.slice();
         while (info.length>=1){
             var d = info[i];
-            // If using async mode, collapse folders by default
-            if (d.type === "folder" && this.options.ajaxSource) {
+            // If using lazyLoad mode, collapse folders by default
+            if (d.type === "folder" && this.options.lazyLoad) {
                 d._collapsed = true;
             };
             if (d.parent_uid === "null" || d.parent_uid === null){
@@ -1302,7 +1303,7 @@ var HGrid = {
     expandItem: function(item, done) {
         var _this = this;
         // Fetch and add datafrom server if in async mode
-        if (this.options.ajaxSource && !item._loaded) {
+        if (this.options.lazyLoad && !item._loaded) {
             _this.addItemsFromServer(item, done)
         };
         item._collapsed = false;

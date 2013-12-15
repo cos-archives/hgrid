@@ -161,7 +161,7 @@
         return;
     }
     var rootData, skaters, soccerPlayers, soccerPros, lazyGrid;
-    module("Async", {
+    module("Lazy-loading", {
         setup: function(){
             rootData = [{'uid': 0, 'type': 'folder', 'name': 'skaters', "parent_uid": "null"},
                             {'uid': 1, 'type': 'folder', 'name': 'soccer_players', "parent_uid": "null"},
@@ -226,7 +226,7 @@
         var lazyGrid;
         HGrid.create({
             container: "#myGrid",
-            ajaxSource: "/files/",
+            ajaxSource: "/files/", lazyLoad: true,
             ajaxOnComplete: function(xhr) {
                 start(); // Start the tests
             },
@@ -257,7 +257,7 @@
         var lazyGrid;
         HGrid.create({
             container: "#myGrid",
-            ajaxSource: "/files/",
+            ajaxSource: "/files/", lazyLoad: true,
             ajaxOnComplete: function(xhr) {
                 start(); // Start the tests
             },
@@ -280,7 +280,7 @@
     asyncTest("getItemsFromServer", function() {
         HGrid.create({
             container: "#myGrid",
-            ajaxSource: "/files/",
+            ajaxSource: "/files/", lazyLoad: true,
             ajaxOnSuccess: function(grid){
                 // Get the data for item 0 (the skaters folder)
                 var item = grid.getItemByValue(grid.data, "0", "uid");
@@ -299,7 +299,7 @@
     asyncTest("addItemsFromServer", function() {
         HGrid.create({
             container: "#myGrid",
-            ajaxSource: "/files/",
+            ajaxSource: "/files/", lazyLoad: true,
             ajaxOnSuccess: function(grid){
                 // Add the data from item 1 (the soccer players folder)
                 var parentItem = grid.getItemByValue(grid.data, "1", "uid");
@@ -326,6 +326,7 @@
         HGrid.create({
             container: "#myGrid",
             ajaxSource: "/files/",
+            lazyLoad: true,
             // Specify how to build the urls
             itemUrl: function(rootUrl, item){
                 return rootUrl + item.name;

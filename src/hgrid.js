@@ -17,7 +17,7 @@ var HGrid = {
     @param defaultOptions.container null
     @param defaultOptions.url null
     @param defaultOptions.info null
-    @param defaultOptions.ajaxRoot null
+    @param defaultOptions.ajaxSource null
     @param defaultOptions.ajaxOnSuccess null
     @param defaultOptions.columns Uid and Name columns
     @param defaultOptions.editable false
@@ -42,9 +42,9 @@ var HGrid = {
         url: null,
         info: null,
         // Root URL to get data at
-        ajaxRoot: null,
-        itemUrl: function(ajaxRoot, item) {
-            return ajaxRoot + item.uid.toString();
+        ajaxSource: null,
+        itemUrl: function(ajaxSource, item) {
+            return ajaxSource + item.uid.toString();
         },
         // Callback on AJAX success
         ajaxOnSuccess: null,
@@ -138,9 +138,9 @@ var HGrid = {
                 self.options[urls[i]] = self.options[urls[i]]();
             }
         }
-        if (self.options.ajaxRoot) { // Get data from server
+        if (self.options.ajaxSource) { // Get data from server
             $.ajax({
-                url: self.options.ajaxRoot, dataType: "json",
+                url: self.options.ajaxSource, dataType: "json",
                 success: function(json)  {
                     self.options.info = json;
                     // Initialize the grid
@@ -939,7 +939,7 @@ var HGrid = {
         while (info.length>=1){
             var d = info[i];
             // If using async mode, collapse folders by default
-            if (d.type === "folder" && this.options.ajaxRoot) {
+            if (d.type === "folder" && this.options.ajaxSource) {
                 d._collapsed = true;
             };
             if (d.parent_uid === "null" || d.parent_uid === null){
@@ -1266,9 +1266,9 @@ var HGrid = {
      */
     getItemUrl: function(item) {
         if(item === null || item === undefined){
-            return this.options.ajaxRoot;
+            return this.options.ajaxSource;
         } else {
-            return this.options.itemUrl(this.options.ajaxRoot, item);
+            return this.options.itemUrl(this.options.ajaxSource, item);
         };
     },
 
@@ -1295,14 +1295,14 @@ var HGrid = {
     },
 
     /**
-     * Expand a collapsed item. Makes an AJAX call to the item if ajaxRoot is set.
+     * Expand a collapsed item. Makes an AJAX call to the item if ajaxSource is set.
      * @param  {Object}   item The data item (folder) to expand.
      * @param  {Function} done Optional AJAX callback that takes the dataset as its only argument.
      */
     expandItem: function(item, done) {
         var _this = this;
         // Fetch and add datafrom server if in async mode
-        if (this.options.ajaxRoot && !item._loaded) {
+        if (this.options.ajaxSource && !item._loaded) {
             _this.addItemsFromServer(item, done)
         };
         item._collapsed = false;

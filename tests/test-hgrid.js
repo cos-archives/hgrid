@@ -144,7 +144,7 @@
             var lazyGrid;
             HGrid.create({
                 container: "#myGrid",
-                ajaxRoot: "/files/",
+                ajaxSource: "/files/",
                 ajaxOnComplete: function(xhr) {
                     start(); // Start the tests
                 },
@@ -226,13 +226,13 @@
         var lazyGrid;
         HGrid.create({
             container: "#myGrid",
-            ajaxRoot: "/files/",
+            ajaxSource: "/files/",
             ajaxOnComplete: function(xhr) {
                 start(); // Start the tests
             },
             ajaxOnSuccess: function(grid){
                 lazyGrid = grid;
-                equal(lazyGrid.options.ajaxRoot, "/files/", "ajaxRoot is correct");
+                equal(lazyGrid.options.ajaxSource, "/files/", "ajaxSource is correct");
                 // each data item has the correct properties
                 for (var i = lazyGrid.data.length - 1; i >= 0; i--) {
                     var item = lazyGrid.data[i];
@@ -257,7 +257,7 @@
         var lazyGrid;
         HGrid.create({
             container: "#myGrid",
-            ajaxRoot: "/files/",
+            ajaxSource: "/files/",
             ajaxOnComplete: function(xhr) {
                 start(); // Start the tests
             },
@@ -280,7 +280,7 @@
     asyncTest("getItemsFromServer", function() {
         HGrid.create({
             container: "#myGrid",
-            ajaxRoot: "/files/",
+            ajaxSource: "/files/",
             ajaxOnSuccess: function(grid){
                 // Get the data for item 0 (the skaters folder)
                 var item = grid.getItemByValue(grid.data, "0", "uid");
@@ -299,7 +299,7 @@
     asyncTest("addItemsFromServer", function() {
         HGrid.create({
             container: "#myGrid",
-            ajaxRoot: "/files/",
+            ajaxSource: "/files/",
             ajaxOnSuccess: function(grid){
                 // Add the data from item 1 (the soccer players folder)
                 var parentItem = grid.getItemByValue(grid.data, "1", "uid");
@@ -325,7 +325,7 @@
         var lazyGrid;
         HGrid.create({
             container: "#myGrid",
-            ajaxRoot: "/files/",
+            ajaxSource: "/files/",
             // Specify how to build the urls
             itemUrl: function(rootUrl, item){
                 return rootUrl + item.name;

@@ -173,8 +173,8 @@
             ];
 
             soccerPlayers = [
-                {'uid': 5, 'type': 'folder', 'name': 'Pro', 'parent_uid': 1},
-                {'uid': 7, 'type': 'folder', 'name': 'Amateur', 'parent_uid': 1},
+                {'uid': 5, 'type': 'folder', 'name': 'pro', 'parent_uid': 1},
+                {'uid': 7, 'type': 'folder', 'name': 'amateur', 'parent_uid': 1},
             ];
 
             soccerPros = [
@@ -321,5 +321,32 @@
         });
     });
 
+    asyncTest("getItemUrl if itemUrl is specified", function() {
+        var lazyGrid;
+        HGrid.create({
+            container: "#myGrid",
+            ajaxRoot: "/files/",
+            // Specify how to build the urls
+            itemUrl: function(rootUrl, item){
+                return rootUrl + item.name;
+            },
+            ajaxOnComplete: function(xhr) {
+                start(); // Start the tests
+            },
+            ajaxOnSuccess: function(grid){
+                var item = grid.getItemByValue(grid.data, "soccer_players", "name");
+                ok(item);
+                equal(grid.getItemUrl(item), "/files/soccer_players");
+                item = grid.getItemByValue(grid.data, "skaters", "name");
+                ok(item);
+                equal(grid.getItemUrl(item), "/files/skaters");
+            },
+            ajaxOnError: noErrorCallbackExpected,
+            breadcrumbBox: "#myGridBreadcrumbs",
+            dropZone: true,
+            url: '/upload/',
+        });
+        $.mockjaxClear();
+    });
 
 })(jQuery);

@@ -43,6 +43,9 @@ var HGrid = {
         info: null,
         // Root URL to get data at
         ajaxRoot: null,
+        itemUrl: function(ajaxRoot, item) {
+            return ajaxRoot + item.uid.toString();
+        },
         // Callback on AJAX success
         ajaxOnSuccess: null,
         // Callback on AJAX error
@@ -1265,7 +1268,7 @@ var HGrid = {
         if(item === null || item === undefined){
             return this.options.ajaxRoot;
         } else {
-            return this.options.ajaxRoot + item.uid;
+            return this.options.itemUrl(this.options.ajaxRoot, item);
         };
     },
 

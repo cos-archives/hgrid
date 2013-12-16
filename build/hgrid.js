@@ -65,6 +65,7 @@ var HGrid = {
         dragDrop: true,
         dropZone: true,
         dropZonePreviewsContainer: null,
+        dropZoneOptions: null,
         navLevel: "null",
         breadcrumbBox: null,
         largeGuide: true,
@@ -517,13 +518,15 @@ var HGrid = {
             url = hGrid.options['url'];
             bool = true;
         }
-        var myDropzone = new Dropzone(hGrid.options.container, {
-            url: url,
-            clickable: hGrid.options.clickUploadElement,
-            previewsContainer: hGrid.options.dropZonePreviewsContainer,
-            addRemoveLinks: true,
-            dropDestination: null
-        } );
+
+        var myDropzoneOptions = $.extend({}, {
+                url: url,
+                clickable: hGrid.options.clickUploadElement,
+                previewsContainer: hGrid.options.dropZonePreviewsContainer,
+                addRemoveLinks: true,
+                dropDestination: null
+            }, hGrid.options.dropZoneOptions);
+        var myDropzone = new Dropzone(hGrid.options.container, myDropzoneOptions);
 
         hGrid.dropZoneObj = myDropzone;
         // Get the SlickGrid Row under the dragged file

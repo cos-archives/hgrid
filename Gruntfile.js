@@ -28,7 +28,7 @@ grunt.initConfig({
     qunit: {
         all: {
             options: {
-                urls:['examples/example.html'],
+                urls:['tests/index.html'],
                 force: true
             }
         }

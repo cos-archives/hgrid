@@ -1370,8 +1370,16 @@ var HGrid = {
                     _this.currentlyRendered = [];
                     if (!item._collapsed) {
                         item._collapsed = true;
+                        dataView.setRefreshHints({
+                                isFilterNarrowing: true,
+                                isFilterExpanding: false
+                        });
                     } else {
                         item._collapsed = false;
+                        dataView.setRefreshHints({
+                                isFilterNarrowing: false,
+                                isFilterExpanding: true
+                        });
                     }
                     dataView.updateItem(item.id, item);
                 }

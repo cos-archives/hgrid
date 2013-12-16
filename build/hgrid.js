@@ -298,6 +298,7 @@ var HGrid = {
         }
     },
 
+    // TODO: columnDef unused. Remove?
     defaultTaskNameFormatter: function(row, cell, value, columnDef, dataContext) {
         value = value.replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");
         var spacer = "<span style='display:inline-block;height:1px;width:" + (15 * dataContext["indent"]) + "px'></span>";
@@ -313,7 +314,9 @@ var HGrid = {
     },
 
     requiredFieldValidator: function (value) {
-        if (value == null || value == undefined || !value.length) {
+        if (value == null || value == undefined || ((typeof value === "string" ||
+                                                    typeof value === "object" ) &&
+                                                    !value.length)){
             return {valid: false, msg: "This is a required field"};
         } else {
             return {valid: true, msg: null};
@@ -368,7 +371,7 @@ var HGrid = {
         var navReset = _this.options.navLevel;
         _this.currentlyRendered = [];
         if (item && itemUid!=="") {
-            _this.currentIndentShift = item['absoluteIndent'];
+            _this.currentIndentShift = item.absoluteIndent;
             try {
                 if(!item["sortpath"]) throw "This item has no sort path";
                 _this.options.navLevel = item["sortpath"];
@@ -439,7 +442,7 @@ var HGrid = {
         Dropzone.autoDiscover = false;
         var url;
         var bool = false;
-// Instantiate this Dropzone
+        // Instantiate this Dropzone
         if(typeof hGrid.options['urlAdd'] === "string"){
             url = hGrid.options['urlAdd'];
         }
@@ -456,7 +459,7 @@ var HGrid = {
         } );
 
         hGrid.dropZoneObj = myDropzone;
-// Get the SlickGrid Row under the dragged file
+        // Get the SlickGrid Row under the dragged file
         myDropzone.on("dragover", function(e){
             currentDropCell = hGrid.Slick.grid.getCellFromEvent(e);
             if(currentDropCell===null){
@@ -531,7 +534,7 @@ var HGrid = {
                 },(1*1000));
             }
         })
-// Hook the drop success to the grid view update
+        // Hook the drop success to the grid view update
         myDropzone.on("success", function(file) {
             var value;
             var promise = $.when(hGrid.hGridOnUpload.notify(file));

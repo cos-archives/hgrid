@@ -1,4 +1,6 @@
-HGrid is a web based data management system integrating DropzoneJS and SlickGridJS. It provides a browser interface to visually organize and manage your data.
+# Hgrid
+
+HGrid is a web based data management system integrating [DropzoneJS](http://www.dropzonejs.com/) and [SlickGridJS](https://github.com/mleibman/SlickGrid). It provides a browser interface to organize and manage your data.
 
 ## Installation
 
@@ -17,7 +19,7 @@ This is currently a lot of files for dependencies, and future versions will have
 
 #### Creating the Grid
 
-Creating the grid requires two things, the data, and a DIV to display the data.
+Creating the grid requires three things: the data, the column specifications, and the DIV to display the data.
 
 The data is a JSON String that must be composed as an array of objects with 4 properties: 
 
@@ -69,41 +71,29 @@ in the project root's root directory.
 
 #### Running Tests
 
+Install phantomjs to run tests without having to open a browser:
+
+    $ npm install -g phantomjs
+
 Run tests with grunt.
 
     $ grunt
 
 #### Writing Tests
 
-On the page that has the js to be tested, include qunit and your testing file:
-<script src="../vendor/js/qunit-1.12.0.js"></script>
-<script src="../build/tests.js"></script>
+Tests are written using the [Qunit](http://qunitjs.com/) framework.
 
-Tests look like this:
+Tests are located in `tests/test-grid.js`.
+
+Example:
+
 ```js
-test( "Create", function() {
-    ok( myGrid, "pass");
-});
-
-test( "Data Length in Grid", function(){
-    equal( myGrid.data.length, data.length, "pass");
+test("Data Length in Grid", function(){
+    equal( myGrid.data.length, data.length);
 });
 ```
-A full testing API can be found at http://qunitjs.com/
 
-Tests are run using grunt
-Gruntfile contains a qunit option in the initConfig:
-```js
-    qunit: {
-        all: ['examples/example.html']
-    }
-```
-Load and register the tasks in the Gruntfile as well:
-```js
-grunt.loadNpmTasks('grunt-contrib-qunit');
-grunt.registerTask('travis', ['copy', 'qunit']);
-```
-For HGrid this is called "travis" so that Travis-CI will call the copy and qunit tasks when a pull request is created
+#### Continuous Integration
 
-To run tests before pushing, install phantomjs to run tests without having to open a browser:
-npm install -g phantomjs
+Hgrid uses [Travis-CI](http://travis-ci.org) for continuous integration. Travis will call the `copy` and `qunit` tasks each time a pull request is created.
+

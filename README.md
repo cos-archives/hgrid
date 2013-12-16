@@ -17,7 +17,7 @@ To install HGrid on your web page, simply copy the /static/ folder to a director
 ```
 This is currently a lot of files for dependencies, and future versions will have condensed this.
 
-#### Creating the Grid
+## Creating the Grid
 
 Creating the grid requires three things: the data, the column specifications, and the DIV to display the data.
 
@@ -55,6 +55,59 @@ var myGrid = HGrid.create({
 });
 ```
 
+## Loading Data from a Server
+
+You can load a JSON array from a server by defining the `ajaxSource` property. The `ajaxOnSuccess` callback will be called upon successfully initializing the grid. For example:
+
+```js
+var myGrid;
+Hgrid.create({
+    container: "#myGrid",
+    ajaxSource: "/files/",
+    ajaxOnSuccess: function(grid) {
+        myGrid = grid; // The initialized grid;
+    },
+    breadCrumbBox: "#breadCrumbs",
+    url: "/upload/"
+});
+```
+
+### Lazy-loading Data
+
+By default, Hgrid will load and render all data retrieved from the server upon initialization. This can take a long time for large datasets. You may see significant speed improvements by "lazy-loading" the data.
+
+If the `lazyLoad` option is set to `true`, a folder's contents will only be fetched from the server the first time its expand button is clicked.
+
+Example:
+
+```js
+Hgrid.create({
+    container: "#myGrid",
+    ajaxSource: "/files/", lazyLoad: true,
+    breadCrumbBox: "#breadCrumbs",
+    url: "/upload/"
+});
+```
+
+By default, the URL used to fetch a folder's contents will be its UID appended to `ajaxSource`, e.g. `/files/3` for a folder item with UID `3`.
+
+You can change the URL scheme by defining the `itemUrl` function, which is passed the root url (`ajaxSource`) and the `item` object.
+
+Example:
+
+```js
+Hgrid.create({
+    container: "#myGrid",
+    ajaxSource: "/files/", lazyLoad: true,
+    itemUrl: function(ajaxSource, item) {
+        return ajaxSource + item.name;
+    }
+    breadCrumbBox: "#breadCrumbs",
+    url: "/upload/"
+});
+```
+
+
 ## Development
 
 Hgrid depends on [NodeJS](http://nodejs.org/) for package management and [Grunt](http://gruntjs.com/) for automation.
@@ -81,7 +134,7 @@ Run tests with grunt.
 
 #### Writing Tests
 
-Tests are written using the [Qunit](http://qunitjs.com/) framework.
+Tests are written using the [QUnit](http://qunitjs.com/) framework.
 
 Tests are located in `tests/test-grid.js`.
 

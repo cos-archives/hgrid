@@ -2,6 +2,8 @@
 (function($){
     "use strict";
 
+    $.mockjaxSettings.responseTime = 0; // Speed up tests
+
     var data, myGrid, referenceItem;
 
     module("Basic", {
@@ -279,10 +281,9 @@
             var selector = ".ui-widget-content:contains(" + children[i].name + ")";
             childrenShown += $(selector).length;
         }
-        console.log(childrenShown);
         equal(childrenShown, children.length, "Children shown on expand");
     });
-    
+
     function noErrorCallbackExpected(xhr, textStatus, errorThrown) {
         ok( false, 'Error callback executed: ' + errorThrown);
     }
@@ -301,28 +302,6 @@
         });
     }
 
-    // Custom test case that injects a lazy-loading Hgrid into the test
-    function testLazyGrid (description, testFn){
-        asyncTest("getItemUrl", function() {
-            var lazyGrid;
-            HGrid.create({
-                container: "#myGrid",
-                ajaxSource: "/files/",
-                ajaxOnComplete: function(xhr) {
-                    start(); // Start the tests
-                },
-                ajaxOnSuccess: function(grid){
-                    testFn(grid);
-
-                },
-                ajaxOnError: noErrorCallbackExpected,
-                breadcrumbBox: "#myGridBreadcrumbs",
-                dropZone: true,
-                url: '/upload/',
-            });
-        });
-        return;
-    }
     var rootData, skaters, soccerPlayers, soccerPros, lazyGrid;
     module("Lazy-loading", {
         setup: function(){

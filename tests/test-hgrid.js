@@ -2,6 +2,8 @@
 (function($){
     "use strict";
 
+    $.mockjaxSettings.responseTime = 0; // Speed up tests
+
     var data, myGrid, referenceItem;
 
     module("Basic", {
@@ -279,7 +281,6 @@
             var selector = ".ui-widget-content:contains(" + children[i].name + ")";
             childrenShown += $(selector).length;
         }
-        console.log(childrenShown);
         equal(childrenShown, children.length, "Children shown on expand");
     });
 

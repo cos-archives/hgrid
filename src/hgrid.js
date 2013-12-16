@@ -190,7 +190,8 @@ var HGrid = {
                 elm.formatter = _this.defaultTaskNameFormatter;
             }
         });
-        if(hGridColumns === this.defaultOptions.columns) {
+        if(hGridColumns[this.Slick.grid.getColumnIndex('name')] &&
+            typeof(hGridColumns[this.Slick.grid.getColumnIndex('name')].formatter) == 'undefined') {
             hGridColumns[this.Slick.grid.getColumnIndex('name')].formatter = this.defaultTaskNameFormatter;
         }
         hGridColumns[this.Slick.grid.getColumnIndex('name')].validator = this.requiredFieldValidator;

@@ -98,10 +98,6 @@
         ok(myGrid.dropZoneObj);
     });
 
-    test("addColumn", function() {
-        ok(myGrid.addColumn({id:'id', name:'id', field:'id'}));
-    });
-
     test("retrieveUrl is null by default", function() {
         equal(myGrid.options.retrieveUrl, null);
     });
@@ -123,7 +119,7 @@
         var item = data[2];
         myGrid.navLevelFilter(item.uid);
         equal(myGrid.currentIndentShift, item.absoluteIndent, "indent shift is updated");
-        // TODO: finish me
+        // TODO: finish me (and dom checks)
     });
 
 //    test("getItemByValue", function(){
@@ -173,6 +169,9 @@
             columns[columns.length-1]['id'],
             newColumn['id']
         ), "IDs of the columns are the same");
+
+        var selector = ".slick-column-name:contains(" + newColumn['name'] + ")";
+        ok($(selector), "Column added to DOM");
     });
 
     test("addItem", function(){
@@ -183,6 +182,9 @@
             myGrid.getItemByValue(myGrid.data, item['uid'], "uid"),
             item
         ), "Item with correct uid is in data");
+
+        var selector = ".ui-widget-content:contains(" + item['name'] + ")";
+        ok($(selector), "Item added to DOM");
     });
 
     test("deleteItems", function(){
@@ -200,12 +202,25 @@
             false
         ), "Item deleted is not found in grid")
 
+        var selector1 = ".ui-widget-content:contains(" + item1['name'] + ")";
+        ok(_.isEqual(
+            $(selector1).length,
+            0
+        ), "Item deleted from DOM");
+
         myGrid.deleteItems([referenceItem['uid']]);
 
         ok(_.isEqual(
             myGrid.getItemByValue(myGrid.data, item2['uid'], "uid") || myGrid.getItemByValue(myGrid.data, referenceItem['uid'], "uid"),
             false
         ), "Folder deleted as well as child");
+
+        var selector2 = ".ui-widget-content:contains(" + item2['name'] + ")";
+        var selector3 = ".ui-widget-content:contains(" + referenceItem['name'] + ")";
+        ok(_.isEqual(
+            $(selector2).length + $(selector3).length,
+            0
+        ), "Folder and child deleted from DOM");
 
         ok(myGrid.getItemByValue(myGrid.data, item3['uid'], "uid"), "Undeleted item still in grid");
     });
@@ -239,6 +254,33 @@
         ok(_.isEqual(item1['parent_uid'], referenceItem['uid']), "Child 1 still has correct parent_uid");
         ok(_.isEqual(item2['parent_uid'], referenceItem['uid']), "Child 2 still has correct parent_uid");
         ok(_.isEqual(referenceItem['parent_uid'], item3['parent_uid']), "Moved item now has destination uid as parent_uid");
+    });
+
+    test("Collapse", function(){
+        var referenceItem = myGrid.getItemByValue(myGrid.data, "skaters", "name");
+        myGrid.collapseItem(referenceItem);
+        var children = myGrid.getItemsByValue(myGrid.data, referenceItem['uid'], "parent_uid");
+        var childrenShown = 0;
+        for(var i=0; i<children.length; i++){
+            var selector = ".ui-widget-content:contains(" + children[i].name + ")";
+            childrenShown += $(selector).length;
+        }
+
+        equal(childrenShown, 0, "Children hidden on collapse");
+    });
+
+    test("Expand", function(){
+        var referenceItem = myGrid.getItemByValue(myGrid.data, "skaters", "name");
+        myGrid.collapseItem(referenceItem);
+        myGrid.expandItem(referenceItem);
+        var children = myGrid.getItemsByValue(myGrid.data, referenceItem['uid'], "parent_uid");
+        var childrenShown = 0;
+        for(var i=0; i<children.length; i++){
+            var selector = ".ui-widget-content:contains(" + children[i].name + ")";
+            childrenShown += $(selector).length;
+        }
+        console.log(childrenShown);
+        equal(childrenShown, children.length, "Children shown on expand");
     });
     
     function noErrorCallbackExpected(xhr, textStatus, errorThrown) {

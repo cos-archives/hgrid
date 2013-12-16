@@ -30,13 +30,11 @@
                 dropZone: true,
                 url: '/',
             });
-
         },
 
         teardown: function(){
             myGrid.destroy();
         }
-
     });
 
     test( "Create", function() {
@@ -173,7 +171,12 @@
         ), "IDs of the columns are the same");
 
         var selector = ".slick-column-name:contains(" + newColumn['name'] + ")";
-        ok($(selector), "Column added to DOM");
+        ok($(selector).length > 0, "Column added to DOM");
+        equal(columns[columns.length-1].name, newColumn.name);
+
+        // can add an item
+        var item = {"uid": 123, "type": "folder", "name": "foo", "parent_uid": "null"};
+        myGrid.addItem(item);
     });
 
     test("addItem", function(){
@@ -186,7 +189,7 @@
         ), "Item with correct uid is in data");
 
         var selector = ".ui-widget-content:contains(" + item['name'] + ")";
-        ok($(selector), "Item added to DOM");
+        ok($(selector).length > 0, "Item added to DOM");
     });
 
     test("deleteItems", function(){
@@ -219,10 +222,7 @@
 
         var selector2 = ".ui-widget-content:contains(" + item2['name'] + ")";
         var selector3 = ".ui-widget-content:contains(" + referenceItem['name'] + ")";
-        ok(_.isEqual(
-            $(selector2).length + $(selector3).length,
-            0
-        ), "Folder and child deleted from DOM");
+        equal($(selector2).length + $(selector3).length, 0, "Folder and child deleted from DOM");
 
         ok(myGrid.getItemByValue(myGrid.data, item3['uid'], "uid"), "Undeleted item still in grid");
     });
@@ -281,6 +281,7 @@
             var selector = ".ui-widget-content:contains(" + children[i].name + ")";
             childrenShown += $(selector).length;
         }
+        console.log(childrenShown);
         equal(childrenShown, children.length, "Children shown on expand");
     });
 

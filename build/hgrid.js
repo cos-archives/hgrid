@@ -659,16 +659,6 @@ var HGrid = {
     addItem: function(item) {
         var _this = this;
         var columns = _this.Slick.grid.getColumns();
-        for(var i=0; i<columns.length; i++){
-            if(columns[i]['id']!="#" && !item[columns[i]['id']]){
-                alert("This is an invalid item.");
-                return false;
-            }
-        }
-//        if (!item['parent_uid'] || !item['uid'] || !item['name'] || !item['type'] || _this.getItemByValue(_this.data, item['uid'], 'uid')){
-//            alert("This is an invalid item.")
-//            return;
-//        }
         var parent= _this.getItemByValue(_this.data, item['parent_uid'], 'uid');
         var value = {'item': item, 'parent':parent};
         var valueAfter = {'item': item, 'parent':parent};
@@ -1302,7 +1292,9 @@ var HGrid = {
     },
 
     /**
-     * Fetches a folder's items and adds them to the dataset.
+     * Fetches a folder's items and adds them to the dataset. This method is
+     * used for lazy-loading folder contents.
+     *
      * @param {Object} parentItem The item whose contents will be added.
      * @param {Function} done Optional callback that takes the new dataset as its argument.
      */

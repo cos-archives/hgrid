@@ -561,12 +561,10 @@ var HGrid = {
             }
             if(bool){
                 if (typeof(hGrid.options.urlAdd) === 'function') {
-                    // if urlAdd is a function, call it, passing in the
-                    // item
-                    // NOTE(sloria): This is modified from Hgrid master
+                    // if urlAdd is a function, call it, passing in the item
                     myDropzone.options.url = hGrid.options.urlAdd(item);
                 } else {
-                    myDropzone.options.url = hGrid.options['urlAdd'][myDropzone.options.dropDestination];
+                    myDropzone.options.url = hGrid.options.urlAdd[myDropzone.options.dropDestination];
                 };
             }
 

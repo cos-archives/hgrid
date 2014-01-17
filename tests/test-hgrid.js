@@ -281,7 +281,6 @@
             var selector = ".ui-widget-content:contains(" + children[i].name + ")";
             childrenShown += $(selector).length;
         }
-        console.log(childrenShown);
         equal(childrenShown, children.length, "Children shown on expand");
     });
 

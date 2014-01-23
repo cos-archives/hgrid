@@ -27,8 +27,7 @@ if (typeof jQuery === 'undefined') {
    * Render a spacer element given an indent value in pixels.
    */
   function makeIndentElem(indent) {
-    // TODO: Clean me up. use a CSS class instead of inline CSS.
-    return '<span style="display:inline-block;height:1px;width:' + indent + 'px"></span>';
+    return '<span class="hg-indent" style="width:' + indent + 'px"></span>';
   }
 
   // TODO: expose this function as a helper?

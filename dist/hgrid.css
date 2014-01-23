@@ -8,6 +8,11 @@
     font-weight: bold;
 }
 
+.hg-indent {
+  display:inline-block;
+  height:1px;
+}
+
 .slick-cell.cell-reorder {
     cursor: move;
     background: url('../images/drag-handle.png') no-repeat center center;

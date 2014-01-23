@@ -31,8 +31,7 @@ if (typeof jQuery === 'undefined') {
    * Render a spacer element given an indent value in pixels.
    */
   function makeIndentElem(indent) {
-    // TODO: Clean me up. use a CSS class instead of inline CSS.
-    return '<span style="display:inline-block;height:1px;width:' + indent + 'px"></span>';
+    return '<span class="hg-indent" style="width:' + indent + 'px"></span>';
   }
 
   // TODO: expose this function as a helper?
@@ -101,13 +100,12 @@ if (typeof jQuery === 'undefined') {
     name: 'Name',
     field: 'name',
     cssClass: 'cell-title',
-    sortable: true,
     defaultSortAsc: true
   }];
   var defaults = {
     data: null,
     // Root URL to get data at
-    ajaxSource: null,
+    // ajaxSource: null,
     // URL where to retrieve a folder's contents (only used if using ajaxSource)
     // itemUrl: function(ajaxSource, item) {
     //   return ajaxSource + item.id.toString();

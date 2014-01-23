@@ -101,7 +101,7 @@ if (typeof jQuery === 'undefined') {
   var defaults = {
     data: null,
     // Root URL to get data at
-    ajaxSource: null,
+    // ajaxSource: null,
     // URL where to retrieve a folder's contents (only used if using ajaxSource)
     // itemUrl: function(ajaxSource, item) {
     //   return ajaxSource + item.id.toString();

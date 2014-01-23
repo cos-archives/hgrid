@@ -63,9 +63,6 @@
     setup: function() {
       myGrid = new HGrid('#myGrid', {
         data: testData,
-        breadCrumbBox: '#myGridBreadcrumbs',
-        dropZone: true,
-        url: '/upload/',
       });
     },
     teardown: function() {
@@ -114,7 +111,6 @@
 
   test('Options and attributes', function() {
     // passed in options
-    equal(myGrid.options.breadCrumbBox, '#myGridBreadcrumbs');
     deepEqual(myGrid.options.data, testData);
     // Default options
     deepEqual(myGrid.options.slickGridOptions, myGrid._defaults.slickGridOptions);
@@ -123,7 +119,6 @@
     // Attributes
     ok(myGrid.element instanceof jQuery, 'myGrid.element is a jQuery element');
     ok(myGrid.grid instanceof Slick.Grid, 'has a SlickGrid object');
-    ok(myGrid.dropZone, 'has a DropZone object');
     ok(myGrid.tree instanceof HGrid.Tree, 'has a HGrid.Tree');
   });
 
@@ -379,6 +374,9 @@
       myGrid = new HGrid('#myGrid', {
         data: testData
       });
+    },
+    teardown: function() {
+      myGrid.destroy();
     }
   });
 
@@ -456,6 +454,15 @@
     root.add(folder);
     root.updateDataView();
     equal(root.dataView.getItems().length, 3);
+  });
+
+  module('Uploads', {});
+
+  test('Creating an HGrid with uploads=true', function() {
+    var grid = new HGrid('#myGrid', {
+      uploads: true
+    });
+    ok(grid.dropZone, 'has a dropzone object');
   });
 
 })(jQuery);

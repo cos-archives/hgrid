@@ -15,6 +15,10 @@ TODO
 2. Include hgrid.js:
 
   ```html
+  <link rel="stylesheet" href="dist/hgrid.css" type="text/css" />
+  ```
+
+  ```html
   <script src="dist/hgrid.min.js"></script>
   ```
 
@@ -49,6 +53,8 @@ TODO
 
 - `onClickItem: function(event, element, item, grid)`
 - `onAdd: function(item, grid)`
+
+*Full documentation to come*
 
 
 

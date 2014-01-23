@@ -96,7 +96,6 @@ if (typeof jQuery === 'undefined') {
     name: 'Name',
     field: 'name',
     cssClass: 'cell-title',
-    sortable: true,
     defaultSortAsc: true
   }];
   var defaults = {

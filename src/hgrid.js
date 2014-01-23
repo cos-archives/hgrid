@@ -19,7 +19,6 @@ if (typeof jQuery === 'undefined') {
   /////////////////////
   // Private Members //
   /////////////////////
-  var INDENT_WIDTH = 15; // TODO: expose indent as an option
   var ROOT_ID = 'root';
   var FILE = 'file';
   var FOLDER = 'folder';
@@ -50,12 +49,12 @@ if (typeof jQuery === 'undefined') {
    * @param  {Function} fileFunc   Function that returns the HTML for a file.
    * @return {Function}            A SlickGrid formatter function, used by Slick.Data.DataView.
    */
-  function makeFormatter(folderFunc, fileFunc) {
+  function makeFormatter(folderFunc, fileFunc, indentWidth) {
     var formatter = function(row, cell, value, columnDef, item) {
       // Opening and closing tags that surround a row
       var openTag = '<span class="hg-item" data-id="' + item.id + '">';
       var closingTag = '</span>';
-      var indent = item.depth * INDENT_WIDTH;
+      var indent = item.depth * indentWidth;
       // indenting span
       var spacer = makeIndentElem(indent);
       if (item.kind === FOLDER) {
@@ -139,6 +138,10 @@ if (typeof jQuery === 'undefined') {
      * CSS class to apply to the grid element. Can also be an array of multiple classes.
      */
     cssClass: 'hgrid',
+    /**
+     * Width to indent items (in px)
+     */
+    indent: 15,
     /**
      * Render a folder to HTML.
      * @param  {Object} item The folder as an item object.
@@ -468,7 +471,7 @@ if (typeof jQuery === 'undefined') {
   HGrid.prototype._initSlickGrid = function() {
     var self = this;
     // Create the formatter function
-    var formatter = makeFormatter(self.options.renderFolder, self.options.renderFile);
+    var formatter = makeFormatter(self.options.renderFolder, self.options.renderFile, self.options.indent);
     // Set the name column's formatter
     // TODO: Rethink this. Should the format be specified explicitly
     // instead of setting it automatically?

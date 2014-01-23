@@ -215,9 +215,15 @@
     var parent = grid.getData()[0];
     parent._collapsed = false;
     var child = grid.getData()[1];
-    isTrue(grid._collapseFilter(child, [grid]), 'returns true if parent is not collpased');
+    isTrue(grid._collapseFilter(child, {
+      thisObj: grid,
+      rootID: 'root'
+    }), 'returns true if parent is not collpased');
     parent._collapsed = true;
-    isFalse(grid._collapseFilter(child, [grid]), 'returns false if parent is collapsed');
+    isFalse(grid._collapseFilter(child, {
+      thisObj: grid,
+      rootID: 'root'
+    }), 'returns false if parent is collapsed');
   });
 
   test('Adding item to a grid with no data', function() {
@@ -253,7 +259,7 @@
 
   test('Creating Trees and Leaves', function() {
     var root = new HGrid.Tree();
-    equal(root.id, null, 'root id is null');
+    equal(root.id, 'root', 'root id is "root"');
     var tree1 = new HGrid.Tree('My Documents', 'folder');
     equal(tree1.id, 0);
     equal(tree1.kind, 'folder', 'sets the tree kind');
@@ -290,7 +296,7 @@
       id: tree.id,
       name: tree.name,
       kind: tree.kind,
-      parentID: null,
+      parentID: 'root',
       depth: tree.depth,
       _node: tree
     }]);
@@ -310,7 +316,7 @@
         id: tree.id,
         name: tree.name,
         kind: tree.kind,
-        parentID: null,
+        parentID: 'root',
         depth: tree.depth,
         _node: tree
       },

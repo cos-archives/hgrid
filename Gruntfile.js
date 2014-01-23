@@ -78,7 +78,7 @@ module.exports = function(grunt) {
           dest: latestMinRelease
         }, {
           src: 'src/hgrid.css',
-          dest: 'hgrid.css'
+          dest: 'dist/hgrid.css'
         }, {
           src: 'src/images/*',
           dest: 'dist/images/',

@@ -2,7 +2,7 @@
 <html>
 <head>
     <title>HGrid Tests</title>
-    <link rel="stylesheet" href="../vendor/css/hgrid-base.css" type="text/css" />
+    <link rel="stylesheet" href="../dist/hgrid.css" type="text/css" />
     <link rel="stylesheet" href="qunit-1.12.0.css">
 </head>
 <body>
@@ -15,24 +15,18 @@
 
 <div id="qunit-fixture">
     <div id="myGridBreadcrumbs"></div>
-    <div id="myGrid" class="dz-Clickable hgrid" style="width:600px;/*height:500px;*/"></div>
+    <div id="myGrid"></div>
 </div>
 
 
-<!-- dependencies -->
-<script src="../vendor/js/jquery-1.7.min.js"></script>
-<script src="../vendor/js/jquery-ui-1.8.16.custom.min.js"></script>
-<script src="../vendor/js/jquery.event.drag-2.2.js"></script>
-<script src="../vendor/js/jquery.event.drop-2.2.js"></script>
-<script src="../vendor/hgrid_dependencies/dropzone.js"></script>
-<script src="../build/slickgrid.custom.min.js"></script>
 <!-- The library -->
-<script src="../src/hgrid.js"></script>
+<script src="./jquery-1.10.2.js"></script>
+<script src="../dist/hgrid.js"></script>
 <!-- testing framework -->
 <script src="./jquery.mockjax.js"></script>
 <script src="./underscore-min.js"></script>
 <script src="./qunit-1.12.0.js"></script>
 <!-- The tests -->
-<script src="./test-hgrid.js"></script>
+<script src="./tests.js"></script>
 </body>
 </html>

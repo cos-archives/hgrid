@@ -1,54 +1,120 @@
 module.exports = function(grunt) {
-grunt.initConfig({
-    copy: {
-        main: {
-            files: [
-                {expand: true, flatten: true, src: ['src/hgrid.js'], dest: 'build/', filter: 'isFile'}
-            ]
-        }
+
+  var latest = '<%= pkg.name %>';
+  var name = '<%= pkg.name %>-v<%= pkg.version%>';
+
+  // Latest releases including version number in filename
+  var devRelease = 'dist/' + name + '.js';
+  var minRelease = 'dist/' + name + '.min.js';
+
+  // Latest releases without version number in filename for easier imports
+  // These go in the project root
+  var latestDevRelease = 'dist/' + latest + '.js';
+  var latestMinRelease = 'dist/' + latest + '.min.js';
+
+  grunt.initConfig({
+
+    // Import package manifest
+    pkg: grunt.file.readJSON('package.json'),
+
+    // Banner definitions
+    meta: {
+      banner: "/*\n" +
+        " *  <%= pkg.title || pkg.name %> - v<%= pkg.version %>\n" +
+        " *  <%= pkg.description %>\n" +
+        " */\n"
     },
 
-	uglify: {
-	    options: {
-		mangle: true
-	    },
-	    my_target: {
-		files: {
-		    'build/slickgrid.custom.min.js': [
-                'vendor/hgrid_dependencies/slick.core.js',
-                'vendor/hgrid_dependencies/slick.grid.js',
-                'vendor/hgrid_dependencies/slick.dataview.js',
-                'vendor/hgrid_dependencies/slick.rowselectionmodel.js',
-                'vendor/hgrid_dependencies/slick.rowmovemanager.js']
-			}
-	    }
-	   },
-
-    qunit: {
-        all: {
-            options: {
-                urls:['tests/index.html'],
-                force: true
-            }
-        }
+    // Concat definitions
+    concat: {
+      target: {
+        src: ['src/**/*.js'],
+        dest: devRelease
+      },
+      options: {
+        banner: '<%= meta.banner %>'
+      }
     },
 
-    yuidoc: {
+    // Lint definitions
+    jshint: {
+      files: ['src/hgrid.js'],
+      options: {
+        jshintrc: '.jshintrc'
+      }
+    },
+
+    // Minify definitions
+    uglify: {
+      target: {
+        src: ['src/**/*js'],
+        dest: minRelease
+      },
+      options: {
+        banner: '<%= meta.banner %>'
+      }
+    },
+
+    // CSS minification
+    cssmin: {
+      add_banner: {
         options: {
-            paths: 'src/'
+          banner: '/* hgrid-<%= pkg.version %> */'
+        },
+        files: {
+          'dist/hgrid.min.css': ['src/**/*.css']
         }
+      }
+    },
+
+    // Copy latest releases without version numbers in filename
+    copy: {
+      main: {
+        files: [{
+          src: devRelease,
+          dest: latestDevRelease
+        }, {
+          src: minRelease,
+          dest: latestMinRelease
+        }, {
+          src: 'src/hgrid.css',
+          dest: 'hgrid.css'
+        }, {
+          src: 'src/images/*',
+          dest: 'dist/images/',
+          flatten: true,
+          expand: true
+        }]
+      }
+    },
+
+    // Unit testing
+    qunit: {
+      all: {
+        options: {
+          urls: ['tests/index.html'],
+          force: true
+        }
+      }
+    },
+
+    // If a source js file changes, concatenated and copy the files to dist/
+    watch: {
+      files: ['src/**/*.js'],
+      tasks: ['concat', 'copy']
     }
-    });
-// Load the plugin that provides the tasks.
-grunt.loadNpmTasks('grunt-contrib-uglify');
-grunt.loadNpmTasks('grunt-contrib-copy');
-grunt.loadNpmTasks('grunt-contrib-qunit');
 
-// Default task(s).
-grunt.registerTask('default', ['uglify' , 'copy', 'qunit']);
+  });
 
-// Travis tasks
-grunt.registerTask('travis', ['copy', 'qunit']);
+  grunt.loadNpmTasks('grunt-contrib-concat');
+  grunt.loadNpmTasks('grunt-contrib-jshint');
+  grunt.loadNpmTasks('grunt-contrib-uglify');
+  grunt.loadNpmTasks('grunt-contrib-cssmin');
+  grunt.loadNpmTasks('grunt-contrib-qunit');
+  grunt.loadNpmTasks('grunt-contrib-copy');
+  grunt.loadNpmTasks('grunt-contrib-watch');
 
+  grunt.registerTask("default", ["concat", "uglify", "cssmin", 'copy', 'jshint', 'qunit']);
+  grunt.registerTask("travis", ['qunit']);
 
 };

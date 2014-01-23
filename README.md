@@ -57,5 +57,40 @@ TODO
 
 *Full documentation to come*
 
+## Development
+
+Hgrid depends on [NodeJS](http://nodejs.org/) for package management and [Grunt](http://gruntjs.com/) for automation.
+
+### Getting started 
+
+To install all dependencies needed for development, run
+
+    $ npm install
+
+in the project root's root directory.
+
+### Testing
+
+#### Running Tests
+
+Run tests with grunt.
+
+    $ grunt
+
+#### Writing Tests
+
+Tests are written using the [QUnit](http://qunitjs.com/) framework.
+
+Tests are located in `tests/tests.js`.
+
+Example:
+
+```js
+test("Data Length in Grid", function(){
+    equal( myGrid.data.length, data.length);
+});
+```
+
+
 
 

@@ -92,8 +92,7 @@ module.exports = function(grunt) {
     qunit: {
       all: {
         options: {
-          urls: ['tests/index.html'],
-          force: true
+          urls: ['tests/index.html']
         }
       }
     },
@@ -114,7 +113,7 @@ module.exports = function(grunt) {
   grunt.loadNpmTasks('grunt-contrib-copy');
   grunt.loadNpmTasks('grunt-contrib-watch');
 
-  grunt.registerTask("default", ["concat", "uglify", "cssmin", 'copy', 'jshint', 'qunit']);
-  grunt.registerTask("travis", ['qunit']);
+  grunt.registerTask("default", ["concat", "uglify", "cssmin", 'copy', 'qunit', 'jshint']);
+  grunt.registerTask("travis", ["concat", 'copy', 'qunit', 'jshint']);
 
 };

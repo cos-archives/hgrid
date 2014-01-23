@@ -23,8 +23,9 @@ if (typeof jQuery === 'undefined') {
   /////////////////////
   // Private Members //
   /////////////////////
-  var INDENT_WIDTH = 15; // TODO: expose indent as an option
-
+  var ROOT_ID = 'root';
+  var FILE = 'file';
+  var FOLDER = 'folder';
 
   /**
    * Render a spacer element given an indent value in pixels.
@@ -52,15 +53,15 @@ if (typeof jQuery === 'undefined') {
    * @param  {Function} fileFunc   Function that returns the HTML for a file.
    * @return {Function}            A SlickGrid formatter function, used by Slick.Data.DataView.
    */
-  function makeFormatter(folderFunc, fileFunc) {
+  function makeFormatter(folderFunc, fileFunc, indentWidth) {
     var formatter = function(row, cell, value, columnDef, item) {
       // Opening and closing tags that surround a row
       var openTag = '<span class="hg-item" data-id="' + item.id + '">';
       var closingTag = '</span>';
-      var indent = item.depth * INDENT_WIDTH;
+      var indent = item.depth * indentWidth;
       // indenting span
       var spacer = makeIndentElem(indent);
-      if (item.kind === 'folder') {
+      if (item.kind === FOLDER) {
         return [openTag, spacer, folderFunc(item), closingTag].join(' ');
       } else {
         return [openTag, spacer, fileFunc(item), closingTag].join(' ');
@@ -71,10 +72,15 @@ if (typeof jQuery === 'undefined') {
 
   /**
    * Filter used by SlickGrid for collapsing/expanding folder.
+   *
+   * @param {Object} item The item object
+   * @param {Object} args Contains "thisObj" and "rootID" properties
+   * @returns {Boolean} Whether to display the item or not.
    */
   function collapseFilter(item, args) {
-    var self = args[0]; // the 'this' object is passed as an extra argument so methods are accessible
-    if (item.parentID) {
+    var self = args.thisObj; // the 'this' object is passed as an extra argument so methods are accessible
+    var rootID = args.rootID;
+    if (item.parentID !== rootID) {
       var parent = self.getByID.call(self, item.parentID);
       while (parent) {
         if (parent._collapsed) {
@@ -137,6 +143,10 @@ if (typeof jQuery === 'undefined') {
      */
     cssClass: 'hgrid',
     /**
+     * Width to indent items (in px)
+     */
+    indent: 15,
+    /**
      * Render a folder to HTML.
      * @param  {Object} item The folder as an item object.
      * @return {String}      HTML for the folder.
@@ -175,11 +185,13 @@ if (typeof jQuery === 'undefined') {
      * By default, expand or collapse the item.
      */
     onClick: function(event, element, item, grid) {
-      if (item && canToggle(element)) {
-        if (grid.isCollapsed(item)) {
-          grid.expandItem(item);
-        } else {
-          grid.collapseItem(item);
+      if (canToggle(element)) {
+        if (item) {
+          if (grid.isCollapsed(item)) {
+            grid.expandItem(item);
+          } else {
+            grid.collapseItem(item);
+          }
         }
       }
       event.stopImmediatePropagation();
@@ -212,7 +224,7 @@ if (typeof jQuery === 'undefined') {
     if (name === undefined && kind === undefined) { // No args passed, it's a root
       this.name = null;
       this.kind = null;
-      this.id = null;
+      this.id = ROOT_ID;
       this.depth = 0;
       this.dataView = new Slick.Data.DataView({
         inlineFilters: true
@@ -250,7 +262,7 @@ if (typeof jQuery === 'undefined') {
     }
     for (var i = 0, len = children.length; i < len; i++) {
       var child = children[i];
-      if (child.kind === 'file') {
+      if (child.kind === FILE) {
         leaf = Leaf.fromObject(child);
         tree.add(leaf);
       } else {
@@ -463,7 +475,7 @@ if (typeof jQuery === 'undefined') {
   HGrid.prototype._initSlickGrid = function() {
     var self = this;
     // Create the formatter function
-    var formatter = makeFormatter(self.options.renderFolder, self.options.renderFile);
+    var formatter = makeFormatter(self.options.renderFolder, self.options.renderFile, self.options.indent);
     // Set the name column's formatter
     // TODO: Rethink this. Should the format be specified explicitly
     // instead of setting it automatically?
@@ -506,7 +518,10 @@ if (typeof jQuery === 'undefined') {
     dataView.beginUpdate();
     // Must pass 'this' as an argument to the filter so that the filter function
     // has access to the methods
-    dataView.setFilterArgs([this]);
+    dataView.setFilterArgs({
+      thisObj: self,
+      rootID: ROOT_ID
+    });
     dataView.setFilter(collapseFilter);
     dataView.endUpdate();
     // wire up model events to drive the grid

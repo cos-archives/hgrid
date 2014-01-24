@@ -110,6 +110,7 @@ if (typeof jQuery === 'undefined') {
     defaultSortAsc: true
   }];
 
+
   /**
    * Default options object
    * @class  defaults
@@ -120,6 +121,12 @@ if (typeof jQuery === 'undefined') {
      * @property data
      */
     data: null,
+    /**
+     * Enable uploads (requires DropZone)
+     * @property [uploads]
+     * @type {Boolean}
+     */
+    uploads: false,
     // Root URL to get data at
     // ajaxSource: null,
     // URL where to retrieve a folder's contents (only used if using ajaxSource)
@@ -203,22 +210,34 @@ if (typeof jQuery === 'undefined') {
       forceFitColumns: true
     },
     /**
+     * Additional options passed to DropZone
+     * @property [dropZoneOptions]
+     * @type {Object}
+     */
+    dropZoneOptions: {},
+    /**
      * Callback function executed after an item is clicked.
      * By default, expand or collapse the item.
      * @property [onClick]
      */
-    onClick: function(event, element, item, grid) {
+    onClick: function(event, element, item) {
       if (canToggle(element)) {
-        grid.toggleCollapse(item);
+        this.toggleCollapse(item);
       }
       event.stopImmediatePropagation();
     },
     /**
      * Callback executed after an item is added.
-     * @property [onAdd]
+     * @property [onItemAdded]
      */
     /*jshint unused: false */
-    onAdd: function(item, grid) {}
+    onItemAdded: function(item) {},
+
+    /**
+     * [init description]
+     * @return {[type]} [description]
+     */
+    init: function() {}
   };
 
   ///////////////////////////////////
@@ -502,6 +521,11 @@ if (typeof jQuery === 'undefined') {
       ._initSlickGrid()
       ._initListeners()
       ._initDataView();
+
+    if (this.options.uploads) {
+      this._initDropZone();
+    }
+    this.options.init.call(this);
     return this;
   };
 
@@ -566,7 +590,7 @@ if (typeof jQuery === 'undefined') {
       var $elem = $(event.target);
       var dataView = self.grid.getData();
       var item = dataView.getItem(args.row);
-      self.options.onClick(event, $elem, item, self);
+      self.options.onClick.call(self, event, $elem, item, self);
     });
     return this;
   };
@@ -598,6 +622,14 @@ if (typeof jQuery === 'undefined') {
       self.grid.invalidateRows(args.rows);
       self.grid.render();
     });
+    return this;
+  };
+
+  HGrid.prototype._initDropZone = function() {
+    // if (typeof this.uploadUrl)
+    //   var defaultDropZoneOpts = {
+    //     url:
+    //   }
     return this;
   };
 
@@ -678,7 +710,7 @@ if (typeof jQuery === 'undefined') {
       this.getDataView().beginUpdate(); // Prevent refresh
     }
     dataView.insertItem(insertIndex, newItem);
-    this.options.onAdd(newItem, this);
+    this.options.onItemAdded.call(this, newItem);
     return newItem;
   };
 

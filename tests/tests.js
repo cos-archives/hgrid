@@ -412,7 +412,7 @@
 
   test('onClick callback', function() {
     var elem, itm;
-    myGrid.options.onClick = function(event, element, item, grid) {
+    myGrid.options.onClick = function(event, element, item) {
       elem = element;
       itm = item;
     };
@@ -432,16 +432,17 @@
     };
     var passed = false,
       passedItem = null,
-      passedGrid = null;
-    myGrid.options.onItemAdded = function(item, grid) {
+      thisObj = null;
+    myGrid.options.onItemAdded = function(item) {
       passed = true;
       passedItem = item;
-      passedGrid = grid;
+      thisObj = this;
     };
     myGrid.addItem(newItem);
     isTrue(passed, 'was called');
     equal(passedItem.name, newItem.name, 'passes the added item');
-    ok(passedGrid, 'passes the grid');
+    ok(thisObj, 'passes the grid as context object');
+    ok(thisObj instanceof HGrid, 'context object is HGrid instance');
 
   });
 

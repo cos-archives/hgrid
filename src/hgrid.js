@@ -216,9 +216,9 @@ if (typeof jQuery === 'undefined') {
      * By default, expand or collapse the item.
      * @property [onClick]
      */
-    onClick: function(event, element, item, grid) {
+    onClick: function(event, element, item) {
       if (canToggle(element)) {
-        grid.toggleCollapse(item);
+        this.toggleCollapse(item);
       }
       event.stopImmediatePropagation();
     },
@@ -227,8 +227,12 @@ if (typeof jQuery === 'undefined') {
      * @property [onItemAdded]
      */
     /*jshint unused: false */
-    onItemAdded: function(item, grid) {},
+    onItemAdded: function(item) {},
 
+    /**
+     * [init description]
+     * @return {[type]} [description]
+     */
     init: function() {}
   };
 
@@ -582,7 +586,7 @@ if (typeof jQuery === 'undefined') {
       var $elem = $(event.target);
       var dataView = self.grid.getData();
       var item = dataView.getItem(args.row);
-      self.options.onClick(event, $elem, item, self);
+      self.options.onClick.call(self, event, $elem, item, self);
     });
     return this;
   };
@@ -702,7 +706,7 @@ if (typeof jQuery === 'undefined') {
       this.getDataView().beginUpdate(); // Prevent refresh
     }
     dataView.insertItem(insertIndex, newItem);
-    this.options.onItemAdded(newItem, this);
+    this.options.onItemAdded.call(this, newItem);
     return newItem;
   };
 

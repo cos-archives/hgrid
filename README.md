@@ -9,7 +9,7 @@ TODO
 1. Include jQuery:
 
   ```html
-  <script src="http://ajax.googleapis.com/ajax/libs/jquery/2.0.0/jquery.min.js"></script>
+  <script src="//code.jquery.com/jquery-1.10.2.js"></script>
   ```
 
 2. Include hgrid.js:
@@ -21,6 +21,8 @@ TODO
   ```html
   <script src="dist/hgrid.min.js"></script>
   ```
+
+  NOTE: Makes sure the `images` directory is in the same directory as `hgrid.css`
 
 3. Create a new grid:
 
@@ -57,13 +59,21 @@ TODO
 
 *Full documentation to come*
 
+
+## Dependencies
+
+- [jQuery](http://jquery.com/)
+- [[DropZone]](http://www.dropzonejs.com/) (if uploads are enabled)
+
+Certain modules of [SlickGrid](https://github.com/mleibman/SlickGrid/wiki) are bundled with HGrid internally.
+
 ## Development
 
 Hgrid depends on [NodeJS](http://nodejs.org/) for package management and [Grunt](http://gruntjs.com/) for automation.
 
 ### Getting started 
 
-To install all dependencies needed for development, run
+To install all development dependencies needed for development, run
 
     $ npm install
 

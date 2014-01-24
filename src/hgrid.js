@@ -1,3 +1,7 @@
+/**
+ * Provides the main HGrid class and HGridError.
+ * @module HGrid
+ */
 if (typeof jQuery === 'undefined') {
   throw 'HGrid requires jQuery to be loaded';
 }
@@ -98,7 +102,16 @@ if (typeof jQuery === 'undefined') {
     cssClass: 'cell-title',
     defaultSortAsc: true
   }];
+
+  /**
+   * Default options object
+   * @class  defaults
+   */
   var defaults = {
+    /**
+     * The data for the grid.
+     * @property data
+     */
     data: null,
     // Root URL to get data at
     // ajaxSource: null,
@@ -125,23 +138,28 @@ if (typeof jQuery === 'undefined') {
     // topCrumb: true,
     // navigation: true,
     /**
-     * Width of the grid div in px.
+     * @property  [width] Width of the grid
      */
     width: 600,
     /**
-     * Height of the grid div in px or 'auto' (to disable vertical scrolling).
+     * Height of the grid div in px or 'auto' (to disable vertical scrolling).*
+     * @property [height]
      */
     height: 'auto',
     /**
      * CSS class to apply to the grid element. Can also be an array of multiple classes.
+     * @property cssClass
      */
     cssClass: 'hgrid',
     /**
-     * Width to indent items (in px)
+     * Width to indent items (in px)*
+     * @property indent
      */
     indent: 15,
     /**
      * Render a folder to HTML.
+     * @property renderFolder
+     * @type {Function}
      * @param  {Object} item The folder as an item object.
      * @return {String}      HTML for the folder.
      */
@@ -157,6 +175,7 @@ if (typeof jQuery === 'undefined') {
     },
     /**
      * Render a file to HTML.
+     * @property renderFile
      * @param  {Object} item The file as an item object.
      * @return {String}      HTML for the file.
      */
@@ -164,8 +183,11 @@ if (typeof jQuery === 'undefined') {
       var fileIcon = '<span class="hg-file"></span>';
       return [fileIcon, sanitized(item.name)].join(' ');
     },
-    // Options passed to Slick.Grid constructor
-    // See: https://github.com/mleibman/SlickGrid/wiki/Grid-Options
+    /**
+     * Options passed to Slick.Grid constructor
+     * See: https://github.com/mleibman/SlickGrid/wiki/Grid-Options
+     * @property slickGridOptions
+     */
     slickGridOptions: {
       editable: false,
       asyncEditorLoading: false,
@@ -177,6 +199,7 @@ if (typeof jQuery === 'undefined') {
     /**
      * Callback function executed after an item is clicked.
      * By default, expand or collapse the item.
+     * @property [onClick]
      */
     onClick: function(event, element, item, grid) {
       if (canToggle(element)) {
@@ -192,8 +215,7 @@ if (typeof jQuery === 'undefined') {
     },
     /**
      * Callback executed after an item is added.
-     * @param  {Object} item The added item
-     * @param  {HGrid} grid The grid Object
+     * @property [onAdd]
      */
     /*jshint unused: false */
     onAdd: function(item, grid) {}
@@ -207,18 +229,29 @@ if (typeof jQuery === 'undefined') {
   /**
    * A tree node. If constructed with no args, the node is
    * considered a root,
-   * e.g.
-   *   var root = new Tree();
-   *   root.depth // => 0
-   *   var subtree = new Tree('A subtree', 'folder');
-   *   root.add(subtree);
-   *   subtree.depth  // => 1
+   *
+   * ```
+   * var root = new HGrid.Tree();
+   * root.depth // => 0
+   * var subtree = new Tree('A subtree', 'folder');
+   * root.add(subtree);
+   * subtree.depth  // => 1
+   * ```
+   *
+   * @class HGrid.Tree
+   * @constructor
+   * @param {String} [name] Name of the node.
+   * @param {String} [kind] Either "file" or folder
    */
   function Tree(name, kind) {
     if (name === undefined && kind === undefined) { // No args passed, it's a root
       this.name = null;
       this.kind = null;
       this.id = ROOT_ID;
+      /**
+       * @attribute  depth
+       * @type {Number}
+       */
       this.depth = 0;
       this.dataView = new Slick.Data.DataView({
         inlineFilters: true
@@ -237,11 +270,19 @@ if (typeof jQuery === 'undefined') {
   }
   /**
    * Construct a new Tree from either an object or an array of data.
-   * e.g.
+   *
+   * Example output:
+   * ```
    * [{name: 'Documents', kind: 'folder',
    *  children: [{name: 'mydoc.txt', type: 'file'}]},
    *  {name: 'rootfile.txt', kind: 'file'}
    *  ]
+   *  ```
+   *
+   * @method fromObject
+   * @param {Object} data
+   * @param {parent} [parent] Parent item.
+   *
    */
   Tree.fromObject = function(data, parent) {
     var tree, children, leaf, subtree;
@@ -274,7 +315,12 @@ if (typeof jQuery === 'undefined') {
     return idCounter;
   };
 
-  /** Add a child, setting the child's parentID.  */
+  /**
+   * Add a component to this node
+   * @method  add
+   * @param component      Either a Tree or Leaf.
+   * @param {Boolean} [updateDataView] Whether to insert the item into the DataView
+   */
   Tree.prototype.add = function(component, updateDataView) {
     // Set deptth, parent ID, and dataview
     component.parentID = this.id;
@@ -360,6 +406,13 @@ if (typeof jQuery === 'undefined') {
     return data;
   };
 
+  /**
+   * Leaf representation
+   * @class  HGrid.Leaf
+   * @constructor
+   * @param {String} name Name of the item
+   * @param {String} kind The type of item, either "folder" or "file".
+   */
   function Leaf(name, kind) {
     this.name = name;
     this.id = idCounter++; // Set id then increment counter
@@ -368,11 +421,24 @@ if (typeof jQuery === 'undefined') {
     this.depth = null;
     return this;
   }
-  /** Construct a new Leaf from an object. */
+  /**
+   * Construct a new Leaf from an object.
+   * @method  fromObject
+   * @param obj
+   * @static
+   * @return {Leaf} The constructed Leaf.
+   */
   Leaf.fromObject = function(obj) {
     var leaf = new Leaf(obj.name, obj.kind);
     return leaf;
   };
+
+  /**
+   * Convert the Leaf to SlickGrid data format
+   * @method toData
+   * @param  {Array} [result] The memoized result
+   * @return {Object}        The leaf an item object.
+   */
   Leaf.prototype.toData = function(result) {
     var item = {
       name: this.name,
@@ -395,6 +461,9 @@ if (typeof jQuery === 'undefined') {
 
   /**
    * Construct an HGrid.
+   *
+   * @class  HGrid
+   * @constructor
    * @param {String} element CSS selector for the grid.
    * @param {Object} options
    */
@@ -415,6 +484,7 @@ if (typeof jQuery === 'undefined') {
     }
     /**
      * The Slick.Grid object.
+     * @attribute  grid
      * @type {Slick.Grid}
      */
     this.grid = null;
@@ -538,6 +608,9 @@ if (typeof jQuery === 'undefined') {
 
   /**
    * Return the data as an array.
+   *
+   * @method  getData
+   * @return {Array} Array of data items in the DataView.
    */
   HGrid.prototype.getData = function() {
     return this.getDataView().getItems();
@@ -551,6 +624,11 @@ if (typeof jQuery === 'undefined') {
     return dataView.getItemById(id);
   };
 
+  /**
+   * Return the grid's underlying DataView.
+   * @method  getDataView
+   * @return {Slick.Data.DataView}
+   */
   HGrid.prototype.getDataView = function() {
     return this.grid.getData();
   };
@@ -575,9 +653,11 @@ if (typeof jQuery === 'undefined') {
 
   /**
    * Add an item to the grid.
-   * @param {Object} item Object with 'name', 'kind', and parentID.
+   * @method  addItem
+   * @param {Object} item Object with `name`, `kind`, and `parentID`.
    *                      Must have parentID.
-   *                      Example: {name: 'New Folder', kind: 'folder', parentID: 123}
+   *                      Example:
+   *                      `{name: 'New Folder', kind: 'folder', parentID: 123}`
    * @return {Object} The added item.
    */
   HGrid.prototype.addItem = function(item, suspend) {
@@ -622,6 +702,7 @@ if (typeof jQuery === 'undefined') {
 
   /**
    * Remove a data item by id.
+   * @method  removeItem
    * @param  {Number} id ID of the datum to remove.
    * @return {Object}    The removed item
    */
@@ -633,6 +714,8 @@ if (typeof jQuery === 'undefined') {
 
   /**
    * Return a HGrid.Tree or HGrid.Leaf node given an id.
+   * @param {Number} id
+   * @return {HGrid.Tree} The Tree with the id.
    */
   HGrid.prototype.getNodeByID = function(id) {
     var item = this.getByID(id);

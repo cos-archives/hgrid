@@ -19,10 +19,10 @@ module.exports = function(grunt) {
 
     // Banner definitions
     meta: {
-      banner: "/*\n" +
-        " *  <%= pkg.title || pkg.name %> - v<%= pkg.version %>\n" +
-        " *  <%= pkg.description %>\n" +
-        " */\n"
+      banner: '/*\n' +
+        ' *  <%= pkg.title || pkg.name %> - v<%= pkg.version %>\n' +
+        ' *  <%= pkg.description %>\n' +
+        ' */\n'
     },
 
     // Concat definitions
@@ -103,6 +103,19 @@ module.exports = function(grunt) {
       tasks: ['concat', 'copy']
     }
 
+    // yuidoc: {
+    //   compile: {
+    //     name: '<%= pkg.name %>',
+    //     description: '<%= pkg.description %>',
+    //     version: '<%= pkg.version %>',
+    //     options: {
+    //       paths: 'src/',
+    //       outdir: 'docs',
+    //       exclude: 'vendor'
+    //     }
+    //   }
+    // }
+
   });
 
   grunt.loadNpmTasks('grunt-contrib-concat');
@@ -112,8 +125,9 @@ module.exports = function(grunt) {
   grunt.loadNpmTasks('grunt-contrib-qunit');
   grunt.loadNpmTasks('grunt-contrib-copy');
   grunt.loadNpmTasks('grunt-contrib-watch');
+  // grunt.loadNpmTasks('grunt-contrib-yuidoc');
 
-  grunt.registerTask("default", ["concat", "uglify", "cssmin", 'copy', 'qunit', 'jshint']);
-  grunt.registerTask("travis", ["concat", 'copy', 'qunit', 'jshint']);
+  grunt.registerTask('default', ['concat', 'uglify', 'cssmin', 'copy', 'qunit', 'jshint']);
+  grunt.registerTask('travis', ['concat', 'copy', 'qunit', 'jshint']);
 
 };

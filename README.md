@@ -12,7 +12,7 @@ TODO
   <script src="//code.jquery.com/jquery-1.10.2.js"></script>
   ```
 
-2. Include hgrid.js:
+2. Include HGrid:
 
   ```html
   <link rel="stylesheet" href="dist/hgrid.css" type="text/css" />
@@ -42,8 +42,67 @@ TODO
   var myGrid = new HGrid('#myGrid', {data: files});
   ```
 
+### File management
 
-### Available Options
+HGrid exposes a number of options and callbacks to allow uploading data as well as removing data.
+
+Example:
+
+```javascript
+var grid = new HGrid('#myGrid', {
+  data: files, 
+  uploads: true,
+  dragDrop: true,
+  maxFilesize: 10,  // MB
+  // Mimetypes or file extensions
+  acceptedFiles: ['image/*', 'application/pdf', '.py'],
+  uploadMethod: function(item) {
+    return item.uploadMethod || 'post';
+  },
+  // Returns where to send request for upload
+  uploadUrl: function(item) {  // {id: 3, name: 'My bucket', kind: 'folder'}
+    return 'files/' + item.id;
+  },
+  uploadParams: {}
+  // Returns where to send request for deletion
+  deleteUrl: function(item) {
+    return 'files/' + item.id + '/remove';
+  },
+  deleteMethod: 'delete',
+  deleteParams: {},
+  // Check if a file is ok to upload
+  // done is a callbaack that takes an error msg
+  // if no msg, then accept the file
+  accept: function(file, folderItem, done){
+    if (file.name === 'justinbieber.jpg') {
+      done('nope');
+    } else{
+      done();
+    }
+  },
+  beforeUpload: function(file, folderItem){},
+  afterUpload: function(file, folderItem){},
+  // Called when a file is added to the queue
+  onAddedFile: function(file, folderItem){},
+  // Called when upload completed successfully
+  uploadSuccess: function(file, folderItem){},
+  uploadError: function(file, message) {},
+});
+```
+
+### Adding other listeners
+
+The `init` option is useful for attaching additional listeners to the grid.
+
+```javascript
+var grid = new HGrid('#myGrid', {
+  init: function() {
+    this.element.on('click', function(event) {alert('clicked on the grid!')});
+  }
+});
+```
+
+### Other Options
 
 - `width`: The width of the grid in px
 - `height`: The height of the grid in px or "auto".
@@ -97,7 +156,7 @@ Example:
 
 ```js
 test("Data Length in Grid", function(){
-    equal( myGrid.data.length, data.length);
+    equal( myGrid.getData().length, testData.length);
 });
 ```
 

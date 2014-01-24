@@ -96,8 +96,23 @@ The `init` option is useful for attaching additional listeners to the grid.
 
 ```javascript
 var grid = new HGrid('#myGrid', {
+  data: files,
   init: function() {
     this.element.on('click', function(event) {alert('clicked on the grid!')});
+  }
+});
+```
+
+### Overriding Slickgrid or Dropzone options
+
+```javascript
+var grid = new HGrid('#myGrid', {
+  data: files,
+  dropzoneOptions: {
+    parallelUploads: 5
+  },
+  slickgridOptions: {
+    editable: true
   }
 });
 ```

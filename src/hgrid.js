@@ -140,7 +140,7 @@ if (typeof jQuery === 'undefined') {
     // lazyLoad: false,
     columns: requiredColumns,
     // dropZonePreviewsContainer: null,
-    // dropZoneOptions: null,
+    // dropzoneOptions: null,
     // navLevel: null,
     // CSS selector for the breadcrumb box
     // breadcrumbBox: null,
@@ -196,9 +196,9 @@ if (typeof jQuery === 'undefined') {
     /**
      * Options passed to Slick.Grid constructor
      * See: https://github.com/mleibman/SlickGrid/wiki/Grid-Options
-     * @property slickGridOptions
+     * @property slickgridOptions
      */
-    slickGridOptions: {
+    slickgridOptions: {
       editable: false,
       asyncEditorLoading: false,
       enableCellNavigation: false,
@@ -207,10 +207,10 @@ if (typeof jQuery === 'undefined') {
     },
     /**
      * Additional options passed to DropZone
-     * @property [dropZoneOptions]
+     * @property [dropzoneOptions]
      * @type {Object}
      */
-    dropZoneOptions: {},
+    dropzoneOptions: {},
     /**
      * Callback function executed after an item is clicked.
      * By default, expand or collapse the item.
@@ -531,7 +531,7 @@ if (typeof jQuery === 'undefined') {
 
   HGrid.prototype.setHeight = function(height) {
     if (height === 'auto') {
-      this.options.slickGridOptions.autoHeight = true;
+      this.options.slickgridOptions.autoHeight = true;
     } else {
       this.element.css('height', height);
     }
@@ -575,7 +575,7 @@ if (typeof jQuery === 'undefined') {
     });
     this.grid = new Slick.Grid(self.element.selector, this.tree.dataView,
       columns,
-      self.options.slickGridOptions);
+      self.options.slickgridOptions);
     return this;
   };
 
@@ -627,7 +627,8 @@ if (typeof jQuery === 'undefined') {
 
   var requiredDropzoneOpts = {
     addRemoveLinks: true,
-    dropDestination: null
+    dropDestination: null,
+    uploadMultiple: false
   };
 
   /**
@@ -642,11 +643,10 @@ if (typeof jQuery === 'undefined') {
     } else { // uploadUrl is a function, so will defer to the function
       uploadUrl = '/';
     }
-    var dropZoneOptions = $.extend({
+    var dropzoneOptions = $.extend({
       url: uploadUrl
-    }, requiredDropzoneOpts, this.options.dropZoneOptions);
-
-    this.dropzone = new Dropzone(this.selector, dropZoneOptions);
+    }, requiredDropzoneOpts, this.options.dropzoneOptions);
+    this.dropzone = new Dropzone(this.selector, dropzoneOptions);
     return this;
   };
 

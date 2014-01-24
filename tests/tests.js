@@ -7,11 +7,11 @@
   // Custom asserts //
   ////////////////////
   function isTrue(expr, msg) {
-    return strictEqual(expr, true, msg || expr.toString() + ' is true');
+    return strictEqual(expr, true, msg || 'is true');
   }
 
   function isFalse(expr, msg) {
-    return strictEqual(expr, false, msg || expr.toString() + ' is false');
+    return strictEqual(expr, false, msg || 'is false');
   }
 
   /**
@@ -191,6 +191,28 @@
     grid.expandItem(folder);
     isFalse(grid.isCollapsed(folder));
     containsText('.slick-cell', 'mydoc.txt', 'shows folder contents in DOM');
+  });
+
+  test('Toggle collapse', function() {
+    var dat = {
+      data: [{
+        kind: 'folder',
+        name: 'Docs',
+        children: [{
+          kind: 'file',
+          name: 'mydoc.txt'
+        }]
+      }]
+    };
+    var grid = new HGrid('#myGrid', {
+      data: dat
+    });
+    var folder = grid.getData()[0];
+    containsText('.slick-cell', 'mydoc.txt');
+    grid.toggleCollapse(folder);
+    notContainsText('.slick-cell', 'mydoc.txt');
+    grid.toggleCollapse(folder);
+    isFalse(grid.isCollapsed(folder));
   });
 
   test('Collapse filter', function() {

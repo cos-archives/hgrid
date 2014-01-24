@@ -13,6 +13,9 @@ if (typeof jQuery === 'undefined') {
 
   /**
    * Custom Error for HGrid-related errors.
+   *
+   * @class  HGridError
+   * @constructor
    */
   function HGridError(message) {
     this.name = 'HGridError';
@@ -193,7 +196,6 @@ if (typeof jQuery === 'undefined') {
       asyncEditorLoading: false,
       enableCellNavigation: false,
       enableColumnReorder: false, // column reordering requires jquery-ui.sortable
-      // autoHeight: true, // disable vertical scrolling
       forceFitColumns: true
     },
     /**
@@ -203,13 +205,7 @@ if (typeof jQuery === 'undefined') {
      */
     onClick: function(event, element, item, grid) {
       if (canToggle(element)) {
-        if (item) {
-          if (grid.isCollapsed(item)) {
-            grid.expandItem(item);
-          } else {
-            grid.collapseItem(item);
-          }
-        }
+        grid.toggleCollapse(item);
       }
       event.stopImmediatePropagation();
     },
@@ -720,6 +716,22 @@ if (typeof jQuery === 'undefined') {
   HGrid.prototype.getNodeByID = function(id) {
     var item = this.getByID(id);
     return item._node;
+  };
+
+  /**
+   * Toggle an item's collapsed/expanded state.
+   * @method  toggleCollapse
+   * @param  {item} item A folder item
+   */
+  HGrid.prototype.toggleCollapse = function(item) {
+    if (item) {
+      if (this.isCollapsed(item)) {
+        this.expandItem(item);
+      } else {
+        this.collapseItem(item);
+      }
+    }
+    return this;
   };
 
   // Expose collapse filter for testing purposes

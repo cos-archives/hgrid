@@ -106,6 +106,7 @@ if (typeof jQuery === 'undefined') {
     defaultSortAsc: true
   }];
 
+
   /**
    * Default options object
    * @class  defaults
@@ -116,6 +117,12 @@ if (typeof jQuery === 'undefined') {
      * @property data
      */
     data: null,
+    /**
+     * Enable uploads (requires DropZone)
+     * @property [uploads]
+     * @type {Boolean}
+     */
+    uploads: false,
     // Root URL to get data at
     // ajaxSource: null,
     // URL where to retrieve a folder's contents (only used if using ajaxSource)
@@ -199,6 +206,12 @@ if (typeof jQuery === 'undefined') {
       forceFitColumns: true
     },
     /**
+     * Additional options passed to DropZone
+     * @property [dropZoneOptions]
+     * @type {Object}
+     */
+    dropZoneOptions: {},
+    /**
      * Callback function executed after an item is clicked.
      * By default, expand or collapse the item.
      * @property [onClick]
@@ -211,10 +224,12 @@ if (typeof jQuery === 'undefined') {
     },
     /**
      * Callback executed after an item is added.
-     * @property [onAdd]
+     * @property [onItemAdded]
      */
     /*jshint unused: false */
-    onAdd: function(item, grid) {}
+    onItemAdded: function(item, grid) {},
+
+    init: function() {}
   };
 
   ///////////////////////////////////
@@ -498,6 +513,11 @@ if (typeof jQuery === 'undefined') {
       ._initSlickGrid()
       ._initListeners()
       ._initDataView();
+
+    if (this.options.uploads) {
+      this._initDropZone();
+    }
+    this.options.init.call(this);
     return this;
   };
 
@@ -597,6 +617,14 @@ if (typeof jQuery === 'undefined') {
     return this;
   };
 
+  HGrid.prototype._initDropZone = function() {
+    // if (typeof this.uploadUrl)
+    //   var defaultDropZoneOpts = {
+    //     url:
+    //   }
+    return this;
+  };
+
   HGrid.prototype.destroy = function() {
     this.element.html('');
     this.grid.destroy();
@@ -674,7 +702,7 @@ if (typeof jQuery === 'undefined') {
       this.getDataView().beginUpdate(); // Prevent refresh
     }
     dataView.insertItem(insertIndex, newItem);
-    this.options.onAdd(newItem, this);
+    this.options.onItemAdded(newItem, this);
     return newItem;
   };
 

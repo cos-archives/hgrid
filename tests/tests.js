@@ -424,7 +424,7 @@
     ok(typeof itm === 'object', 'item was set to an item object');
   });
 
-  test('onAdd callback', function() {
+  test('onItemAdded callback', function() {
     var newItem = {
       parentID: myGrid.getData()[0].id,
       name: 'New folder',
@@ -433,7 +433,7 @@
     var passed = false,
       passedItem = null,
       passedGrid = null;
-    myGrid.options.onAdd = function(item, grid) {
+    myGrid.options.onItemAdded = function(item, grid) {
       passed = true;
       passedItem = item;
       passedGrid = grid;
@@ -485,6 +485,7 @@
       uploads: true
     });
     ok(grid.dropZone, 'has a dropzone object');
+    grid.destroy();
   });
 
 })(jQuery);

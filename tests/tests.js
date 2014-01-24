@@ -485,7 +485,7 @@
     var grid = new HGrid('#myGrid', {
       uploads: true
     });
-    ok(grid.dropZone, 'has a dropzone object');
+    ok(grid.dropzone, 'has a dropzone object');
     grid.destroy();
   });
 

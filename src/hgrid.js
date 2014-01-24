@@ -483,6 +483,7 @@ if (typeof jQuery === 'undefined') {
    * @param {Object} options
    */
   function HGrid(selector, options) {
+    this.selector = selector;
     this.element = $(selector);
     // Merge defaults with options passed in
     this.options = $.extend({}, defaults, options);
@@ -519,6 +520,9 @@ if (typeof jQuery === 'undefined') {
       ._initDataView();
 
     if (this.options.uploads) {
+      if (typeof Dropzone === 'undefined') {
+        throw new HGridError('uploads=true requires DropZone to be loaded');
+      }
       this._initDropZone();
     }
     this.options.init.call(this);
@@ -621,11 +625,28 @@ if (typeof jQuery === 'undefined') {
     return this;
   };
 
+  var requiredDropzoneOpts = {
+    addRemoveLinks: true,
+    dropDestination: null
+  };
+
+  /**
+   * Builds a new DropZone object and attaches it the "dropzone" attribute of
+   * the grid.
+   * @method  _initDropZone
+   */
   HGrid.prototype._initDropZone = function() {
-    // if (typeof this.uploadUrl)
-    //   var defaultDropZoneOpts = {
-    //     url:
-    //   }
+    var uploadUrl;
+    if (typeof this.options.uploadUrl === 'string') {
+      uploadUrl = this.options.uploadUrl;
+    } else { // uploadUrl is a function, so will defer to the function
+      uploadUrl = '/';
+    }
+    var dropZoneOptions = $.extend({
+      url: uploadUrl
+    }, requiredDropzoneOpts, this.options.dropZoneOptions);
+
+    this.dropzone = new Dropzone(this.selector, dropZoneOptions);
     return this;
   };
 

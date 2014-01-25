@@ -403,7 +403,7 @@
   });
 
   /** Trigger a Slick.Event **/
-  function trigger(evt, args, e) {
+  function triggerSlick(evt, args, e) {
     e = e || new Slick.EventData();
     args = args || {};
     args.grid = self;
@@ -411,38 +411,29 @@
   }
 
   test('onClick callback', function() {
-    var elem, itm;
+    expect(2);
     myGrid.options.onClick = function(event, element, item) {
-      elem = element;
-      itm = item;
+      ok(element instanceof jQuery, 'element was set to a jQuery element');
+      ok(typeof item === 'object', 'item was set to an item object');
     };
     // Trigger the Slick event
-    trigger(myGrid.grid.onClick, {
+    triggerSlick(myGrid.grid.onClick, {
       row: 2
     });
-    ok(elem instanceof jQuery, 'element was set to a jQuery element');
-    ok(typeof itm === 'object', 'item was set to an item object');
   });
 
   test('onItemAdded callback', function() {
+    expect(2);
     var newItem = {
       parentID: myGrid.getData()[0].id,
       name: 'New folder',
       kind: 'folder'
     };
-    var passed = false,
-      passedItem = null,
-      thisObj = null;
     myGrid.options.onItemAdded = function(item) {
-      passed = true;
-      passedItem = item;
-      thisObj = this;
+      equal(item.name, newItem.name, 'passes the added item');
+      ok(this instanceof HGrid, 'context object is HGrid instance');
     };
     myGrid.addItem(newItem);
-    isTrue(passed, 'was called');
-    equal(passedItem.name, newItem.name, 'passes the added item');
-    ok(thisObj, 'passes the grid as context object');
-    ok(thisObj instanceof HGrid, 'context object is HGrid instance');
 
   });
 
@@ -486,6 +477,17 @@
       uploads: true
     });
     ok(grid.dropzone, 'has a dropzone object');
+    grid.destroy();
+  });
+
+  test('Overriding Dropzone options', function() {
+    var grid = new HGrid('#myGrid', {
+      uploads: true,
+      dropzoneOptions: {
+        parallelUploads: 123
+      }
+    });
+    equal(grid.dropzone.options.parallelUploads, 123);
     grid.destroy();
   });
 

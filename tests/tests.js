@@ -191,8 +191,24 @@
     equal(addedItem.id, HGrid.Tree._getCurrentID() - 1, 'id is unique');
     equal(addedItem.parentID, parentItem.id, 'parentID is correct');
     equal(addedItem.depth, parentItem.depth + 1, 'new item has a depth 1 greater than its parent');
-
     containsText('.slick-cell', newItem.name, 'Item added to DOM');
+  });
+
+  test('Added tree and leaf point to same dataview', function() {
+    var root = new HGrid.Tree();
+    var tree = new HGrid.Tree({
+      name: 'Docs',
+      kind: HGrid.FOLDER
+    });
+    var leaf = new HGrid.Leaf({
+      name: 'myfile.txt',
+      kind: HGrid.FILE
+    });
+    tree.add(leaf); // NOTE: nodes are added out of hierarchical order
+    root.add(tree);
+    root.updateDataView();
+    equal(root.dataView, tree.dataView, 'root and tree point to same dataview');
+    equal(tree.dataView, leaf.dataView, 'tree and leaf point to same dataview');
   });
 
   test('Removing item', function() {
@@ -224,6 +240,8 @@
       data: dat
     });
     var folder = grid.getData()[0];
+    console.log('-FOLDER-');
+    console.log(folder);
     grid.collapseItem(folder); // Start with collapsed
     notContainsText('.slick-cell', 'mydoc.txt');
     grid.expandItem(folder);
@@ -332,6 +350,105 @@
     });
     equal(leaf1.id, 2);
     equal(leaf1.data.kind, 'file', 'sets the leaf kind');
+  });
+
+  test('Tree.getItem()', function() {
+    var root = new HGrid.Tree();
+    equal(root.getItem(), undefined, 'root does not have an item');
+    var folder = new HGrid.Tree({
+      name: 'Folder 1',
+      kind: 'folder'
+    })
+    root.add(folder);
+    root.updateDataView();
+    var item = folder.getItem();
+    equal(item.name, 'Folder 1');
+    equal(item.parentID, HGrid.ROOT_ID);
+    equal(item._node, folder);
+  });
+
+  test('Leaf.getItem()', function() {
+    var root = new HGrid.Tree();
+    var leaf = new HGrid.Leaf({
+      name: 'file.txt',
+      kind: 'file'
+    })
+    root.add(leaf);
+    root.updateDataView();
+    var leafItem = leaf.getItem();
+    equal(leafItem.kind, 'file');
+    equal(leafItem.parentID, HGrid.ROOT_ID);
+  });
+
+  test('Leaf.collapse()', function() {
+    var root = new HGrid.Tree();
+    var leaf = new HGrid.Leaf({
+      name: 'doc.txt',
+      kind: HGrid.FILE,
+      _collapsed: false
+    });
+    root.add(leaf, true);
+    var leafItem = leaf.getItem();
+    isFalse(leafItem._collapsed, 'not collapsed');
+    leaf.collapse();
+    isTrue(leafItem._collapsed, 'collapses after calling collapse()')
+  });
+
+  test('Leaf.expand()', function() {
+    var root = new HGrid.Tree();
+    var leaf = new HGrid.Leaf({
+      name: 'doc.txt',
+      kind: HGrid.FILE,
+      _collapsed: true
+    });
+    root.add(leaf, true);
+    isTrue(leaf.getItem()._collapsed, 'collapsed to begin with');
+    leaf.expand();
+    isFalse(leaf.getItem()._collapsed, 'expanded');
+  });
+
+  test('Tree.collapse()', function() {
+    var root = new HGrid.Tree();
+    var tree = new HGrid.Tree({
+      name: 'Docs',
+      kind: HGrid.FOLDER,
+      _collapsed: false
+    });
+    var leaf = new HGrid.Leaf({
+      name: 'mydoc.txt',
+      kind: HGrid.FILE,
+      _collapsed: false
+    });
+    root.add(tree, true);
+    tree.add(leaf, true);
+    var item = tree.getItem();
+    isFalse(item._collapsed, 'not collapsed to begin with');
+    isFalse(leaf.getItem()._collapsed, 'leaf is not collapsed to begin with');
+    tree.collapse();
+    isTrue(item._collapsed, 'collapses after calling collapse()');
+    isTrue(leaf.getItem()._collapsed, 'child leaf also collapses after parent is collapsed');
+  });
+
+  test('Tree.expand()', function() {
+    var root = new HGrid.Tree();
+    var tree = new HGrid.Tree({
+      name: 'Docs',
+      kind: HGrid.FOLDER,
+      _collapsed: true
+    });
+    var leaf = new HGrid.Leaf({
+      name: 'mydoc.txt',
+      kind: HGrid.FILE,
+      _collapsed: true
+    });
+    root.add(tree, true);
+    tree.add(leaf, true);
+    var item = tree.getItem();
+    isTrue(item._collapsed, 'collapsed to begin with');
+    isTrue(leaf.getItem()._collapsed, 'leaf is collapsed to begin with');
+    tree.expand();
+    isFalse(item._collapsed, 'expanded after calling collapse()');
+    isFalse(leaf.getItem()._collapsed, 'child leaf is expanded after parent is collapsed');
   });
 
   test('Creating trees with metadata', function() {
@@ -455,19 +572,21 @@
       kind: 'file'
     }];
     var root = HGrid.Tree.fromObject(data);
+    root.updateDataView();
     equal(root.depth, 0, 'Root depth is 0');
     ok(root instanceof HGrid.Tree, 'HGrid.Tree.fromObject returns a HGrid.Tree');
     equal(root.children.length, data.length, 'Tree has as many children as the data');
     var subtree = root.children[0];
+    equal(subtree.dataView, root.dataView, 'root and subtree point to the same DataView');
     equal(subtree.depth, 1, 'subtree depth is 1');
     equal(subtree.data.name, 'Documents');
     equal(subtree.data.kind, 'folder');
     var child = subtree.children[0];
     ok(child instanceof HGrid.Leaf, 'file is an HGrid.Leaf');
+    equal(child.dataView, root.dataView, 'leaf and root point to the same DataView');
     equal(child.data.name, 'mydoc.txt');
     equal(child.data.kind, 'file');
     equal(child.depth, 2, 'child depth is 2');
-    root.updateDataView();
     equal(root.dataView.getItems().length, root.toData().length, 'DataView and Tree have same data length');
   });
 

@@ -51,9 +51,11 @@ if (typeof jQuery === 'undefined') {
    *
    * See: https://github.com/mleibman/SlickGrid/blob/gh-pages/examples/example2-formatters.html
    *
+   * @private
    * @param  {Function} folderFunc Function that returns the HTML for a folder.
    * @param  {Function} fileFunc   Function that returns the HTML for a file.
-   * @return {Function}            A SlickGrid formatter function, used by Slick.Data.DataView.
+   * @return {Function}            A SlickGrid formatter function, used by Slick.Data.DataView
+   *                                 to render the folder and file display text.
    */
   function makeFormatter(folderFunc, fileFunc, indentWidth) {
     var formatter = function(row, cell, value, columnDef, item) {
@@ -75,6 +77,8 @@ if (typeof jQuery === 'undefined') {
   /**
    * Filter used by SlickGrid for collapsing/expanding folder.
    *
+   * @class  collapseFilter
+   * @private
    * @param {Object} item The item object
    * @param {Object} args Contains "thisObj" and "rootID" properties
    * @returns {Boolean} Whether to display the item or not.
@@ -105,7 +109,6 @@ if (typeof jQuery === 'undefined') {
     cssClass: 'cell-title',
     defaultSortAsc: true
   }];
-
 
   /**
    * Default options object
@@ -194,9 +197,9 @@ if (typeof jQuery === 'undefined') {
       return [fileIcon, sanitized(item.name)].join(' ');
     },
     /**
-     * Options passed to Slick.Grid constructor
+     * Additional options passed to Slick.Grid constructor
      * See: https://github.com/mleibman/SlickGrid/wiki/Grid-Options
-     * @property slickgridOptions
+     * @property [slickgridOptions]
      */
     slickgridOptions: {
       editable: false,
@@ -206,7 +209,8 @@ if (typeof jQuery === 'undefined') {
       forceFitColumns: true
     },
     /**
-     * Additional options passed to DropZone
+     * Additional options passed to DropZone constructor
+     * See: http://www.dropzonejs.com/
      * @property [dropzoneOptions]
      * @type {Object}
      */
@@ -516,15 +520,16 @@ if (typeof jQuery === 'undefined') {
       .setWidth(this.options.width)
       .setCSSClass(this.options.cssClass)
       ._initSlickGrid()
-      ._initListeners()
       ._initDataView();
 
     if (this.options.uploads) {
       if (typeof Dropzone === 'undefined') {
         throw new HGridError('uploads=true requires DropZone to be loaded');
       }
-      this._initDropZone();
+      this._initDropzone();
     }
+    // Attach the listeners last, after this.grid and this.dropzone are set
+    this._initListeners();
     this.options.init.call(this);
     return this;
   };
@@ -579,19 +584,58 @@ if (typeof jQuery === 'undefined') {
     return this;
   };
 
+  /**
+   * SlickGrid events that the grid subscribes to. Mostly just delegates to one
+   * of the callbacks in `options`.
+   * @class slickEvents
+   * @private
+   */
+  var slickEvents = {
+    'onClick': function(evt, args) {
+      var $elem = $(evt.target);
+      var item = this.getDataView().getItem(args.row);
+      this.options.onClick.call(this, event, $elem, item);
+    },
+    'onCellChange': function(evt, args) {
+      this.getDataView().updateItem(args.item.id, args.item);
+    }
+  };
+
+  /**
+   * DropZone events that the grid subscribes to.
+   * @class  dropzoneEvents
+   * @private
+   * @type {Object}
+   */
+  var dropzoneEvents = {
+    'dragover': function(evt) {
+      var currentDropCell = this.grid.getCellFromEvent(event);
+      var item, dropHighlight;
+      if (currentDropCell) {
+        item = this.getDataView().getItem(currentDropCell.row);
+      } else {
+        dropHighlight = null;
+        this.dropzone.dropDestination = null;
+        this.draggerGuide(dropHighlight);
+      }
+    }
+  };
+
   HGrid.prototype._initListeners = function() {
     var self = this;
-    this.grid.onCellChange.subscribe(function(event, args) {
-      dataView.updateItem(args.item.id, args.item);
-    });
+    // Wire up all the slickgrid events
+    for (var callbackName in slickEvents) {
+      var fn = slickEvents[callbackName].bind(self); // make `this` object the grid
+      self.grid[callbackName].subscribe(fn);
+    }
 
-    this.grid.onClick.subscribe(function(event, args) {
-      // Delegate to user-defined onClick function
-      var $elem = $(event.target);
-      var dataView = self.grid.getData();
-      var item = dataView.getItem(args.row);
-      self.options.onClick.call(self, event, $elem, item, self);
-    });
+    if (this.options.uploads) {
+      // Wire up all the dropzone events
+      for (var callbackName in dropzoneEvents) {
+        var fn = dropzoneEvents[callbackName].bind(self);
+        self.dropzone.on(callbackName, fn);
+      }
+    }
     return this;
   };
 
@@ -636,7 +680,7 @@ if (typeof jQuery === 'undefined') {
    * the grid.
    * @method  _initDropZone
    */
-  HGrid.prototype._initDropZone = function() {
+  HGrid.prototype._initDropzone = function() {
     var uploadUrl;
     if (typeof this.options.uploadUrl === 'string') {
       uploadUrl = this.options.uploadUrl;

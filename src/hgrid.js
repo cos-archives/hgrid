@@ -451,6 +451,14 @@ if (typeof jQuery === 'undefined') {
     return this;
   };
 
+  Tree.prototype.expand = function() {
+    for (var i = 0, node; node = this.children[i]; i++) {
+      node.expand();
+    }
+    this.getItem()._collapsed = false;
+    return this;
+  };
+
   /**
    * Leaf representation
    * @class  HGrid.Leaf
@@ -489,13 +497,22 @@ if (typeof jQuery === 'undefined') {
   };
 
   /**
-   * Collapse this leaf by setting it's item's _collapsed property.
+   * Collapse this leaf by setting its item's _collapsed property.
    * @method  collapse
    */
   Leaf.prototype.collapse = function() {
     this.getItem()._collapsed = true;
     return this;
-  }
+  };
+
+  /**
+   * Expand this leaf by setting its item's _collapse property
+   * @method  expand
+   */
+  Leaf.prototype.expand = function() {
+    this.getItem()._collapsed = false;
+    return this;
+  };
 
   /**
    * Convert the Leaf to SlickGrid data format

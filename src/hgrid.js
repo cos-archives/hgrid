@@ -161,9 +161,15 @@ if (typeof jQuery === 'undefined') {
     height: 'auto',
     /**
      * CSS class to apply to the grid element. Can also be an array of multiple classes.
-     * @property cssClass
+     * @property [cssClass]
      */
     cssClass: 'hgrid',
+    /**
+     * CSS class applied for a highlighted row.
+     * @property [highlightClass]
+     * @type {String}
+     */
+    highlightClass: 'hg-dragger-guide',
     /**
      * Width to indent items (in px)*
      * @property indent
@@ -503,11 +509,16 @@ if (typeof jQuery === 'undefined') {
       this.tree = new Tree();
     }
     /**
-     * The Slick.Grid object.
+     * The Slick.Grid object. This is set upon calling init()
      * @attribute  grid
      * @type {Slick.Grid}
      */
     this.grid = null;
+    /**
+     * The Dropzone object. This is set upon calling init()
+     * @type {Dropzone}
+     */
+    this.dropzone = null;
     this.init();
   }
 
@@ -584,9 +595,30 @@ if (typeof jQuery === 'undefined') {
     return this;
   };
 
+  HGrid.prototype.removeHighlight = function() {
+    this.element.find('.' + this.options.highlightClass)
+      .removeClass(this.options.highlightClass);
+    return this;
+  }
+
+  HGrid.prototype.addHighlight = function(item) {
+    this.removeHighlight();
+    var parent;
+    if (item.kind === FOLDER) {
+      parent = this.grid.getCellNode(this.getDataView().getRowById(item.id), 0).parentNode;
+    } else {
+      parent = this.grid.getCellNode(this.getDataView().getRowById(item.parentID), 0).parentNode;
+    }
+    if (parent) {
+      $(parent).addClass(this.options.highlightClass);
+    }
+    return this;
+  }
+
   /**
    * SlickGrid events that the grid subscribes to. Mostly just delegates to one
    * of the callbacks in `options`.
+   * For each funcion, `this` refers to the HGrid object.
    * @class slickEvents
    * @private
    */
@@ -596,31 +628,60 @@ if (typeof jQuery === 'undefined') {
       var item = this.getDataView().getItem(args.row);
       this.options.onClick.call(this, event, $elem, item);
     },
+
     'onCellChange': function(evt, args) {
       this.getDataView().updateItem(args.item.id, args.item);
     }
   };
 
+
   /**
    * DropZone events that the grid subscribes to.
+   * For each function, `this` refers to the HGrid object.
    * @class  dropzoneEvents
    * @private
    * @type {Object}
    */
   var dropzoneEvents = {
     'dragover': function(evt) {
-      var currentDropCell = this.grid.getCellFromEvent(event);
-      var item, dropHighlight;
-      if (currentDropCell) {
-        item = this.getDataView().getItem(currentDropCell.row);
+      var cell = this.grid.getCellFromEvent(evt);
+      var item, itemToHighlight;
+      if (cell) {
+        item = this.getDataView().getItem(cell.row);
+        cell.insertBefore = cell.row;
+        if (item.kind === FOLDER) {
+          itemToHighlight = item;
+        } else {
+          itemToHighlight = this.getByID(item.parentID);
+        }
+        if (itemToHighlight.permission || typeof itemToHighlight.permission === 'undefined') {
+          this.addHighlight(item);
+        }
       } else {
-        dropHighlight = null;
+        itemToHighlight = null;
         this.dropzone.dropDestination = null;
-        this.draggerGuide(dropHighlight);
+        this.addHighlight(itemToHighlight);
       }
+      // if upload url is a function, call it, passing in the item,
+      // and set dropzone to upload to the result
+      if (typeof this.options.uploadUrl === 'function') {
+        this.dropzone.options.url = this.options.uploadUrl(item);
+      }
+    },
+    'dragleave': function(evt) {
+      this.removeHighlight();
+    },
+    'addedfile': function(file) {
+
     }
+
   };
 
+  /**
+   * Wires up all the event handlers.
+   * @method  _initListeners
+   * @return {[type]} [description]
+   */
   HGrid.prototype._initListeners = function() {
     var self = this;
     // Wire up all the slickgrid events
@@ -684,7 +745,7 @@ if (typeof jQuery === 'undefined') {
     var uploadUrl;
     if (typeof this.options.uploadUrl === 'string') {
       uploadUrl = this.options.uploadUrl;
-    } else { // uploadUrl is a function, so will defer to the function
+    } else { // uploadUrl is a function, so will compute the upload url dynamically
       uploadUrl = '/';
     }
     var dropzoneOptions = $.extend({
@@ -697,6 +758,9 @@ if (typeof jQuery === 'undefined') {
   HGrid.prototype.destroy = function() {
     this.element.html('');
     this.grid.destroy();
+    if (this.dropzone) {
+      this.dropzone.destroy();
+    };
   };
 
   /**

@@ -47,11 +47,11 @@
     width: 32px;
 }
 
-.slick-row.dragger-guide {
+.slick-row.hg-dragger-guide {
     background-color: rgba(0,0,255,0.5);
 }
 
-.slick-viewport.dragger-guide1{
+.slick-viewport.hg-dragger-guide-lg{
     border: 5px solid rgba(0,0,255,0.5);
 }
 

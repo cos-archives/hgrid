@@ -98,7 +98,7 @@ The `init` option is useful for attaching additional listeners to the grid.
 var grid = new HGrid('#myGrid', {
   data: files,
   init: function() {
-    this.element.on('click', function(event) {alert('clicked on the grid!')});
+    this.element.on('mycustomevent', function(event) {alert('custom event triggered')});
   }
 });
 ```
@@ -128,8 +128,9 @@ TODO
 
 #### Callbacks 
 
-- `onClickItem: function(event, element, item, grid)`
+- `onClickItem: function(event, element, item)`
 - `onAdd: function(item, grid)`
+- `onDragover: function(event, item)`
 
 *Full documentation to come*
 

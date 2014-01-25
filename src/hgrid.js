@@ -81,7 +81,7 @@ if (typeof jQuery === 'undefined') {
    * @private
    * @returns {Boolean} Whether to display the item or not.
    */
-  function collapseFilter(item, args) {
+  function collapseFilter(item) {
     return !item._hidden;
   }
 
@@ -394,7 +394,7 @@ if (typeof jQuery === 'undefined') {
       node.ensureDataView(dataView);
     }
     return this;
-  }
+  };
 
   /**
    * Update the dataview with this tree's data. This should only be called on
@@ -460,7 +460,7 @@ if (typeof jQuery === 'undefined') {
   };
 
   /**
-   * Expand this and all children nodes by settig the item's _collapsed attribute
+   * Expand this and all children nodes by setting the item's _collapsed attribute
    * @method  expand
    */
   Tree.prototype.expand = function() {
@@ -516,7 +516,7 @@ if (typeof jQuery === 'undefined') {
    * @method  collapse
    */
   Leaf.prototype.collapse = function() {
-    var item = this.getItem()
+    var item = this.getItem();
     item._collapsed = item._hidden = true;
     return this;
   };
@@ -682,7 +682,7 @@ if (typeof jQuery === 'undefined') {
     this.element.find('.' + this.options.highlightClass)
       .removeClass(this.options.highlightClass);
     return this;
-  }
+  };
 
   HGrid.prototype.addHighlight = function(item) {
     this.removeHighlight();
@@ -696,7 +696,7 @@ if (typeof jQuery === 'undefined') {
       $(parent).addClass(this.options.highlightClass);
     }
     return this;
-  }
+  };
 
   /**
    * SlickGrid events that the grid subscribes to. Mostly just delegates to one
@@ -710,13 +710,14 @@ if (typeof jQuery === 'undefined') {
       var $elem = $(evt.target);
       var item = this.getDataView().getItem(args.row);
       this.options.onClick.call(this, event, $elem, item);
+      return this;
     },
 
     'onCellChange': function(evt, args) {
       this.getDataView().updateItem(args.item.id, args.item);
+      return this;
     }
   };
-
 
   /**
    * DropZone events that the grid subscribes to.
@@ -753,11 +754,7 @@ if (typeof jQuery === 'undefined') {
     },
     'dragleave': function(evt) {
       this.removeHighlight();
-    },
-    'addedfile': function(file) {
-
     }
-
   };
 
   /**
@@ -767,17 +764,23 @@ if (typeof jQuery === 'undefined') {
    */
   HGrid.prototype._initListeners = function() {
     var self = this;
+    var callbackName;
+    var fn;
     // Wire up all the slickgrid events
-    for (var callbackName in slickEvents) {
-      var fn = slickEvents[callbackName].bind(self); // make `this` object the grid
-      self.grid[callbackName].subscribe(fn);
+    for (callbackName in slickEvents) {
+      if (slickEvents.hasOwnProperty(callbackName)) {
+        fn = slickEvents[callbackName].bind(self); // make `this` object the grid
+        self.grid[callbackName].subscribe(fn);
+      }
     }
 
     if (this.options.uploads) {
       // Wire up all the dropzone events
-      for (var callbackName in dropzoneEvents) {
-        var fn = dropzoneEvents[callbackName].bind(self);
-        self.dropzone.on(callbackName, fn);
+      for (callbackName in dropzoneEvents) {
+        if (dropzoneEvents.hasOwnProperty(callbackName)) {
+          fn = dropzoneEvents[callbackName].bind(self);
+          self.dropzone.on(callbackName, fn);
+        }
       }
     }
     return this;
@@ -837,7 +840,7 @@ if (typeof jQuery === 'undefined') {
     this.grid.destroy();
     if (this.dropzone) {
       this.dropzone.destroy();
-    };
+    }
   };
 
   /**
@@ -869,6 +872,13 @@ if (typeof jQuery === 'undefined') {
 
   HGrid.prototype.expandItem = function(item) {
     item._node.expand();
+    var dataview = this.getDataView();
+    var ignoreBefore = dataview.getRowById(item.id);
+    dataview.setRefreshHints({
+      isFilterNarrowing: false,
+      isFilterExpanding: true,
+      ignoreDiffsBefore: ignoreBefore
+    });
     this.getDataView().updateItem(item.id, item);
     return this;
   };
@@ -876,7 +886,14 @@ if (typeof jQuery === 'undefined') {
 
   HGrid.prototype.collapseItem = function(item) {
     item._node.collapse();
-    this.getDataView().updateItem(item.id, item);
+    var dataview = this.getDataView();
+    var ignoreBefore = dataview.getRowById(item.id);
+    dataview.setRefreshHints({
+      isFilterNarrowing: true,
+      isFilterExpanding: false,
+      ignoreDiffsBefore: ignoreBefore
+    });
+    dataview.updateItem(item.id, item);
     return this;
   };
 

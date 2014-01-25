@@ -102,7 +102,26 @@
     });
     equal(grid.getData()[0].lang, 'python', 'can get lang');
     equal(grid.getData()[1].lang, 'javascript', 'can get lang');
-  })
+  });
+
+  test('Initializing grid, overriding `id` property', function() {
+    var items = {
+      data: [{
+        name: 'foo.py',
+        kind: 'file',
+        id: 'file1'
+      }, {
+        name: 'bar.js',
+        kind: 'file',
+        id: 'file2'
+      }]
+    };
+    var grid = new HGrid('#myGrid', {
+      data: items
+    });
+    var foo = grid.getByID('file1');
+    equal(foo.name, 'foo.py', 'retrieved correct item');
+  });
 
   test('CSS', function() {
     var grid = new HGrid('#myGrid', {

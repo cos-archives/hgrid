@@ -410,12 +410,12 @@ if (typeof jQuery === 'undefined') {
     // Add this node's data, unless it's a root
     var data = result || [];
     if (this.depth !== 0) {
-      var thisItem = $.extend({}, this.data, {
+      var thisItem = $.extend({}, {
         id: this.id,
         parentID: this.parentID,
         _node: this,
         depth: this.depth
-      });
+      }, this.data);
       data.push(thisItem);
     }
     for (var i = 0, len = this.children.length; i < len; i++) {
@@ -456,12 +456,12 @@ if (typeof jQuery === 'undefined') {
    * @return {Object}        The leaf an item object.
    */
   Leaf.prototype.toData = function(result) {
-    var item = $.extend({}, this.data, {
+    var item = $.extend({}, {
       id: this.id,
       parentID: this.parentID,
       _node: this,
       depth: this.depth
-    });
+    }, this.data);
     if (result) {
       result.push(item);
     }
@@ -806,7 +806,7 @@ if (typeof jQuery === 'undefined') {
    *                      `{name: 'New Folder', kind: 'folder', parentID: 123}`
    * @return {Object} The added item.
    */
-  HGrid.prototype.addItem = function(item, suspend) {
+  HGrid.prototype.addItem = function(item) {
     var newItem = $.extend(true, {}, item); // copy the item
     var dataView = this.getDataView();
     var parent = this.getByID(newItem.parentID);
@@ -820,9 +820,6 @@ if (typeof jQuery === 'undefined') {
     }
     // Set id and depth
     newItem.id = idCounter++; // set and increment
-    if (suspend) {
-      this.getDataView().beginUpdate(); // Prevent refresh
-    }
     dataView.insertItem(insertIndex, newItem);
     this.options.onItemAdded.call(this, newItem);
     return newItem;
@@ -839,9 +836,6 @@ if (typeof jQuery === 'undefined') {
     for (var i = 0, len = items.length - 1; i < len; i++) {
       var item = items[i];
       this.addItem(item, true); // Suspend refresh
-    }
-    if (!suspend) {
-      this.getDataView().endUpdate();
     }
     return this;
   };

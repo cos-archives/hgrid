@@ -79,22 +79,12 @@ if (typeof jQuery === 'undefined') {
    *
    * @class  collapseFilter
    * @private
-   * @param {Object} item The item object
-   * @param {Object} args Contains "thisObj" and "rootID" properties
    * @returns {Boolean} Whether to display the item or not.
    */
   function collapseFilter(item, args) {
-    var hgrid = args.thisObj; // the 'this' object is passed as an extra argument so methods are accessible
-    var rootID = args.rootID;
-
-    if (item.parentID !== rootID) {
-      var dataView = hgrid.grid.getData();
-      var parent = dataView.getItemById(item.parentID);
-      while (parent && parent.id !== rootID) {
-        if (parent._collapsed) {
-          return false;
-        }
-        parent = dataView.getItemById(parent.parentID);
+    if (args.clicked && (item.id !== args.clicked.id)) {
+      if (item._collapsed) {
+        return false;
       }
     }
     return true;
@@ -709,6 +699,9 @@ if (typeof jQuery === 'undefined') {
     'onClick': function(evt, args) {
       var $elem = $(evt.target);
       var item = this.getDataView().getItem(args.row);
+      this.getDataView().setFilterArgs({
+        clicked: item
+      });
       this.options.onClick.call(this, event, $elem, item);
     },
 
@@ -792,11 +785,8 @@ if (typeof jQuery === 'undefined') {
     var self = this;
     var dataView = this.getDataView();
     dataView.beginUpdate();
-    // Must pass 'this' as an argument to the filter so that the filter function
-    // has access to the methods
     dataView.setFilterArgs({
-      thisObj: self,
-      rootID: ROOT_ID
+      clicked: null
     });
     dataView.setFilter(collapseFilter);
     dataView.endUpdate();

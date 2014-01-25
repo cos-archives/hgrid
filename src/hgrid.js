@@ -84,15 +84,16 @@ if (typeof jQuery === 'undefined') {
    * @returns {Boolean} Whether to display the item or not.
    */
   function collapseFilter(item, args) {
-    var self = args.thisObj; // the 'this' object is passed as an extra argument so methods are accessible
+    var hgrid = args.thisObj; // the 'this' object is passed as an extra argument so methods are accessible
     var rootID = args.rootID;
     if (item.parentID !== rootID) {
-      var parent = self.getByID.call(self, item.parentID);
-      while (parent) {
+      var dataView = hgrid.grid.getData();
+      var parent = dataView.getItemById(item.parentID);
+      while (parent && parent.id !== rootID) {
         if (parent._collapsed) {
           return false;
         }
-        parent = self.getByID.call(self, parent.parentID);
+        parent = dataView.getItemById(parent.parentID);
       }
     }
     return true;
@@ -227,10 +228,12 @@ if (typeof jQuery === 'undefined') {
      * @property [onClick]
      */
     onClick: function(event, element, item) {
+      // var then = new Date();
       if (canToggle(element)) {
         this.toggleCollapse(item);
       }
       event.stopImmediatePropagation();
+      // console.log(new Date() - then);
     },
     /**
      * Callback executed after an item is added.
@@ -808,6 +811,9 @@ if (typeof jQuery === 'undefined') {
    */
   HGrid.prototype.addItem = function(item) {
     var newItem = $.extend(true, {}, item); // copy the item
+    if (newItem.parentID === null) {
+      newItem.parentID = ROOT_ID;
+    }
     var dataView = this.getDataView();
     var parent = this.getByID(newItem.parentID);
     var insertIndex;
@@ -830,14 +836,22 @@ if (typeof jQuery === 'undefined') {
    *
    * Only one refresh is made to the grid after adding all the items.
    * @param {Array} items Array of items with "name", "kind", and "parentID".
-   * @param {Boolean} suspend Don't refresh the DataView after inserting the items
    */
-  HGrid.prototype.addItems = function(items, suspend) {
-    for (var i = 0, len = items.length - 1; i < len; i++) {
-      var item = items[i];
-      this.addItem(item, true); // Suspend refresh
-    }
+  HGrid.prototype.addItems = function(items) {
+    var self = this;
+    this.batchUpdate(function() {
+      for (var i = 0, len = items.length - 1; i < len; i++) {
+        var item = items[i];
+        self.addItem(item); // Suspend refresh
+      }
+    });
     return this;
+  };
+
+  HGrid.prototype.batchUpdate = function(func) {
+    this.getDataView().beginUpdate();
+    func.call(this);
+    this.getDataView().endUpdate();
   };
 
   /**

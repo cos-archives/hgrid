@@ -85,6 +85,25 @@
     }, HGridError, 'fails if both ajax url and data are passed to constructor');
   });
 
+  test('Initializing HGrid with data that has metadata', function() {
+    var items = {
+      data: [{
+        name: 'foo.py',
+        kind: 'file',
+        lang: 'python'
+      }, {
+        name: 'bar.js',
+        kind: 'file',
+        lang: 'javascript'
+      }]
+    };
+    var grid = new HGrid('#myGrid', {
+      data: items
+    });
+    equal(grid.getData()[0].lang, 'python', 'can get lang');
+    equal(grid.getData()[1].lang, 'javascript', 'can get lang');
+  })
+
   test('CSS', function() {
     var grid = new HGrid('#myGrid', {
       data: testData
@@ -257,7 +276,7 @@
     var tree = myGrid.getNodeByID(item.id);
     ok(tree instanceof HGrid.Tree, 'returns a HGrid.Tree');
     equal(tree.id, item.id, 'tree and item have same id');
-    equal(tree.name, item.name, 'tree and item have same name');
+    equal(tree.data.name, item.name, 'tree and item have same name');
   });
 
   module('Tree and leaf', {
@@ -277,15 +296,34 @@
   test('Creating Trees and Leaves', function() {
     var root = new HGrid.Tree();
     equal(root.id, 'root', 'root id is "root"');
-    var tree1 = new HGrid.Tree('My Documents', 'folder');
+    var tree1 = new HGrid.Tree({
+      name: 'My Documents',
+      kind: 'folder'
+    });
     equal(tree1.id, 0);
-    equal(tree1.kind, 'folder', 'sets the tree kind');
-    var tree2 = new HGrid.Tree('My Music', 'folder');
+    equal(tree1.data.kind, 'folder', 'sets the tree kind');
+    var tree2 = new HGrid.Tree({
+      name: 'My Music',
+      kind: 'folder'
+    });
     equal(tree2.id, 1);
-    var leaf1 = new HGrid.Leaf('foo.py', 'file');
+    var leaf1 = new HGrid.Leaf({
+      name: 'foo.py',
+      kind: 'file'
+    });
     equal(leaf1.id, 2);
-    equal(leaf1.kind, 'file', 'sets the leaf kind');
+    equal(leaf1.data.kind, 'file', 'sets the leaf kind');
   });
+
+  test('Creating trees with metadata', function() {
+    var t1 = HGrid.Tree({
+      name: 'foo.py',
+      kind: 'folder',
+      language: 'python'
+    });
+    equal(t1.data.language, 'python');
+    equal(t1.id, 0);
+  })
 
   test('Depths', function() {
     var root = new HGrid.Tree();
@@ -306,33 +344,39 @@
   test('Tree and leaf to Slick data', function() {
     var root = new HGrid.Tree();
     ok(root.depth === 0, 'Constructing HGrid.Tree with no args creates a root node');
-    var tree = new HGrid.Tree('My Documents', 'folder');
+    var tree = new HGrid.Tree({
+      name: 'My Documents',
+      kind: 'folder'
+    });
     ok(tree.depth !== 0, 'A tree with a name and kind is not a root node.');
     root.add(tree);
     deepEqual(tree.toData(), [{
       id: tree.id,
-      name: tree.name,
-      kind: tree.kind,
+      name: tree.data.name,
+      kind: tree.data.kind,
       parentID: 'root',
       depth: tree.depth,
       _node: tree
     }]);
     // root is not included in data
     deepEqual(root.toData(), tree.toData(), 'root is excluded from data');
-    var leaf = new HGrid.Leaf('foo.py', 'file');
+    var leaf = new HGrid.Leaf({
+      name: 'foo.py',
+      kind: 'file'
+    });
     tree.add(leaf);
     deepEqual(leaf.toData(), {
       id: leaf.id,
-      name: leaf.name,
-      kind: leaf.kind,
+      name: leaf.data.name,
+      kind: leaf.data.kind,
       parentID: tree.id,
       depth: leaf.depth,
       _node: leaf
     }, 'Converting leaf to data');
     deepEqual(tree.toData(), [{
         id: tree.id,
-        name: tree.name,
-        kind: tree.kind,
+        name: tree.data.name,
+        kind: tree.data.kind,
         parentID: 'root',
         depth: tree.depth,
         _node: tree
@@ -341,14 +385,31 @@
     ], 'Converting tree to data');
   });
 
+  test('Tree.toData() with metadata', function() {
+    var tree = new HGrid.Tree({
+      name: 'foo.py',
+      kind: 'file',
+      lang: 'python'
+    });
+    deepEqual(tree.toData(), [{
+      id: tree.id,
+      name: tree.data.name,
+      kind: tree.data.kind,
+      depth: tree.depth,
+      parentID: null,
+      _node: tree,
+      lang: 'python'
+    }]);
+  })
+
   test('Constructing leaf from object', function() {
     var file = HGrid.Leaf.fromObject({
       name: 'foo.py',
       kind: 'file'
     });
     ok(file instanceof HGrid.Leaf, 'fromObject returns a HGrid.Leaf');
-    equal(file.name, 'foo.py');
-    equal(file.kind, 'file');
+    equal(file.data.name, 'foo.py');
+    equal(file.data.kind, 'file');
   });
 
   test('Constructing tree from object', function() {
@@ -380,12 +441,12 @@
     equal(root.children.length, data.length, 'Tree has as many children as the data');
     var subtree = root.children[0];
     equal(subtree.depth, 1, 'subtree depth is 1');
-    equal(subtree.name, 'Documents');
-    equal(subtree.kind, 'folder');
+    equal(subtree.data.name, 'Documents');
+    equal(subtree.data.kind, 'folder');
     var child = subtree.children[0];
     ok(child instanceof HGrid.Leaf, 'file is an HGrid.Leaf');
-    equal(child.name, 'mydoc.txt');
-    equal(child.kind, 'file');
+    equal(child.data.name, 'mydoc.txt');
+    equal(child.data.kind, 'file');
     equal(child.depth, 2, 'child depth is 2');
     root.updateDataView();
     equal(root.dataView.getItems().length, root.toData().length, 'DataView and Tree have same data length');

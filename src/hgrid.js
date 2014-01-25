@@ -258,20 +258,17 @@ if (typeof jQuery === 'undefined') {
    * ```
    * var root = new HGrid.Tree();
    * root.depth // => 0
-   * var subtree = new Tree('A subtree', 'folder');
+   * var subtree = new Tree({name: 'A subtree', kind: 'folder'});
    * root.add(subtree);
    * subtree.depth  // => 1
    * ```
    *
    * @class HGrid.Tree
    * @constructor
-   * @param {String} [name] Name of the node.
-   * @param {String} [kind] Either "file" or folder
+   * @param {Object} data Data to attach to the tree
    */
-  function Tree(name, kind) {
-    if (name === undefined && kind === undefined) { // No args passed, it's a root
-      this.name = null;
-      this.kind = null;
+  function Tree(data) {
+    if (data === undefined) { // No args passed, it's a root
       this.id = ROOT_ID;
       /**
        * @attribute  depth
@@ -282,8 +279,7 @@ if (typeof jQuery === 'undefined') {
         inlineFilters: true
       });
     } else {
-      this.name = name;
-      this.kind = kind;
+      this.data = data;
       this.id = idCounter++; // set id then increment counter
       // Depth and dataView will be set by parent after being added as a subtree
       this.depth = null;
@@ -296,7 +292,7 @@ if (typeof jQuery === 'undefined') {
   /**
    * Construct a new Tree from either an object or an array of data.
    *
-   * Example output:
+   * Example input:
    * ```
    * [{name: 'Documents', kind: 'folder',
    *  children: [{name: 'mydoc.txt', type: 'file'}]},
@@ -316,7 +312,7 @@ if (typeof jQuery === 'undefined') {
       tree = new Tree();
       children = data;
     } else { // data is an object, create a subtree
-      tree = new Tree(data.name, data.kind);
+      tree = new Tree(data);
       tree.depth = parent.depth + 1;
       children = data.children || [];
     }
@@ -414,14 +410,12 @@ if (typeof jQuery === 'undefined') {
     // Add this node's data, unless it's a root
     var data = result || [];
     if (this.depth !== 0) {
-      var thisItem = {
-        name: this.name,
+      var thisItem = $.extend({}, this.data, {
         id: this.id,
         parentID: this.parentID,
-        kind: this.kind,
         _node: this,
         depth: this.depth
-      };
+      });
       data.push(thisItem);
     }
     for (var i = 0, len = this.children.length; i < len; i++) {
@@ -435,14 +429,11 @@ if (typeof jQuery === 'undefined') {
    * Leaf representation
    * @class  HGrid.Leaf
    * @constructor
-   * @param {String} name Name of the item
-   * @param {String} kind The type of item, either "folder" or "file".
    */
-  function Leaf(name, kind) {
-    this.name = name;
+  function Leaf(data) {
+    this.data = data;
     this.id = idCounter++; // Set id then increment counter
     this.parentID = null;
-    this.kind = kind;
     this.depth = null;
     return this;
   }
@@ -454,7 +445,7 @@ if (typeof jQuery === 'undefined') {
    * @return {Leaf} The constructed Leaf.
    */
   Leaf.fromObject = function(obj) {
-    var leaf = new Leaf(obj.name, obj.kind);
+    var leaf = new Leaf(obj);
     return leaf;
   };
 
@@ -465,14 +456,12 @@ if (typeof jQuery === 'undefined') {
    * @return {Object}        The leaf an item object.
    */
   Leaf.prototype.toData = function(result) {
-    var item = {
-      name: this.name,
+    var item = $.extend({}, this.data, {
       id: this.id,
       parentID: this.parentID,
-      kind: this.kind,
       _node: this,
       depth: this.depth
-    };
+    });
     if (result) {
       result.push(item);
     }

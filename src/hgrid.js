@@ -400,6 +400,17 @@ if (typeof jQuery === 'undefined') {
     this.dataView.endUpdate();
   };
 
+  Tree.prototype.ensureDataView = function(dataView) {
+    if (!dataView) {
+      dataView = this.dataView;
+    }
+    this.dataView = dataView;
+    for (var i = 0, node; node = this.children[i]; i++) {
+      node.ensureDataView(dataView);
+    }
+    return this;
+  }
+
   /**
    * Update the dataview with this tree's data. This should only be called on
    * a root node.
@@ -408,6 +419,7 @@ if (typeof jQuery === 'undefined') {
     if (!this.dataView) {
       throw new HGridError('Tree does not have a DataView. updateDataView must be called on a root node.');
     }
+    this.ensureDataView();
     this.dataView.beginUpdate();
     this.dataView.setItems(this.toData());
     this.dataView.endUpdate();
@@ -451,6 +463,10 @@ if (typeof jQuery === 'undefined') {
     return this;
   };
 
+  /**
+   * Expand this and all children nodes by settig the item's _collapsed attribute
+   * @method  expand
+   */
   Tree.prototype.expand = function() {
     for (var i = 0, node; node = this.children[i]; i++) {
       node.expand();
@@ -471,9 +487,10 @@ if (typeof jQuery === 'undefined') {
     } else {
       this.id = idCounter++; // Set id then increment counter
     }
-    this.parentID = null;
+    this.parentID = null; // Set by parent
     this.depth = null;
     this.children = [];
+    this.dataView = null; // Set by parent
     return this;
   }
   /**
@@ -531,6 +548,14 @@ if (typeof jQuery === 'undefined') {
       result.push(item);
     }
     return item;
+  };
+
+  Leaf.prototype.ensureDataView = function(dataView) {
+    if (!dataView) {
+      dataView = this.dataView;
+    }
+    this.dataView = dataView;
+    return this;
   };
 
 
@@ -849,22 +874,15 @@ if (typeof jQuery === 'undefined') {
   };
 
   HGrid.prototype.expandItem = function(item) {
-    item._collapsed = false;
+    item._node.expand();
     this.getDataView().updateItem(item.id, item);
     return this;
   };
 
 
   HGrid.prototype.collapseItem = function(item) {
-    item._node._collapsed = true;
-    var child;
-    for (var i = 0, len = item._node.children.length; i < len; i++) {
-      child = item._node.children[i];
-
-    }
-    item._collapsed = true;
-    var dataView = this.getDataView();
-    dataView.updateItem(item.id, item);
+    item._node.collapse();
+    this.getDataView().updateItem(item.id, item);
     return this;
   };
 

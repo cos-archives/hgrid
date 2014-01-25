@@ -240,8 +240,6 @@
       data: dat
     });
     var folder = grid.getData()[0];
-    console.log('-FOLDER-');
-    console.log(folder);
     grid.collapseItem(folder); // Start with collapsed
     notContainsText('.slick-cell', 'mydoc.txt');
     grid.expandItem(folder);
@@ -292,7 +290,8 @@
       thisObj: grid,
       rootID: 'root'
     }), 'returns true if parent is not collpased');
-    parent._collapsed = true;
+    parent._node.collapse();
+    child = grid.getData()[1];
     isFalse(grid._collapseFilter(child, {
       thisObj: grid,
       rootID: 'root'
@@ -407,7 +406,7 @@
     isFalse(leaf.getItem()._collapsed, 'expanded');
   });
 
-  test('Tree.collapse()', function() {
+  test('Tree.collapse() including root', function() {
     var root = new HGrid.Tree();
     var tree = new HGrid.Tree({
       name: 'Docs',
@@ -424,10 +423,35 @@
     var item = tree.getItem();
     isFalse(item._collapsed, 'not collapsed to begin with');
     isFalse(leaf.getItem()._collapsed, 'leaf is not collapsed to begin with');
-    tree.collapse();
-    isTrue(item._collapsed, 'collapses after calling collapse()');
+    tree.collapse(true);
+    isTrue(item._collapsed, 'collapses after calling collapse(true)');
     isTrue(leaf.getItem()._collapsed, 'child leaf also collapses after parent is collapsed');
   });
+
+  test('Tree.collapse() children only', function() {
+    var root = new HGrid.Tree();
+    var tree = new HGrid.Tree({
+      name: 'Docs',
+      kind: HGrid.FOLDER,
+      _collapsed: false
+    });
+    var leaf = new HGrid.Leaf({
+      name: 'mydoc.txt',
+      kind: HGrid.FILE,
+      _collapsed: false
+    });
+    root.add(tree);
+    tree.add(leaf);
+    root.updateDataView();
+    var item = tree.getItem();
+    isFalse(item._collapsed, 'not collapsed to begin with');
+    isFalse(leaf.getItem()._collapsed, 'leaf is not collapsed to begin with');
+    tree.collapse(); // didn't pass first argument, so don't collpase the tree itself
+    item = tree.getItem();
+    isTrue(item._collapsed, 'item collapsed after calling its collapse() method');
+    isFalse(item._hidden, 'item is visible after calling collapse()');
+    isTrue(leaf.getItem()._collapsed, 'child leaf also collapses after parent is collapsed');
+  })
 
   test('Tree.expand()', function() {
     var root = new HGrid.Tree();

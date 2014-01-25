@@ -82,12 +82,7 @@ if (typeof jQuery === 'undefined') {
    * @returns {Boolean} Whether to display the item or not.
    */
   function collapseFilter(item, args) {
-    if (args.clicked && (item.id !== args.clicked.id)) {
-      if (item._collapsed) {
-        return false;
-      }
-    }
-    return true;
+    return !item._hidden;
   }
 
   function canToggle($elem) {
@@ -444,12 +439,23 @@ if (typeof jQuery === 'undefined') {
   /**
    * Collapse this and all children nodes, by setting the _collapsed attribute
    * @method  collapse
+   * @param {Boolean} hideSelf Whether to hide this node as well
    */
-  Tree.prototype.collapse = function() {
-    for (var i = 0, node; node = this.children[i]; i++) {
-      node.collapse();
+  Tree.prototype.collapse = function(hideSelf) {
+    var item = this.getItem();
+    // A node can be collapsed but not hidden. For example, if you click
+    // on a folder, it should collapse and hide all of its contents, but the folder
+    // should still be visible.
+    item._collapsed = true;
+    if (hideSelf) {
+      item._hidden = true;
+    } else {
+      item._hidden = false;
     }
-    this.getItem()._collapsed = true;
+    // Collapse and hide all children
+    for (var i = 0, node; node = this.children[i]; i++) {
+      node.collapse(true);
+    }
     return this;
   };
 
@@ -458,10 +464,12 @@ if (typeof jQuery === 'undefined') {
    * @method  expand
    */
   Tree.prototype.expand = function() {
+    var item = this.getItem();
+    item._collapsed = item._hidden = false;
+    // Expand all children
     for (var i = 0, node; node = this.children[i]; i++) {
       node.expand();
     }
-    this.getItem()._collapsed = false;
     return this;
   };
 
@@ -508,7 +516,8 @@ if (typeof jQuery === 'undefined') {
    * @method  collapse
    */
   Leaf.prototype.collapse = function() {
-    this.getItem()._collapsed = true;
+    var item = this.getItem()
+    item._collapsed = item._hidden = true;
     return this;
   };
 
@@ -517,7 +526,8 @@ if (typeof jQuery === 'undefined') {
    * @method  expand
    */
   Leaf.prototype.expand = function() {
-    this.getItem()._collapsed = false;
+    var item = this.getItem();
+    item._collapsed = item._hidden = false;
     return this;
   };
 
@@ -699,9 +709,6 @@ if (typeof jQuery === 'undefined') {
     'onClick': function(evt, args) {
       var $elem = $(evt.target);
       var item = this.getDataView().getItem(args.row);
-      this.getDataView().setFilterArgs({
-        clicked: item
-      });
       this.options.onClick.call(this, event, $elem, item);
     },
 
@@ -785,9 +792,6 @@ if (typeof jQuery === 'undefined') {
     var self = this;
     var dataView = this.getDataView();
     dataView.beginUpdate();
-    dataView.setFilterArgs({
-      clicked: null
-    });
     dataView.setFilter(collapseFilter);
     dataView.endUpdate();
     // wire up model events to drive the grid

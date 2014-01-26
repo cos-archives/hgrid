@@ -194,23 +194,6 @@
     containsText('.slick-cell', newItem.name, 'Item added to DOM');
   });
 
-  test('Added tree and leaf point to same dataview', function() {
-    var root = new HGrid.Tree();
-    var tree = new HGrid.Tree({
-      name: 'Docs',
-      kind: HGrid.FOLDER
-    });
-    var leaf = new HGrid.Leaf({
-      name: 'myfile.txt',
-      kind: HGrid.FILE
-    });
-    tree.add(leaf); // NOTE: nodes are added out of hierarchical order
-    root.add(tree);
-    root.updateDataView();
-    equal(root.dataView, tree.dataView, 'root and tree point to same dataview');
-    equal(tree.dataView, leaf.dataView, 'tree and leaf point to same dataview');
-  });
-
   test('Removing item', function() {
     // Remove the last item in the dataset
     var allData = myGrid.getData();
@@ -349,6 +332,24 @@
     });
     equal(leaf1.id, 2);
     equal(leaf1.data.kind, 'file', 'sets the leaf kind');
+  });
+
+
+  test('Added tree and leaf point to same dataview', function() {
+    var root = new HGrid.Tree();
+    var tree = new HGrid.Tree({
+      name: 'Docs',
+      kind: HGrid.FOLDER
+    });
+    var leaf = new HGrid.Leaf({
+      name: 'myfile.txt',
+      kind: HGrid.FILE
+    });
+    tree.add(leaf); // NOTE: nodes are added out of hierarchical order
+    root.add(tree);
+    root.updateDataView();
+    equal(root.dataView, tree.dataView, 'root and tree point to same dataview');
+    equal(tree.dataView, leaf.dataView, 'tree and leaf point to same dataview');
   });
 
   test('Tree.getItem()', function() {
@@ -703,7 +704,7 @@
     grid.destroy();
   });
 
-  test('Overriding Dropzone options', function() {
+  test('Overriding Dropzone options directly', function() {
     var grid = new HGrid('#myGrid', {
       uploads: true,
       dropzoneOptions: {
@@ -712,6 +713,15 @@
     });
     equal(grid.dropzone.options.parallelUploads, 123);
     grid.destroy();
+  });
+
+  test('Overriding Dropzone options with HGrid options', function() {
+    var grid = new HGrid('#myGrid', {
+      uploads: true,
+      acceptedFiles: ['.py', 'application/pdf', 'image/*']
+    });
+    equal(grid.dropzone.options.acceptedFiles, '.py,application/pdf,image/*',
+      'Dropzone `acceptedFiles` option was set');
   });
 
 })(jQuery);

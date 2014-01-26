@@ -202,6 +202,13 @@ if (typeof jQuery === 'undefined') {
       forceFitColumns: true
     },
     /**
+     * Array of accepted file types. Can be file extensions or mimetypes.
+     * Example: `['.py', 'application/pdf', 'image/*']
+     * @property [acceptedFiles]
+     * @type {Array}
+     */
+    acceptedFiles: null,
+    /**
      * Additional options passed to DropZone constructor
      * See: http://www.dropzonejs.com/
      * @property [dropzoneOptions]
@@ -305,9 +312,9 @@ if (typeof jQuery === 'undefined') {
       tree = new Tree();
       children = data;
     } else { // data is an object, create a subtree
+      children = data.children || [];
       tree = new Tree(data);
       tree.depth = parent.depth + 1;
-      children = data.children || [];
     }
     for (var i = 0, len = children.length; i < len; i++) {
       var child = children[i];
@@ -754,13 +761,13 @@ if (typeof jQuery === 'undefined') {
     },
     'dragleave': function(evt) {
       this.removeHighlight();
-    }
+    },
+    'addedfile': function(file) {}
   };
 
   /**
    * Wires up all the event handlers.
    * @method  _initListeners
-   * @return {[type]} [description]
    */
   HGrid.prototype._initListeners = function() {
     var self = this;
@@ -790,6 +797,8 @@ if (typeof jQuery === 'undefined') {
    * Sets up the DataView with the filter function. Must be executed after
    * initializing the Slick.Grid because the filter function needs access to the
    * data.
+   * @method  _initDataView
+   * @private
    */
   HGrid.prototype._initDataView = function() {
     var self = this;
@@ -820,6 +829,7 @@ if (typeof jQuery === 'undefined') {
    * Builds a new DropZone object and attaches it the "dropzone" attribute of
    * the grid.
    * @method  _initDropZone
+   * @private
    */
   HGrid.prototype._initDropzone = function() {
     var uploadUrl;
@@ -829,8 +839,12 @@ if (typeof jQuery === 'undefined') {
       uploadUrl = '/';
     }
     var dropzoneOptions = $.extend({
-      url: uploadUrl
-    }, requiredDropzoneOpts, this.options.dropzoneOptions);
+        url: uploadUrl,
+        // Dropzone expects comma separated list
+        acceptedFiles: this.options.acceptedFiles ? this.options.acceptedFiles.join(',') : null
+      },
+      requiredDropzoneOpts,
+      this.options.dropzoneOptions);
     this.dropzone = new Dropzone(this.selector, dropzoneOptions);
     return this;
   };
@@ -870,6 +884,11 @@ if (typeof jQuery === 'undefined') {
     return this.grid.getData();
   };
 
+  /**
+   * Expand an item. Updates the dataview.
+   * @method  expandItem
+   * @param  {Object} item
+   */
   HGrid.prototype.expandItem = function(item) {
     item._node.expand();
     var dataview = this.getDataView();
@@ -883,7 +902,11 @@ if (typeof jQuery === 'undefined') {
     return this;
   };
 
-
+  /**
+   * Collapse an item. Updates the dataview.
+   * @method  collapseItem
+   * @param  {Object} item
+   */
   HGrid.prototype.collapseItem = function(item) {
     item._node.collapse();
     var dataview = this.getDataView();
@@ -943,7 +966,7 @@ if (typeof jQuery === 'undefined') {
     this.batchUpdate(function() {
       for (var i = 0, len = items.length - 1; i < len; i++) {
         var item = items[i];
-        self.addItem(item); // Suspend refresh
+        self.addItem(item);
       }
     });
     return this;
@@ -970,7 +993,7 @@ if (typeof jQuery === 'undefined') {
   /**
    * Return a HGrid.Tree or HGrid.Leaf node given an id.
    * @param {Number} id
-   * @return {HGrid.Tree} The Tree with the id.
+   * @return {HGrid.Tree} The Tree or Leaf with the id.
    */
   HGrid.prototype.getNodeByID = function(id) {
     var item = this.getByID(id);

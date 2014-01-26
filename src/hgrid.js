@@ -156,7 +156,7 @@ if (typeof jQuery === 'undefined') {
      * @property [highlightClass]
      * @type {String}
      */
-    highlightClass: 'hg-dragger-guide',
+    highlightClass: 'hg-row-highlight',
     /**
      * Width to indent items (in px)*
      * @property indent
@@ -709,16 +709,20 @@ if (typeof jQuery === 'undefined') {
     return this;
   };
 
+  HGrid.prototype.getRowElement = function(id) {
+    return this.grid.getCellNode(this.getDataView().getRowById(id), 0).parentNode;
+  };
+
   HGrid.prototype.addHighlight = function(item) {
     this.removeHighlight();
-    var parent;
-    if (item.kind === FOLDER) {
-      parent = this.grid.getCellNode(this.getDataView().getRowById(item.id), 0).parentNode;
+    var rowElem;
+    if (item && item.kind === FOLDER) {
+      rowElem = this.getRowElement(item.id);
     } else {
-      parent = this.grid.getCellNode(this.getDataView().getRowById(item.parentID), 0).parentNode;
+      rowElem = this.getRowElement(item.parentID);
     }
-    if (parent) {
-      $(parent).addClass(this.options.highlightClass);
+    if (rowElem) {
+      $(rowElem).addClass(this.options.highlightClass);
     }
     return this;
   };
@@ -741,6 +745,18 @@ if (typeof jQuery === 'undefined') {
     'onCellChange': function(evt, args) {
       this.getDataView().updateItem(args.item.id, args.item);
       return this;
+    },
+    'onMouseLeave': function(evt, args) {
+      this.removeHighlight();
+    }
+  };
+
+  HGrid.prototype.getItemFromEvent = function(evt) {
+    var cell = this.grid.getCellFromEvent(evt);
+    if (cell) {
+      return this.getDataView().getItem(cell.row);
+    } else {
+      return null;
     }
   };
 
@@ -753,34 +769,31 @@ if (typeof jQuery === 'undefined') {
    */
   var dropzoneEvents = {
     'dragover': function(evt) {
-      var cell = this.grid.getCellFromEvent(evt);
-      var item, itemToHighlight;
-      if (cell) {
-        item = this.getDataView().getItem(cell.row);
-        cell.insertBefore = cell.row;
+      var item = this.getItemFromEvent(evt);
+      var targetItem;
+      if (item) {
         if (item.kind === FOLDER) {
-          itemToHighlight = item;
+          targetItem = item;
         } else {
-          itemToHighlight = this.getByID(item.parentID);
+          targetItem = this.getByID(item.parentID);
         }
-        if (itemToHighlight.permission || typeof itemToHighlight.permission === 'undefined') {
+        if (targetItem.permission || typeof targetItem.permission === 'undefined') {
           this.addHighlight(item);
         }
-      } else {
-        itemToHighlight = null;
-        this.dropzone.dropDestination = null;
-        this.addHighlight(itemToHighlight);
-      }
-      // if upload url is a function, call it, passing in the item,
-      // and set dropzone to upload to the result
-      if (typeof this.options.uploadUrl === 'function') {
-        this.dropzone.options.url = this.options.uploadUrl(item);
+        // if upload url is a function, call it, passing in the item,
+        // and set dropzone to upload to the result
+        if (typeof this.options.uploadUrl === 'function') {
+          this.dropzone.options.url = this.options.uploadUrl(targetItem);
+        }
       }
     },
     'dragleave': function(evt) {
       this.removeHighlight();
     },
-    'addedfile': function(file) {}
+    'drop': function(evt) {
+      this.removeHighlight();
+    }
+    // 'addedfile': function(file) {}
   };
 
   /**
@@ -838,9 +851,12 @@ if (typeof jQuery === 'undefined') {
   };
 
   var requiredDropzoneOpts = {
-    addRemoveLinks: true,
+    addRemoveLinks: false,
     dropDestination: null,
-    uploadMultiple: false
+    uploadMultiple: false,
+    previewTemplate: '<div class="dz-preview">' +
+      '<div class="dz-progress"><span class="dz-upload" data-dz-uploadprogress></span></div>' +
+      '</div>'
   };
 
   /**

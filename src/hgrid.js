@@ -731,10 +731,9 @@ if (typeof jQuery === 'undefined') {
    * SlickGrid events that the grid subscribes to. Mostly just delegates to one
    * of the callbacks in `options`.
    * For each funcion, `this` refers to the HGrid object.
-   * @class slickEvents
-   * @private
+   * @attribute slickEvents
    */
-  var slickEvents = {
+  HGrid.prototype.slickEvents = {
     'onClick': function(evt, args) {
       var $elem = $(evt.target);
       var item = this.getDataView().getItem(args.row);
@@ -763,11 +762,10 @@ if (typeof jQuery === 'undefined') {
   /**
    * DropZone events that the grid subscribes to.
    * For each function, `this` refers to the HGrid object.
-   * @class  dropzoneEvents
-   * @private
+   * @attribute  dropzoneEvents
    * @type {Object}
    */
-  var dropzoneEvents = {
+  HGrid.prototype.dropzoneEvents = {
     'dragover': function(evt) {
       var item = this.getItemFromEvent(evt);
       var targetItem;
@@ -777,7 +775,7 @@ if (typeof jQuery === 'undefined') {
         } else {
           targetItem = this.getByID(item.parentID);
         }
-        if (targetItem.permission || typeof targetItem.permission === 'undefined') {
+        if (targetItem.allowUploads || typeof targetItem.allowUploads === 'undefined') {
           this.addHighlight(item);
         }
         // if upload url is a function, call it, passing in the item,
@@ -805,20 +803,16 @@ if (typeof jQuery === 'undefined') {
     var callbackName;
     var fn;
     // Wire up all the slickgrid events
-    for (callbackName in slickEvents) {
-      if (slickEvents.hasOwnProperty(callbackName)) {
-        fn = slickEvents[callbackName].bind(self); // make `this` object the grid
-        self.grid[callbackName].subscribe(fn);
-      }
+    for (callbackName in self.slickEvents) {
+      fn = self.slickEvents[callbackName].bind(self); // make `this` object the grid
+      self.grid[callbackName].subscribe(fn);
     }
 
     if (this.options.uploads) {
       // Wire up all the dropzone events
-      for (callbackName in dropzoneEvents) {
-        if (dropzoneEvents.hasOwnProperty(callbackName)) {
-          fn = dropzoneEvents[callbackName].bind(self);
-          self.dropzone.on(callbackName, fn);
-        }
+      for (callbackName in self.dropzoneEvents) {
+        fn = self.dropzoneEvents[callbackName].bind(self);
+        self.dropzone.on(callbackName, fn);
       }
     }
     return this;

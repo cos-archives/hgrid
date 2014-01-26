@@ -202,12 +202,30 @@ if (typeof jQuery === 'undefined') {
       forceFitColumns: true
     },
     /**
+     * URL to send upload requests to. Can be either a string of a function
+     * that receives a data item.
+     * Example:
+     *  uploadUrl: function(item) {return '/upload/' + item.id; }
+     * @property [uploadUrl]
+     */
+    uploadUrl: null,
+    /**
      * Array of accepted file types. Can be file extensions or mimetypes.
      * Example: `['.py', 'application/pdf', 'image/*']
      * @property [acceptedFiles]
      * @type {Array}
      */
     acceptedFiles: null,
+    /**
+     * Max filesize in Mb.
+     * @property [maxFilesize]
+     */
+    maxFilesize: 256,
+    /**
+     * HTTP method to use for uploading.
+     */
+    // TODO: allow this to be a function that receives an item
+    uploadMethod: 'POST',
     /**
      * Additional options passed to DropZone constructor
      * See: http://www.dropzonejs.com/
@@ -236,8 +254,8 @@ if (typeof jQuery === 'undefined') {
     onItemAdded: function(item) {},
 
     /**
-     * [init description]
-     * @return {[type]} [description]
+     * Additional initialization. Useful for adding listeners.
+     * @property {Function} init
      */
     init: function() {}
   };
@@ -838,10 +856,15 @@ if (typeof jQuery === 'undefined') {
     } else { // uploadUrl is a function, so will compute the upload url dynamically
       uploadUrl = '/';
     }
+    // Build up the options object, combining the HGrid options, required options,
+    // and additional options
     var dropzoneOptions = $.extend({
         url: uploadUrl,
         // Dropzone expects comma separated list
-        acceptedFiles: this.options.acceptedFiles ? this.options.acceptedFiles.join(',') : null
+        acceptedFiles: this.options.acceptedFiles ?
+          this.options.acceptedFiles.join(',') : null,
+        maxFilesize: this.options.maxFilesize,
+        method: this.options.uploadMethod
       },
       requiredDropzoneOpts,
       this.options.dropzoneOptions);

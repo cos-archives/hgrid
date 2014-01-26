@@ -718,10 +718,16 @@
   test('Overriding Dropzone options with HGrid options', function() {
     var grid = new HGrid('#myGrid', {
       uploads: true,
-      acceptedFiles: ['.py', 'application/pdf', 'image/*']
+      acceptedFiles: ['.py', 'application/pdf', 'image/*'],
+      maxFilesize: 10,
+      uploadMethod: 'PUT',
+      uploadUrl: '/files/upload'
     });
     equal(grid.dropzone.options.acceptedFiles, '.py,application/pdf,image/*',
       'Dropzone `acceptedFiles` option was set');
+    equal(grid.dropzone.options.maxFilesize, 10, 'maxFilesize was set');
+    equal(grid.dropzone.options.method, 'PUT', 'method was set');
+    equal(grid.dropzone.options.url, '/files/upload', 'url was set');
   });
 
 })(jQuery);

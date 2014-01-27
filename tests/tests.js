@@ -3,6 +3,16 @@
 
   $.mockjaxSettings.responseTime = 0; // Speed up tests
 
+  var counter = 0;
+
+  function getMockFile() {
+    return {
+      name: 'test file ' + counter++,
+      size: 123456,
+      type: 'text/html'
+    };
+  }
+
   ////////////////////
   // Custom asserts //
   ////////////////////
@@ -209,6 +219,14 @@
     equal(newLength, oldLength - 1, 'decreases the length of the data by 1');
     equal(removedItem.id, item.id, 'removes the correct datum');
     notContainsText('.slick-cell', item.name, 'removes the element from the DOM');
+  });
+
+  test('getRowElement()', function() {
+    var item = myGrid.getData()[0];
+    var $elem = myGrid.getRowElement(item.id);
+    isTrue($elem instanceof jQuery, 'is a jQuery element');
+    isTrue($elem.hasClass('slick-row'), 'is a SlickGrid row');
+    equal($elem.find('.hg-item').attr('data-id'), item.id.toString(), 'is the row for the correct item');
   });
 
   test('Expanding item', function() {
@@ -737,6 +755,26 @@
     equal(grid.dropzone.options.maxFilesize, 10, 'maxFilesize was set');
     equal(grid.dropzone.options.method, 'PUT', 'method was set');
     equal(grid.dropzone.options.url, '/files/upload', 'url was set');
+  });
+
+  module('Dropzone callbacks', {
+    setup: function() {
+      myGrid = new HGrid('#myGrid', {
+        uploads: true,
+        data: testData
+      });
+    }
+  });
+
+  test('addedfile', function() {
+    myGrid.currentTarget = myGrid.getData()[0];
+    var file = getMockFile();
+    var oldLength = myGrid.getData().length;
+    var addedItem = myGrid.dropzoneEvents.addedfile.call(myGrid, file);
+    equal(myGrid.getData().length, oldLength + 1, 'a row was added');
+    isTrue(myGrid.getRowElement(addedItem.id).hasClass('hg-dl-started'),
+      'hg-dl-started class was added to the row element');
+
   });
 
 })(jQuery);

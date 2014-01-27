@@ -711,20 +711,25 @@ if (typeof jQuery === 'undefined') {
     return this;
   };
 
+  /**
+   * Get the row element for an item, given its id.
+   * @method  getRowElement
+   * @return {jQuery}    The jQuery element for
+   */
   HGrid.prototype.getRowElement = function(id) {
-    return this.grid.getCellNode(this.getDataView().getRowById(id), 0).parentNode;
+    return $(this.grid.getCellNode(this.getDataView().getRowById(id), 0).parentNode);
   };
 
   HGrid.prototype.addHighlight = function(item) {
     this.removeHighlight();
-    var rowElem;
+    var $rowElement;
     if (item && item.kind === FOLDER) {
-      rowElem = this.getRowElement(item.id);
+      $rowElement = this.getRowElement(item.id);
     } else {
-      rowElem = this.getRowElement(item.parentID);
+      $rowElement = this.getRowElement(item.parentID);
     }
-    if (rowElem) {
-      $(rowElem).addClass(this.options.highlightClass);
+    if ($rowElement) {
+      $rowElement.addClass(this.options.highlightClass);
     }
     return this;
   };
@@ -767,7 +772,7 @@ if (typeof jQuery === 'undefined') {
    * @attribute  dropzoneEvents
    * @type {Object}
    */
-  var currentTarget; // The item to upload to
+  HGrid.prototype.currentTarget = null; // The item to upload to
   HGrid.prototype.dropzoneEvents = {
     drop: function(evt) {
       this.removeHighlight();
@@ -780,14 +785,15 @@ if (typeof jQuery === 'undefined') {
       var item = this.getItemFromEvent(evt);
       if (item) {
         if (item.kind === FOLDER) {
-          currentTarget = item;
+          this.currentTarget = item;
         } else {
-          currentTarget = this.getByID(item.parentID);
+          this.currentTarget = this.getByID(item.parentID);
         }
       }
       this.options.onDragenter.call(this, evt, item);
     },
     dragover: function(evt) {
+      var currentTarget = this.currentTarget;
       var item = this.getItemFromEvent(evt);
       if (currentTarget) {
         if (currentTarget.allowUploads || typeof currentTarget.allowUploads === 'undefined') {
@@ -804,7 +810,18 @@ if (typeof jQuery === 'undefined') {
     dragend: function(evt) {
       this.removeHighlight();
     },
-    addedfile: function(file) {} //TODO
+    addedfile: function(file) {
+      var currentTarget = this.currentTarget;
+      // Add a new row
+      var addedItem = this.addItem({
+        name: file.name,
+        kind: HGrid.FILE,
+        parentID: currentTarget.id
+      });
+      var $rowElem = this.getRowElement(addedItem.id);
+      $rowElem.addClass('hg-dl-started');
+      return addedItem;
+    } //TODO
 
     // 'addedfile': function(file) {}
   };

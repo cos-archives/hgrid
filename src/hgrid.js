@@ -766,7 +766,13 @@ if (typeof jQuery === 'undefined') {
    * @type {Object}
    */
   HGrid.prototype.dropzoneEvents = {
-    'dragover': function(evt) {
+    drop: function(evt) {
+      this.removeHighlight();
+    },
+    dragleave: function(evt) {
+      this.removeHighlight();
+    },
+    dragover: function(evt) {
       var item = this.getItemFromEvent(evt);
       var targetItem;
       if (item) {
@@ -785,12 +791,15 @@ if (typeof jQuery === 'undefined') {
         }
       }
     },
-    'dragleave': function(evt) {
+    dragenter: function(evt) {
+      var item = this.getItemFromEvent(evt);
+      this.addHighlight(item);
+    },
+    dragend: function(evt) {
       this.removeHighlight();
     },
-    'drop': function(evt) {
-      this.removeHighlight();
-    }
+    addedfile: function(file) {} //TODO
+
     // 'addedfile': function(file) {}
   };
 
@@ -799,9 +808,8 @@ if (typeof jQuery === 'undefined') {
    * @method  _initListeners
    */
   HGrid.prototype._initListeners = function() {
-    var self = this;
-    var callbackName;
-    var fn;
+    var self = this,
+      callbackName, fn;
     // Wire up all the slickgrid events
     for (callbackName in self.slickEvents) {
       fn = self.slickEvents[callbackName].bind(self); // make `this` object the grid

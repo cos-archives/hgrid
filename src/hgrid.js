@@ -685,6 +685,8 @@ if (typeof jQuery === 'undefined') {
   /**
    * Constructs a Slick.Grid and Slick.Data.DataView from the data.
    * Sets this.grid.
+   * @method  _initSlickGrid
+   * @private
    */
   HGrid.prototype._initSlickGrid = function() {
     var self = this;
@@ -714,19 +716,19 @@ if (typeof jQuery === 'undefined') {
   /**
    * Get the row element for an item, given its id.
    * @method  getRowElement
-   * @return {jQuery}    The jQuery element for
+   * @return {jQuery}    The jQuery element for the grid row.
    */
   HGrid.prototype.getRowElement = function(id) {
-    return $(this.grid.getCellNode(this.getDataView().getRowById(id), 0).parentNode);
+    return this.grid.getCellNode(this.getDataView().getRowById(id), 0).parentNode;
   };
 
   HGrid.prototype.addHighlight = function(item) {
     this.removeHighlight();
     var $rowElement;
     if (item && item.kind === FOLDER) {
-      $rowElement = this.getRowElement(item.id);
+      $rowElement = $(this.getRowElement(item.id));
     } else {
-      $rowElement = this.getRowElement(item.parentID);
+      $rowElement = $(this.getRowElement(item.parentID));
     }
     if ($rowElement) {
       $rowElement.addClass(this.options.highlightClass);
@@ -766,13 +768,13 @@ if (typeof jQuery === 'undefined') {
     }
   };
 
+  HGrid.prototype.currentTarget = null; // The item to upload to
   /**
    * DropZone events that the grid subscribes to.
    * For each function, `this` refers to the HGrid object.
    * @attribute  dropzoneEvents
    * @type {Object}
    */
-  HGrid.prototype.currentTarget = null; // The item to upload to
   HGrid.prototype.dropzoneEvents = {
     drop: function(evt) {
       this.removeHighlight();
@@ -818,8 +820,11 @@ if (typeof jQuery === 'undefined') {
         kind: HGrid.FILE,
         parentID: currentTarget.id
       });
-      var $rowElem = this.getRowElement(addedItem.id);
+      var rowElem = this.getRowElement(addedItem.id),
+        $rowElem = $(rowElem);
       $rowElem.addClass('hg-dl-started');
+      file.gridElement = rowElem;
+      // TODO: Add cancel upload link to actions
       return addedItem;
     } //TODO
 
@@ -1036,6 +1041,24 @@ if (typeof jQuery === 'undefined') {
     this.getDataView().beginUpdate();
     func.call(this);
     this.getDataView().endUpdate();
+  };
+
+
+  /**
+   * Add a new grid column
+   * @method  addColumn
+   * Example:
+   * ```
+   * grid.addColumn({id: 'size', name: 'File Size', field: 'filesize', width: 50})
+   * ```
+   * @param {Object} colSpec Column specification. See
+   *                         https://github.com/mleibman/SlickGrid/wiki/Column-Options
+   */
+  HGrid.prototype.addColumn = function(colSpec) {
+    var columns = this.grid.getColumns();
+    columns.push(colSpec);
+    this.grid.setColumns(columns);
+    return this;
   };
 
   /**

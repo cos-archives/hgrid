@@ -43,7 +43,6 @@
   function areIdentical(x, y, msg) {
     return ok(x == y, x + ' and ' + y + ' are identical');
   }
-
   var testData = {
     data: [{
       name: 'Documents',
@@ -207,6 +206,14 @@
     ok(tree instanceof HGrid.Tree, 'tree node was added');
   });
 
+  test('Adding column', function() {
+    myGrid.addColumn({
+      id: 'mycol',
+      name: 'Testing column'
+    });
+    containsText('.slick-header', 'Testing column', 'new column was added in the DOM');
+  });
+
   test('Removing item', function() {
     // Remove the last item in the dataset
     var allData = myGrid.getData();
@@ -223,8 +230,7 @@
 
   test('getRowElement()', function() {
     var item = myGrid.getData()[0];
-    var $elem = myGrid.getRowElement(item.id);
-    isTrue($elem instanceof jQuery, 'is a jQuery element');
+    var $elem = $(myGrid.getRowElement(item.id));
     isTrue($elem.hasClass('slick-row'), 'is a SlickGrid row');
     equal($elem.find('.hg-item').attr('data-id'), item.id.toString(), 'is the row for the correct item');
   });
@@ -772,8 +778,10 @@
     var oldLength = myGrid.getData().length;
     var addedItem = myGrid.dropzoneEvents.addedfile.call(myGrid, file);
     equal(myGrid.getData().length, oldLength + 1, 'a row was added');
-    isTrue(myGrid.getRowElement(addedItem.id).hasClass('hg-dl-started'),
+    var $rowElem = $(myGrid.getRowElement(addedItem.id));
+    isTrue($rowElem.hasClass('hg-dl-started'),
       'hg-dl-started class was added to the row element');
+    containsText('.slick-row', file.name, 'file name is in DOM');
 
   });
 

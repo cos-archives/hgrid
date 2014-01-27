@@ -975,23 +975,19 @@ if (typeof jQuery === 'undefined') {
    * @return {Object} The added item.
    */
   HGrid.prototype.addItem = function(item) {
-    var newItem = $.extend(true, {}, item); // copy the item
-    if (newItem.parentID === null) {
-      newItem.parentID = ROOT_ID;
+    var node, parentNode;
+    if (item.kind === HGrid.FOLDER) {
+      node = new HGrid.Tree(item);
+    } else {
+      node = new HGrid.Leaf(item);
     }
-    var dataView = this.getDataView();
-    var parent = this.getByID(newItem.parentID);
-    var insertIndex;
-    if (parent) {
-      insertIndex = dataView.getIdxById(parent.id) + 1;
-      newItem.depth = parent.depth + 1;
-    } else { // Parent may be null
-      insertIndex = 0;
-      newItem.depth = 1;
+    if (item.parentID == null) {
+      parentNode = this.tree;
+    } else {
+      parentNode = this.getNodeByID(item.parentID);
     }
-    // Set id and depth
-    newItem.id = idCounter++; // set and increment
-    dataView.insertItem(insertIndex, newItem);
+    parentNode.add(node, true);
+    var newItem = this.getByID(node.id);
     this.options.onItemAdded.call(this, newItem);
     return newItem;
   };
@@ -1037,6 +1033,9 @@ if (typeof jQuery === 'undefined') {
    * @return {HGrid.Tree} The Tree or Leaf with the id.
    */
   HGrid.prototype.getNodeByID = function(id) {
+    if (id === HGrid.ROOT_ID) {
+      return this.tree;
+    }
     var item = this.getByID(id);
     return item._node;
   };

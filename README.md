@@ -134,6 +134,14 @@ TODO
 
 *Full documentation to come*
 
+### Styling the Grid
+
+CSS Classes
+
+- `hgrid`
+- `hg-item`
+- `hg-folder`
+- `hg-row-highlight`
 
 ## Dependencies
 

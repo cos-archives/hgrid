@@ -179,12 +179,13 @@
 
   test('Adding item', function() {
     var oldDataLength = myGrid.getData().length;
-    var parentItem = myGrid.getByID(0);
+    var parentItem = myGrid.getData()[0];
     var newItem = {
       parentID: parentItem.id,
       name: 'New folder',
       kind: 'folder'
     };
+
     var addedItem = myGrid.addItem(newItem); // Returns the added item
     var newLength = myGrid.getData().length;
     equal(newLength, oldDataLength + 1, 'increases the length of the data by 1');
@@ -192,6 +193,8 @@
     equal(addedItem.parentID, parentItem.id, 'parentID is correct');
     equal(addedItem.depth, parentItem.depth + 1, 'new item has a depth 1 greater than its parent');
     containsText('.slick-cell', newItem.name, 'Item added to DOM');
+    var tree = myGrid.getNodeByID(addedItem.id);
+    ok(tree instanceof HGrid.Tree, 'tree node was added');
   });
 
   test('Removing item', function() {
@@ -296,6 +299,12 @@
     ok(tree instanceof HGrid.Tree, 'returns a HGrid.Tree');
     equal(tree.id, item.id, 'tree and item have same id');
     equal(tree.data.name, item.name, 'tree and item have same name');
+  });
+
+  test('Getting root node by ID', function() {
+    var root = myGrid.getNodeByID(HGrid.ROOT_ID);
+    ok(root instanceof HGrid.Tree, 'root is a tree');
+    equal(root.id, HGrid.ROOT_ID, 'has root id');
   });
 
   module('Tree and leaf', {

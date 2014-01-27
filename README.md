@@ -146,7 +146,8 @@ CSS Classes
 - `hg-folder`
 - `hg-file`
 - `hg-row-highlight`
-- `hg-dl-started`: Added to a after a file is added and download has started
+- `hg-upload-started`: Added to a row after a file is added and upload has started
+- `hg-upload-error`: Added to a row if an error occurs during upload.
 
 ### Rendering File and Folder HTML
 

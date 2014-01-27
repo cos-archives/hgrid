@@ -50,7 +50,7 @@ if (typeof jQuery === 'undefined') {
    * the passed in folder rendering function and file rendering function.
    *
    * See: https://github.com/mleibman/SlickGrid/blob/gh-pages/examples/example2-formatters.html
-   *
+   * @class  makeFormatter
    * @private
    * @param  {Function} folderFunc Function that returns the HTML for a folder.
    * @param  {Function} fileFunc   Function that returns the HTML for a file.
@@ -61,14 +61,16 @@ if (typeof jQuery === 'undefined') {
     var formatter = function(row, cell, value, columnDef, item) {
       // Opening and closing tags that surround a row
       var openTag = '<span class="hg-item" data-id="' + item.id + '">';
+      // Placeholder for error messages
+      var errorElem = '<span class="error" data-upload-errormessage></span>';
       var closingTag = '</span>';
       var indent = item.depth * indentWidth;
       // indenting span
       var spacer = makeIndentElem(indent);
       if (item.kind === FOLDER) {
-        return [openTag, spacer, folderFunc(item), closingTag].join(' ');
+        return [openTag, spacer, folderFunc(item), errorElem, closingTag].join(' ');
       } else {
-        return [openTag, spacer, fileFunc(item), closingTag].join(' ');
+        return [openTag, spacer, fileFunc(item), errorElem, closingTag].join(' ');
       }
     };
     return formatter;
@@ -835,13 +837,24 @@ if (typeof jQuery === 'undefined') {
       });
       var rowElem = this.getRowElement(addedItem.id),
         $rowElem = $(rowElem);
-      $rowElem.addClass('hg-dl-started');
+      $rowElem.addClass('hg-upload-started');
       file.gridElement = rowElem;
       // TODO: Add cancel upload link to actions
       return addedItem;
-    } //TODO
-
-    // 'addedfile': function(file) {}
+    },
+    thumbnail: function(file, dataUrl) {},
+    error: function(file, message) {
+      var $rowElem = $(file.gridElement);
+      $rowElem.addClass('hg-upload-error');
+      var msg;
+      if (typeof message !== 'string' && message.error) {
+        msg = message.error;
+      } else {
+        msg = message;
+      }
+      // Show error message
+      $rowElem.find('[data-upload-errormessage]').text(msg);
+    }
   };
 
   /**

@@ -813,10 +813,22 @@
     var addedItem = myGrid.dropzoneEvents.addedfile.call(myGrid, file);
     equal(myGrid.getData().length, oldLength + 1, 'a row was added');
     var $rowElem = $(myGrid.getRowElement(addedItem.id));
-    isTrue($rowElem.hasClass('hg-dl-started'),
-      'hg-dl-started class was added to the row element');
+    isTrue($rowElem.hasClass('hg-upload-started'),
+      'hg-upload-started class was added to the row element');
     containsText('.slick-row', file.name, 'file name is in DOM');
+  });
 
+  test('error', function() {
+    var item = myGrid.getData()[0];
+    var file = getMockFile();
+    file.gridElement = myGrid.getRowElement(item.id);
+    var message = {
+      error: 'Could not upload file'
+    };
+    myGrid.dropzoneEvents.error.call(myGrid, file, message);
+    var $row = $(file.gridElement);
+    isTrue($row.hasClass('hg-upload-error'), 'row element has hg-upload-error class');
+    containsText('.slick-cell', message.error, 'Cell contains error message');
   });
 
 })(jQuery);

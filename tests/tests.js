@@ -41,7 +41,7 @@
   }
 
   function areIdentical(x, y, msg) {
-    return ok(x == y, x + ' and ' + y + ' are identical');
+    return ok(x == y, msg || (x + ' and ' + y + ' are identical'));
   }
   var testData = {
     data: [{
@@ -153,7 +153,14 @@
     classes.forEach(function(cls) {
       isTrue(multiClassGrid.element.hasClass(cls));
     });
+  });
 
+  test('Default columns', function() {
+    var grid = new HGrid('#myGrid');
+    var cols = grid.grid.getColumns();
+    equal(cols[0].name, 'Name');
+    equal(cols[0].id, 'name');
+    containsText('.slick-header', 'Name', 'name column is in DOM');
   });
 
   test('Options and attributes', function() {
@@ -391,7 +398,7 @@
     var folder = new HGrid.Tree({
       name: 'Folder 1',
       kind: 'folder'
-    })
+    });
     root.add(folder);
     root.updateDataView();
     var item = folder.getItem();
@@ -405,7 +412,7 @@
     var leaf = new HGrid.Leaf({
       name: 'file.txt',
       kind: 'file'
-    })
+    });
     root.add(leaf);
     root.updateDataView();
     var leafItem = leaf.getItem();
@@ -424,7 +431,7 @@
     var leafItem = leaf.getItem();
     isFalse(leafItem._collapsed, 'not collapsed');
     leaf.collapse();
-    isTrue(leafItem._collapsed, 'collapses after calling collapse()')
+    isTrue(leafItem._collapsed, 'collapses after calling collapse()');
   });
 
   test('Leaf.expand()', function() {
@@ -459,6 +466,7 @@
     isFalse(leaf.getItem()._collapsed, 'leaf is not collapsed to begin with');
     tree.collapse(true);
     isTrue(leaf.getItem()._collapsed, 'child leaf collapses after parent is collapsed');
+    isTrue(leaf.getItem()._hidden, 'child leaf is hidden');
   });
 
   test('Tree.collapse() children only', function() {

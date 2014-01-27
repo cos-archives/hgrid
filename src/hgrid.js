@@ -89,13 +89,13 @@ if (typeof jQuery === 'undefined') {
     return $elem.hasClass('toggle');
   }
 
-  var requiredColumns = [{
+  HGrid.COL_NAME = {
     id: 'name',
     name: 'Name',
     field: 'name',
     cssClass: 'cell-title',
     defaultSortAsc: true
-  }];
+  };
 
   /**
    * Default options object
@@ -128,7 +128,7 @@ if (typeof jQuery === 'undefined') {
     // Additional options to be passed into $.ajax when sending AJAX requests
     // ajaxOptions: {},
     // lazyLoad: false,
-    columns: requiredColumns,
+    columns: [HGrid.COL_NAME],
     // dropZonePreviewsContainer: null,
     // dropzoneOptions: null,
     // navLevel: null,
@@ -503,6 +503,14 @@ if (typeof jQuery === 'undefined') {
       }
     }
     return this;
+  };
+
+  /**
+   * @method isCollapsed
+   * @return {Boolean} Whether the node is collapsed.
+   */
+  Tree.prototype.isCollapsed = function() {
+    return this.getItem()._collapsed;
   };
 
   /**

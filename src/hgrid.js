@@ -193,7 +193,7 @@ if (typeof jQuery === 'undefined') {
       // Placeholder for error messages
       var errorElem = '<span class="error" data-upload-errormessage></span>';
       // Placeholder for progress bar
-      var progressElem = '<span class="hg-upload" data-upload-progress></span>';
+      var progressElem = '<div class="hg-progress"><span class="hg-upload" data-upload-progress></span></div>';
       return [fileIcon, sanitized(item.name), progressElem, errorElem].join(' ');
     },
     /**
@@ -289,11 +289,18 @@ if (typeof jQuery === 'undefined') {
       });
       return this;
     },
+
+    /**
+     * Called whenever upload progress gets updated.
+     * @param  {Object} file      the file object
+     * @param  {Number} progress  Percentage (0-100)
+     * @param  {Number} bytesSent
+     * @param  {The data item element} item
+     */
     uploadProgress: function(file, progress, bytesSent, item) {
+      // Use the row as a progress bar
       var $row = $(file.gridElement);
-      $row.find('[data-upload-progress]').each(function(i) {
-        this.textContent = progress + '%';
-      });
+      $row.width(progress + '%');
     },
     /**
      * Additional initialization. Useful for adding listeners.

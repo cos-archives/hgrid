@@ -252,7 +252,13 @@ if (typeof jQuery === 'undefined') {
      */
     /*jshint unused: false */
     onItemAdded: function(item) {},
-
+    /**
+     * Executed when dragging, e.g. a file over the grid.
+     * @property  [onDragOver]
+     *
+     */
+    /*jshint unused: false */
+    onDragover: function(evt, item) {},
     /**
      * Additional initialization. Useful for adding listeners.
      * @property {Function} init
@@ -763,6 +769,7 @@ if (typeof jQuery === 'undefined') {
    * @attribute  dropzoneEvents
    * @type {Object}
    */
+  var currentTarget; // The item to upload to
   HGrid.prototype.dropzoneEvents = {
     drop: function(evt) {
       this.removeHighlight();
@@ -772,26 +779,25 @@ if (typeof jQuery === 'undefined') {
     },
     dragover: function(evt) {
       var item = this.getItemFromEvent(evt);
-      var targetItem;
       if (item) {
         if (item.kind === FOLDER) {
-          targetItem = item;
+          currentTarget = item;
         } else {
-          targetItem = this.getByID(item.parentID);
+          currentTarget = this.getByID(item.parentID);
         }
-        if (targetItem.allowUploads || typeof targetItem.allowUploads === 'undefined') {
-          this.addHighlight(item);
+        if (currentTarget.allowUploads || typeof currentTarget.allowUploads === 'undefined') {
+          this.addHighlight(currentTarget);
         }
         // if upload url is a function, call it, passing in the item,
         // and set dropzone to upload to the result
         if (typeof this.options.uploadUrl === 'function') {
-          this.dropzone.options.url = this.options.uploadUrl(targetItem);
+          this.dropzone.options.url = this.options.uploadUrl(currentTarget);
         }
       }
+      this.options.onDragover.call(this, evt, item);
     },
     dragenter: function(evt) {
-      var item = this.getItemFromEvent(evt);
-      this.addHighlight(item);
+      this.addHighlight(currentTarget);
     },
     dragend: function(evt) {
       this.removeHighlight();

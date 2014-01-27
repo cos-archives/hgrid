@@ -192,7 +192,9 @@ if (typeof jQuery === 'undefined') {
       var fileIcon = '<span class="hg-file"></span>';
       // Placeholder for error messages
       var errorElem = '<span class="error" data-upload-errormessage></span>';
-      return [fileIcon, sanitized(item.name), errorElem].join(' ');
+      // Placeholder for progress bar
+      var progressElem = '<span class="hg-upload" data-upload-progress></span>';
+      return [fileIcon, sanitized(item.name), progressElem, errorElem].join(' ');
     },
     /**
      * Additional options passed to Slick.Grid constructor
@@ -266,9 +268,12 @@ if (typeof jQuery === 'undefined') {
      * Called whenever an upload error occur
      * @property [uploadError]
      * @param  {Object} file    The HTML file object
-     * @param  {String} message
+     * @param {String} message Error message
+     * @param {Object} item The placeholder item that was added to the grid for the file.
      */
-    uploadError: function(file, message) {
+    /*jshint unused: false */
+    uploadError: function(file, message, item) {
+      // The row element for the added file is stored on the file object
       var $rowElem = $(file.gridElement);
       $rowElem.addClass('hg-upload-error');
       var msg;
@@ -277,11 +282,18 @@ if (typeof jQuery === 'undefined') {
       } else {
         msg = message;
       }
-      // Show error message in any element that contains 'data-upload-errormessage'
+      // Show error message in any element within the row
+      // that contains 'data-upload-errormessage'
       $rowElem.find('[data-upload-errormessage]').each(function(i) {
         this.textContent = msg;
       });
       return this;
+    },
+    uploadProgress: function(file, progress, bytesSent, item) {
+      var $row = $(file.gridElement);
+      $row.find('[data-upload-progress]').each(function(i) {
+        this.textContent = progress + '%';
+      });
     },
     /**
      * Additional initialization. Useful for adding listeners.
@@ -851,6 +863,9 @@ if (typeof jQuery === 'undefined') {
     dragend: function(evt) {
       this.removeHighlight();
     },
+    // When a file is added, set currentTarget (the folder item to upload to)
+    // and bind gridElement (the html element for the added row) and gridItem
+    // (the added item object) to the file object
     addedfile: function(file) {
       var currentTarget = this.currentTarget;
       // Add a new row
@@ -861,14 +876,17 @@ if (typeof jQuery === 'undefined') {
       });
       var rowElem = this.getRowElement(addedItem.id),
         $rowElem = $(rowElem);
-      $rowElem.addClass('hg-upload-started');
+      // Save the item data and HTML element on the file object
+      file.gridItem = addedItem;
       file.gridElement = rowElem;
+      $rowElem.addClass('hg-upload-started');
       // TODO: Add cancel upload link to actions
       return addedItem;
     },
     thumbnail: function(file, dataUrl) {},
+    // Just delegate error function to options.uploadError
     error: function(file, message) {
-      return this.options.uploadError.call(this, file, message);
+      return this.options.uploadError.call(this, file, message, file.gridItem);
     },
     processing: function(file) {
       $(file.gridElement).addClass('hg-upload-processing');
@@ -876,8 +894,7 @@ if (typeof jQuery === 'undefined') {
       return this;
     },
     uploadprogress: function(file, progress, bytesSent) {
-      // TODO
-
+      return this.options.uploadProgress.call(this, file, progress, bytesSent, file.gridItem);
     }
   };
 

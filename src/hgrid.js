@@ -252,13 +252,11 @@ if (typeof jQuery === 'undefined') {
      */
     /*jshint unused: false */
     onItemAdded: function(item) {},
-    /**
-     * Executed when dragging, e.g. a file over the grid.
-     * @property  [onDragOver]
-     *
-     */
+    // Dragging related callbacks
     /*jshint unused: false */
     onDragover: function(evt, item) {},
+    /*jshint unused: false */
+    onDragenter: function(evt, item) {},
     /**
      * Additional initialization. Useful for adding listeners.
      * @property {Function} init
@@ -777,7 +775,8 @@ if (typeof jQuery === 'undefined') {
     dragleave: function(evt) {
       this.removeHighlight();
     },
-    dragover: function(evt) {
+    // Set the current upload target upon dragging a file onto the grid
+    dragenter: function(evt) {
       var item = this.getItemFromEvent(evt);
       if (item) {
         if (item.kind === FOLDER) {
@@ -785,6 +784,12 @@ if (typeof jQuery === 'undefined') {
         } else {
           currentTarget = this.getByID(item.parentID);
         }
+      }
+      this.options.onDragenter.call(this, evt, item);
+    },
+    dragover: function(evt) {
+      var item = this.getItemFromEvent(evt);
+      if (currentTarget) {
         if (currentTarget.allowUploads || typeof currentTarget.allowUploads === 'undefined') {
           this.addHighlight(currentTarget);
         }
@@ -795,9 +800,6 @@ if (typeof jQuery === 'undefined') {
         }
       }
       this.options.onDragover.call(this, evt, item);
-    },
-    dragenter: function(evt) {
-      this.addHighlight(currentTarget);
     },
     dragend: function(evt) {
       this.removeHighlight();

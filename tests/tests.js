@@ -797,18 +797,20 @@
     equal(grid.dropzone.options.url, '/files/upload', 'url was set');
   });
 
+  var file;
   module('Dropzone callbacks', {
     setup: function() {
       myGrid = new HGrid('#myGrid', {
         uploads: true,
         data: testData
       });
+      myGrid.currentTarget = myGrid.getData()[0];
+      file = getMockFile();
+      file.gridElement = myGrid.getRowElement(myGrid.getData()[1].id);
     }
   });
 
-  test('addedfile', function() {
-    myGrid.currentTarget = myGrid.getData()[0];
-    var file = getMockFile();
+  test('default addedfile', function() {
     var oldLength = myGrid.getData().length;
     var addedItem = myGrid.dropzoneEvents.addedfile.call(myGrid, file);
     equal(myGrid.getData().length, oldLength + 1, 'a row was added');
@@ -818,26 +820,52 @@
     containsText('.slick-row', file.name, 'file name is in DOM');
   });
 
-  test('error', function() {
-    expect(4);
+  test('default error callback', function() {
     var grid = new HGrid('#myGrid', {
-      data: testData,
-      uploadError: function(f, msg) {
-        deepEqual(f, file);
-        equal(msg.error, 'Could not upload file');
-      }
+      data: testData
     });
-    var item = grid.getData()[0];
-    var file = getMockFile();
-    file.gridElement = grid.getRowElement(item.id);
     var message = {
       error: 'Could not upload file'
     };
-    // Set the callback
+    file.gridElement = grid.getRowElement(grid.getData()[1].id);
     grid.dropzoneEvents.error.call(grid, file, message);
     var $row = $(file.gridElement);
     isTrue($row.hasClass('hg-upload-error'), 'row element has hg-upload-error class');
     containsText('.slick-cell', message.error, 'Cell contains error message');
+  });
+
+  test('default processing callback', function() {
+    myGrid.dropzoneEvents.processing.call(myGrid, file);
+    var $row = $(file.gridElement);
+    isTrue($row.hasClass('hg-upload-processing'), 'row has hg-upload-processing class');
+  });
+
+  test('default success callback', function() {
+    var $row = $(file.gridElement);
+    $row.addClass('hg-upload-processing');
+    myGrid.dropzoneEvents.success.call(myGrid, file);
+    isTrue($row.hasClass('hg-upload-success'), 'row has hg-upload-success class');
+    isFalse($row.hasClass('hg-upload-processing'), 'hg-upload-processing class was removed');
+  });
+
+  test('uploadComplete callback', function() {
+    expect(2); // Make sure callback executes
+    var file = getMockFile();
+    var grid = new HGrid('#myGrid', {
+      data: testData,
+      uploadComplete: function(file, item) {
+        ok(typeof(file) === 'object');
+        ok(typeof(item) === 'object');
+      }
+    });
+    var folder = grid.getData()[0];
+    file.gridItem = grid.addItem({
+      name: 'New file',
+      kind: 'file',
+      parentID: folder.id
+    });
+    grid.currentTarget = folder;
+    grid.dropzoneEvents.complete.call(grid, file);
   });
 
 })(jQuery);

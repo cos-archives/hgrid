@@ -277,6 +277,7 @@ if (typeof jQuery === 'undefined') {
      * Called whenever a file gets processed.
      * @property {Function} [uploadProcessing]
      */
+    /*jshint unused: false */
     uploadProcessing: function(file, item) {
         $(file.gridElement).addClass('hg-upload-processing');
       // TODO: display Cancel upload button text
@@ -306,19 +307,34 @@ if (typeof jQuery === 'undefined') {
       });
       return this;
     },
-
     /**
      * Called whenever upload progress gets updated.
+     * @property [uploadProgress] 
      * @param  {Object} file      the file object
      * @param  {Number} progress  Percentage (0-100)
      * @param  {Number} bytesSent
      * @param  {The data item element} item
      */
+    /*jshint unused: false */
     uploadProgress: function(file, progress, bytesSent, item) {
       // Use the row as a progress bar
       var $row = $(file.gridElement);
       $row.width(progress + '%');
     },
+    /**
+     * Called whenever an upload is finished successfully
+     * @property [uploadSuccess]
+     */
+    /*jshint unused: false */
+    uploadSuccess: function(file, item) {
+      $(file.gridElement).addClass('hg-upload-success')
+                        .removeClass('hg-upload-processing');
+    },
+    /**
+     * Called when an upload completes (whether it is successful or not)
+     * @property [uploadComplete] 
+     */
+    uploadComplete: function(file, item) {},
     /**
      * Additional initialization. Useful for adding listeners.
      * @property {Function} init
@@ -920,6 +936,12 @@ if (typeof jQuery === 'undefined') {
     },
     uploadprogress: function(file, progress, bytesSent) {
       return this.options.uploadProgress.call(this, file, progress, bytesSent, file.gridItem);
+    },
+    success: function(file) {
+      return this.options.uploadSuccess.call(this, file, file.gridItem);
+    },
+    complete: function(file) {
+      return this.options.uploadComplete.call(this, file, file.gridItem);
     }
   };
 

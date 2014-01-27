@@ -473,10 +473,10 @@ if (typeof jQuery === 'undefined') {
     // A node can be collapsed but not hidden. For example, if you click
     // on a folder, it should collapse and hide all of its contents, but the folder
     // should still be visible.
-    item._collapsed = true;
     if (hideSelf) {
       item._hidden = true;
     } else {
+      item._collapsed = true;
       item._hidden = false;
     }
     // Collapse and hide all children
@@ -490,12 +490,17 @@ if (typeof jQuery === 'undefined') {
    * Expand this and all children nodes by setting the item's _collapsed attribute
    * @method  expand
    */
-  Tree.prototype.expand = function() {
+  Tree.prototype.expand = function(notFirst) {
     var item = this.getItem();
-    item._collapsed = item._hidden = false;
+    if (!notFirst) {
+      item._collapsed = false;
+    }
+    item._hidden = false;
     // Expand all children
     for (var i = 0, node; node = this.children[i]; i++) {
-      node.expand();
+      if (!item._collapsed) { // Maintain subtree's collapsed state
+        node.expand(true);
+      }
     }
     return this;
   };

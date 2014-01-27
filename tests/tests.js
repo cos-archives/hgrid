@@ -458,8 +458,7 @@
     isFalse(item._collapsed, 'not collapsed to begin with');
     isFalse(leaf.getItem()._collapsed, 'leaf is not collapsed to begin with');
     tree.collapse(true);
-    isTrue(item._collapsed, 'collapses after calling collapse(true)');
-    isTrue(leaf.getItem()._collapsed, 'child leaf also collapses after parent is collapsed');
+    isTrue(leaf.getItem()._collapsed, 'child leaf collapses after parent is collapsed');
   });
 
   test('Tree.collapse() children only', function() {
@@ -507,6 +506,25 @@
     tree.expand();
     isFalse(item._collapsed, 'expanded after calling collapse()');
     isFalse(leaf.getItem()._collapsed, 'child leaf is expanded after parent is collapsed');
+  });
+
+  test('Tree.expand() maintains subtree collapsed state', function() {
+    var root = new HGrid.Tree();
+    var tree = new HGrid.Tree({
+      name: 'Docs',
+      kind: HGrid.FOLDER,
+    });
+    var subtree = new HGrid.Tree({
+      name: 'Scripts',
+      kind: HGrid.FOLDER
+    });
+    root.add(tree, true);
+    tree.add(subtree, true);
+    subtree.collapse();
+    tree.collapse();
+    tree.expand();
+    isFalse(tree.isCollapsed(), 'tree is expanded');
+    isTrue(subtree.isCollapsed(), 'subtree is still collapsed');
   });
 
   test('Creating trees with metadata', function() {

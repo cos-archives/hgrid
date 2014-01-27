@@ -819,13 +819,22 @@
   });
 
   test('error', function() {
-    var item = myGrid.getData()[0];
+    expect(4);
+    var grid = new HGrid('#myGrid', {
+      data: testData,
+      uploadError: function(f, msg) {
+        deepEqual(f, file);
+        equal(msg.error, 'Could not upload file');
+      }
+    });
+    var item = grid.getData()[0];
     var file = getMockFile();
-    file.gridElement = myGrid.getRowElement(item.id);
+    file.gridElement = grid.getRowElement(item.id);
     var message = {
       error: 'Could not upload file'
     };
-    myGrid.dropzoneEvents.error.call(myGrid, file, message);
+    // Set the callback
+    grid.dropzoneEvents.error.call(grid, file, message);
     var $row = $(file.gridElement);
     isTrue($row.hasClass('hg-upload-error'), 'row element has hg-upload-error class');
     containsText('.slick-cell', message.error, 'Cell contains error message');

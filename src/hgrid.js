@@ -260,6 +260,13 @@ if (typeof jQuery === 'undefined') {
     /*jshint unused: false */
     onDragenter: function(evt, item) {},
     /**
+     * Called whenever an upload error occur
+     * @property [uploadError]
+     * @param  {Object} file    The HTML file object
+     * @param  {String} message
+     */
+    uploadError: function(file, message) {},
+    /**
      * Additional initialization. Useful for adding listeners.
      * @property {Function} init
      */
@@ -852,14 +859,18 @@ if (typeof jQuery === 'undefined') {
       } else {
         msg = message;
       }
-      // Show error message
-      $rowElem.find('[data-upload-errormessage]').text(msg);
+      // Show error message in any element that contains 'data-upload-errormessage'
+      $rowElem.find('[data-upload-errormessage]').each(function(i) {
+        this.textContent = msg;
+      });
+      this.options.uploadError.call(this, file, message);
     }
   };
 
   /**
    * Wires up all the event handlers.
    * @method  _initListeners
+   * @private
    */
   HGrid.prototype._initListeners = function() {
     var self = this,

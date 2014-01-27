@@ -265,7 +265,24 @@ if (typeof jQuery === 'undefined') {
     /*jshint unused: false */
     onDragenter: function(evt, item) {},
     /**
-     * Called whenever an upload error occur
+     * Called whenever a file is added for uploaded
+     * @param  {Object} file The file object. Has gridElement and gridItem bound to it.
+     * @param  {Object} item The added item
+     */
+    uploadAdded: function(file, item){
+      $(file.gridElement).addClass('hg-upload-started');
+      // TODO: Add cancel upload link to actions
+    },
+    /**
+     * Called whenever a file gets processed.
+     * @property {Function} [uploadProcessing]
+     */
+    uploadProcessing: function(file, item) {
+        $(file.gridElement).addClass('hg-upload-processing');
+      // TODO: display Cancel upload button text
+    },
+    /**
+     * Called whenever an upload error occurs
      * @property [uploadError]
      * @param  {Object} file    The HTML file object
      * @param {String} message Error message
@@ -830,6 +847,9 @@ if (typeof jQuery === 'undefined') {
   /**
    * DropZone events that the grid subscribes to.
    * For each function, `this` refers to the HGrid object.
+   * These listeners are responsible for any setup that needs to occur before executing 
+   * the callbacks in `options`. For example, adding a new row item to the grid, setting the 
+   * current upload target, and passing necessary arguments to the options callbacks.
    * @attribute  dropzoneEvents
    * @type {Object}
    */
@@ -886,8 +906,7 @@ if (typeof jQuery === 'undefined') {
       // Save the item data and HTML element on the file object
       file.gridItem = addedItem;
       file.gridElement = rowElem;
-      $rowElem.addClass('hg-upload-started');
-      // TODO: Add cancel upload link to actions
+      this.options.uploadAdded.call(this, file, file.gridItem);
       return addedItem;
     },
     thumbnail: function(file, dataUrl) {},
@@ -896,8 +915,7 @@ if (typeof jQuery === 'undefined') {
       return this.options.uploadError.call(this, file, message, file.gridItem);
     },
     processing: function(file) {
-      $(file.gridElement).addClass('hg-upload-processing');
-      // TODO: display Cancel upload button text
+      this.options.uploadProcessing.call(this, file, file.gridItem);
       return this;
     },
     uploadprogress: function(file, progress, bytesSent) {

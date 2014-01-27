@@ -80,13 +80,11 @@ var grid = new HGrid('#myGrid', {
       done();
     }
   },
-  beforeUpload: function(file, folderItem){},
-  afterUpload: function(file, folderItem){},
-  // Called when a file is added to the queue
-  onAddedFile: function(file, folderItem){},
-  // Called when upload completed successfully
-  uploadSuccess: function(file, folderItem){},
-  uploadError: function(file, message) {},
+  uploadAdded: function(file, newItem){},
+  uploadSuccess: function(file, newItem){},
+  uploadError: function(file, message, newItem) {},
+  uploadProcessing: function(file, newItem) {},
+  uploadProgress: function(file, progress, bytesSent, newItem) {}
 });
 ```
 

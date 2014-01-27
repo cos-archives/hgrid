@@ -70,6 +70,9 @@ var grid = new HGrid('#myGrid', {
   },
   deleteMethod: 'delete',
   deleteParams: {},
+  downloadUrl: function(item) {
+    return 'download/' + item.name;
+  },
   // Check if a file is ok to upload
   // done is a callbaack that takes an error msg
   // if no msg, then accept the file
@@ -85,6 +88,32 @@ var grid = new HGrid('#myGrid', {
   uploadError: function(file, message, newItem) {},
   uploadProcessing: function(file, newItem) {},
   uploadProgress: function(file, progress, bytesSent, newItem) {}
+});
+```
+
+## Adding buttons 
+
+Predefined actions:
+
+- `download`
+- `upload`: Opens filepicker to upload to a folder
+- `delete`: Sends request to delete a file
+
+```javascript
+var grid = new HGrid('#myGrid', {
+  data: myData,
+  folderButtons: function(folder) {
+    return [
+      {template: 'Upload', action: 'upload'}
+    ]
+  },
+  fileButtons: function(file) {
+    return [
+      {template: 'Download', action: 'download'},
+      {template: 'Delete', action: 'delete'},
+      {template: '<a class="btn" href="http://www.example.com/">Custom button</a>'}
+    ];
+  }
 });
 ```
 

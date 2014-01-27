@@ -394,7 +394,6 @@ if (typeof jQuery === 'undefined') {
   }
 
   Tree.prototype.insertIntoDataView = function(component) {
-    this.dataView.beginUpdate();
     var data = component.toData();
     var idx;
     if (Array.isArray(data)) {
@@ -407,7 +406,6 @@ if (typeof jQuery === 'undefined') {
       idx = computeAddIdx(data, this.dataView);
       this.dataView.insertItem(idx, data);
     }
-    this.dataView.endUpdate();
   };
 
   Tree.prototype.ensureDataView = function(dataView) {
@@ -839,7 +837,6 @@ if (typeof jQuery === 'undefined') {
     dataView.beginUpdate();
     dataView.setFilter(collapseFilter);
     dataView.endUpdate();
-    // wire up model events to drive the grid
     dataView.onRowCountChanged.subscribe(function(event, args) {
       self.grid.updateRowCount();
       self.grid.render();
@@ -969,13 +966,14 @@ if (typeof jQuery === 'undefined') {
    * Add an item to the grid.
    * @method  addItem
    * @param {Object} item Object with `name`, `kind`, and `parentID`.
-   *                      Must have parentID.
+   *                      If parentID is not specified, the new item is added to the root node.
    *                      Example:
    *                      `{name: 'New Folder', kind: 'folder', parentID: 123}`
    * @return {Object} The added item.
    */
   HGrid.prototype.addItem = function(item) {
     var node, parentNode;
+    // Create a new node for the item
     if (item.kind === HGrid.FOLDER) {
       node = new HGrid.Tree(item);
     } else {
@@ -1001,7 +999,7 @@ if (typeof jQuery === 'undefined') {
   HGrid.prototype.addItems = function(items) {
     var self = this;
     this.batchUpdate(function() {
-      for (var i = 0, len = items.length - 1; i < len; i++) {
+      for (var i = 0, len = items.length; i < len; i++) {
         var item = items[i];
         self.addItem(item);
       }
@@ -1033,7 +1031,7 @@ if (typeof jQuery === 'undefined') {
    * @return {HGrid.Tree} The Tree or Leaf with the id.
    */
   HGrid.prototype.getNodeByID = function(id) {
-    if (id === HGrid.ROOT_ID) {
+    if (id === HGrid.ROOT_ID || id == null) {
       return this.tree;
     }
     var item = this.getByID(id);

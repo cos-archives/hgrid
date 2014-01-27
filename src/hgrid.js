@@ -61,16 +61,15 @@ if (typeof jQuery === 'undefined') {
     var formatter = function(row, cell, value, columnDef, item) {
       // Opening and closing tags that surround a row
       var openTag = '<span class="hg-item" data-id="' + item.id + '">';
-      // Placeholder for error messages
-      var errorElem = '<span class="error" data-upload-errormessage></span>';
+
       var closingTag = '</span>';
       var indent = item.depth * indentWidth;
       // indenting span
       var spacer = makeIndentElem(indent);
       if (item.kind === FOLDER) {
-        return [openTag, spacer, folderFunc(item), errorElem, closingTag].join(' ');
+        return [openTag, spacer, folderFunc(item), closingTag].join(' ');
       } else {
-        return [openTag, spacer, fileFunc(item), errorElem, closingTag].join(' ');
+        return [openTag, spacer, fileFunc(item), closingTag].join(' ');
       }
     };
     return formatter;
@@ -173,13 +172,15 @@ if (typeof jQuery === 'undefined') {
      */
     renderFolder: function(item) {
       var name = sanitized(item.name);
+      // Placeholder for error messages
+      var errorElem = '<span class="error" data-upload-errormessage></span>';
       // The + / - button for expanding/collapsing a folder
       var expander = item._collapsed ? '<span class="toggle expand"></span>' :
         '<span class="toggle collapse"></span>';
       // The folder icon
       var folderIcon = ' <span class="hg-folder"></span>';
       // Concatenate the expander, folder icon, and the folder name
-      return [expander, folderIcon, name].join(' ');
+      return [expander, folderIcon, errorElem, name].join(' ');
     },
     /**
      * Render a file to HTML.
@@ -189,7 +190,9 @@ if (typeof jQuery === 'undefined') {
      */
     renderFile: function(item) {
       var fileIcon = '<span class="hg-file"></span>';
-      return [fileIcon, sanitized(item.name)].join(' ');
+      // Placeholder for error messages
+      var errorElem = '<span class="error" data-upload-errormessage></span>';
+      return [fileIcon, sanitized(item.name), errorElem].join(' ');
     },
     /**
      * Additional options passed to Slick.Grid constructor
@@ -265,7 +268,21 @@ if (typeof jQuery === 'undefined') {
      * @param  {Object} file    The HTML file object
      * @param  {String} message
      */
-    uploadError: function(file, message) {},
+    uploadError: function(file, message) {
+      var $rowElem = $(file.gridElement);
+      $rowElem.addClass('hg-upload-error');
+      var msg;
+      if (typeof message !== 'string' && message.error) {
+        msg = message.error;
+      } else {
+        msg = message;
+      }
+      // Show error message in any element that contains 'data-upload-errormessage'
+      $rowElem.find('[data-upload-errormessage]').each(function(i) {
+        this.textContent = msg;
+      });
+      return this;
+    },
     /**
      * Additional initialization. Useful for adding listeners.
      * @property {Function} init
@@ -851,19 +868,16 @@ if (typeof jQuery === 'undefined') {
     },
     thumbnail: function(file, dataUrl) {},
     error: function(file, message) {
-      var $rowElem = $(file.gridElement);
-      $rowElem.addClass('hg-upload-error');
-      var msg;
-      if (typeof message !== 'string' && message.error) {
-        msg = message.error;
-      } else {
-        msg = message;
-      }
-      // Show error message in any element that contains 'data-upload-errormessage'
-      $rowElem.find('[data-upload-errormessage]').each(function(i) {
-        this.textContent = msg;
-      });
-      this.options.uploadError.call(this, file, message);
+      return this.options.uploadError.call(this, file, message);
+    },
+    processing: function(file) {
+      $(file.gridElement).addClass('hg-upload-processing');
+      // TODO: display Cancel upload button text
+      return this;
+    },
+    uploadprogress: function(file, progress, bytesSent) {
+      // TODO
+
     }
   };
 

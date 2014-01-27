@@ -137,19 +137,34 @@ TODO
 
 *Full documentation to come*
 
-### Styling the Grid
+## Styling the Grid
 
 CSS Classes
 
 - `hgrid`
-- `hg-item`
+- `hg-item`: Includes an item's indent spacer element, icon, and name
 - `hg-folder`
+- `hg-file`
 - `hg-row-highlight`
 - `hg-dl-started`: Added to a after a file is added and download has started
 
 ### Rendering File and Folder HTML
 
 TODO: document `renderFile(item)` and `renderFolder(item)` options
+
+## Modifying default columns
+
+```
+// Modifying the `Name` column header text
+HGrid.COL_NAME.name = 'Name of file'
+```
+
+## Accessing SlickGrid and DropZone objects directly
+
+```
+myGrid.grid // => The Slick.Grid object 
+myGrid.dropzone  // => The Dropzone object
+```
 
 ## Dependencies
 

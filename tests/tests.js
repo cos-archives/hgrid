@@ -163,6 +163,14 @@
     containsText('.slick-header', 'Name', 'name column is in DOM');
   });
 
+  test('Changing column text', function() {
+    HGrid.COL_NAME.name = 'My Filename';
+    var grid = new HGrid('#myGrid');
+    var cols = grid.grid.getColumns();
+    equal(cols[0].name, 'My Filename');
+    containsText('.slick-header', 'My Filename', 'custom column name is in DOM');
+  });
+
   test('Options and attributes', function() {
     // passed in options
     deepEqual(myGrid.options.data, testData);

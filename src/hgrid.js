@@ -50,14 +50,14 @@ if (typeof jQuery === 'undefined') {
    * the passed in folder rendering function and file rendering function.
    *
    * See: https://github.com/mleibman/SlickGrid/blob/gh-pages/examples/example2-formatters.html
-   * @class  makeFormatter
+   * @class  makeNameFormatter
    * @private
    * @param  {Function} folderFunc Function that returns the HTML for a folder.
    * @param  {Function} fileFunc   Function that returns the HTML for a file.
    * @return {Function}            A SlickGrid formatter function, used by Slick.Data.DataView
    *                                 to render the folder and file display text.
    */
-  function makeFormatter(folderFunc, fileFunc, indentWidth) {
+  function makeNameFormatter(folderFunc, fileFunc, indentWidth) {
     var formatter = function(row, cell, value, columnDef, item) {
       // Opening and closing tags that surround a row
       var openTag = '<span class="hg-item" data-id="' + item.id + '">';
@@ -782,7 +782,7 @@ if (typeof jQuery === 'undefined') {
   HGrid.prototype._initSlickGrid = function() {
     var self = this;
     // Create the formatter function
-    var formatter = makeFormatter(self.options.renderFolder, self.options.renderFile, self.options.indent);
+    var formatter = makeNameFormatter(self.options.renderFolder, self.options.renderFile, self.options.indent);
     // Set the name column's formatter
     // TODO: Rethink this. Should the format be specified explicitly
     // instead of setting it automatically?

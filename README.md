@@ -122,15 +122,18 @@ var grid = new HGrid('#myGrid', {
 - `width`: The width of the grid in px
 - `height`: The height of the grid in px or "auto".
 - `cssClass`: CSS class to apply to the grid. Can also be an array of classes. By default, the `"hgrid"` class will be added to the element.
-- `indent`: Width to indent items in px.
+- `indent`: Width to indent items in px. Defaults to 15px.
+- `highlightClass`: Class added to a row when a row is highlighted. Defaults to `hg-row-highlight`.
 
 TODO
 
 #### Callbacks 
 
-- `onClickItem: function(event, element, item)`
+- `onClick: function(event, element, item)`: Called when grid is clicked. By default, toggles the collapsed state of `item`.
 - `onAdd: function(item, grid)`
 - `onDragover: function(event, item)`
+- `onDragenter: function(event, item)`
+- `onItemAdded: function(item)`: Called whenever a new row is added to the grid.
 
 *Full documentation to come*
 
@@ -142,6 +145,11 @@ CSS Classes
 - `hg-item`
 - `hg-folder`
 - `hg-row-highlight`
+- `hg-dl-started`: Added to a after a file is added and download has started
+
+### Rendering File and Folder HTML
+
+TODO: document `renderFile(item)` and `renderFolder(item)` options
 
 ## Dependencies
 
@@ -162,27 +170,17 @@ To install all development dependencies needed for development, run
 
 in the project root's root directory.
 
-### Testing
-
-#### Running Tests
+### Tests
 
 Run tests with grunt.
 
     $ grunt
 
-#### Writing Tests
-
 Tests are written using the [QUnit](http://qunitjs.com/) framework.
 
 Tests are located in `tests/tests.js`.
 
-Example:
 
-```js
-test("Data Length in Grid", function(){
-    equal( myGrid.getData().length, testData.length);
-});
-```
 
 
 

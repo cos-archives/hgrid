@@ -828,9 +828,11 @@
       error: 'Could not upload file'
     };
     file.gridElement = grid.getRowElement(grid.getData()[1].id);
-    grid.dropzoneEvents.error.call(grid, file, message);
     var $row = $(file.gridElement);
+    $row.addClass('hg-upload-processing');
+    grid.dropzoneEvents.error.call(grid, file, message);
     isTrue($row.hasClass('hg-upload-error'), 'row element has hg-upload-error class');
+    isFalse($row.hasClass('hg-upload-processing'), 'hg-upload-processing class was removed');
     containsText('.slick-cell', message.error, 'Cell contains error message');
   });
 
@@ -853,6 +855,7 @@
     var file = getMockFile();
     var grid = new HGrid('#myGrid', {
       data: testData,
+      // Just check that the params are ok
       uploadComplete: function(file, item) {
         ok(typeof(file) === 'object');
         ok(typeof(item) === 'object');

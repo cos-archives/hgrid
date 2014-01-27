@@ -293,7 +293,7 @@ if (typeof jQuery === 'undefined') {
     uploadError: function(file, message, item) {
       // The row element for the added file is stored on the file object
       var $rowElem = $(file.gridElement);
-      $rowElem.addClass('hg-upload-error');
+      $rowElem.addClass('hg-upload-error').removeClass('hg-upload-processing');
       var msg;
       if (typeof message !== 'string' && message.error) {
         msg = message.error;

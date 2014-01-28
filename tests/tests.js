@@ -1,8 +1,6 @@
 (function($) {
   'use strict';
 
-  $.mockjaxSettings.responseTime = 0; // Speed up tests
-
   var counter = 0;
 
   function getMockFile() {
@@ -876,6 +874,7 @@
   });
 
   test('updateDropzone', function() {
+    expect(3);
     var grid = new HGrid('#myGrid', {
       data: testData,
       uploads: true,
@@ -883,6 +882,7 @@
         return 'uploads/' + folder.id;
       },
       uploadMethod: function(folder) {
+        deepEqual(this.getData()[0], folder);
         return 'PUT';
       }
     });

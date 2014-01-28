@@ -85,10 +85,6 @@ if (typeof jQuery === 'undefined') {
     return !item._hidden;
   }
 
-  function canToggle($elem) {
-    return $elem.hasClass('toggle');
-  }
-
   HGrid.COL_NAME = {
     id: 'name',
     name: 'Name',
@@ -246,7 +242,7 @@ if (typeof jQuery === 'undefined') {
      */
     onClick: function(event, element, item) {
       // var then = new Date();
-      if (canToggle(element)) {
+      if (this.canToggle(element)) {
         this.toggleCollapse(item);
       }
       event.stopImmediatePropagation();
@@ -268,7 +264,7 @@ if (typeof jQuery === 'undefined') {
      * @param  {Object} file The file object. Has gridElement and gridItem bound to it.
      * @param  {Object} item The added item
      */
-    uploadAdded: function(file, item){
+    uploadAdded: function(file, item) {
       $(file.gridElement).addClass('hg-upload-started');
       // TODO: Add cancel upload link to actions
     },
@@ -278,7 +274,7 @@ if (typeof jQuery === 'undefined') {
      */
     /*jshint unused: false */
     uploadProcessing: function(file, item) {
-        $(file.gridElement).addClass('hg-upload-processing');
+      $(file.gridElement).addClass('hg-upload-processing');
       // TODO: display Cancel upload button text
     },
     /**
@@ -308,7 +304,7 @@ if (typeof jQuery === 'undefined') {
     },
     /**
      * Called whenever upload progress gets updated.
-     * @property [uploadProgress] 
+     * @property [uploadProgress]
      * @param  {Object} file      the file object
      * @param  {Number} progress  Percentage (0-100)
      * @param  {Number} bytesSent
@@ -327,23 +323,25 @@ if (typeof jQuery === 'undefined') {
     /*jshint unused: false */
     uploadSuccess: function(file, item) {
       $(file.gridElement).addClass('hg-upload-success')
-                        .removeClass('hg-upload-processing');
+        .removeClass('hg-upload-processing');
     },
     /**
      * Called when an upload completes (whether it is successful or not)
-     * @property [uploadComplete] 
+     * @property [uploadComplete]
      */
     uploadComplete: function(file, item) {},
     /**
      * Called before a file gets uploaded. If `done` is called with a string argument,
      * An error is thrown with the message. If `done` is called with no arguments,
      * the file is accepted.
-     * @property [uploadAccept] 
+     * @property [uploadAccept]
      * @param  {Object} file   The file object
      * @param  {Object} folder The folder item being uploaded to
      * @param  {Function} done Called to either accept or reject a file.
      */
-    uploadAccept: function(file, folder, done) {return done();},
+    uploadAccept: function(file, folder, done) {
+      return done();
+    },
     /**
      * Additional initialization. Useful for adding listeners.
      * @property {Function} init
@@ -870,7 +868,7 @@ if (typeof jQuery === 'undefined') {
 
   HGrid.prototype.currentTarget = null; // The item to upload to
   /**
-   * Update the dropzone object's options dynamically. Lazily updates the 
+   * Update the dropzone object's options dynamically. Lazily updates the
    * upload url, method, etc.
    * @method  updateDropzone
    */
@@ -878,7 +876,7 @@ if (typeof jQuery === 'undefined') {
     var self = this;
     // if upload url or upload method is a function, call it, passing in the item,
     // and set dropzone to upload to the result
-    if (self.currentTarget){
+    if (self.currentTarget) {
       if (typeof this.options.uploadUrl === 'function') {
         self.dropzone.options.url = self.options.uploadUrl.call(self, self.currentTarget);
       }
@@ -890,14 +888,14 @@ if (typeof jQuery === 'undefined') {
         this.dropzone.options.accept = function(file, done) {
           return self.options.uploadAccept.call(self, file, self.currentTarget, done);
         };
-      }  
+      }
     }
   };
   /**
    * DropZone events that the grid subscribes to.
    * For each function, `this` refers to the HGrid object.
-   * These listeners are responsible for any setup that needs to occur before executing 
-   * the callbacks in `options`. For example, adding a new row item to the grid, setting the 
+   * These listeners are responsible for any setup that needs to occur before executing
+   * the callbacks in `options`. For example, adding a new row item to the grid, setting the
    * current upload target, and passing necessary arguments to the options callbacks.
    * @attribute  dropzoneEvents
    * @type {Object}
@@ -1040,10 +1038,10 @@ if (typeof jQuery === 'undefined') {
     var uploadUrl, uploadMethod;
     if (typeof this.options.uploadUrl === 'string') {
       uploadUrl = this.options.uploadUrl;
-    } else { // uploadUrl is a function, so compute the url lazily; 
+    } else { // uploadUrl is a function, so compute the url lazily;
       uploadUrl = '/'; // placeholder
     }
-    if (typeof this.options.uploadMethod === 'string'){
+    if (typeof this.options.uploadMethod === 'string') {
       uploadMethod = this.options.uploadMethod;
     } else { // uploadMethod is a function, so compute the upload url lazily
       uploadMethod = 'POST'; // placeholder
@@ -1137,6 +1135,10 @@ if (typeof jQuery === 'undefined') {
 
   HGrid.prototype.isCollapsed = function(item) {
     return item._collapsed;
+  };
+
+  HGrid.prototype.canToggle = function($elem) {
+    return $elem.hasClass('toggle');
   };
 
   /**

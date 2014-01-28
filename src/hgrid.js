@@ -95,7 +95,7 @@ if (typeof jQuery === 'undefined') {
    * @class  renderButton
    * @private
    */
-  function renderButton(item, buttonDef) {
+  function renderButton(item, buttonDef, btnIdx) {
     var cssClass;
     // For now, buttons are required to have the hg-btn class so that a click
     // event listener can be attacked to them later
@@ -104,7 +104,7 @@ if (typeof jQuery === 'undefined') {
     } else {
       cssClass = 'hg-btn';
     }
-    var openTag = '<button class="' + cssClass + '" data-id="' + item.id + '">';
+    var openTag = '<button data-btn-idx="' + btnIdx + '" class="' + cssClass + '" data-item-id="' + item.id + '">';
     var closingTag = '</button>';
     var html = [openTag, buttonDef.text, closingTag].join(' ');
     return html;
@@ -130,8 +130,8 @@ if (typeof jQuery === 'undefined') {
       } else {
         buttonDefs = fileFunc(item);
       }
-      renderedButtons = buttonDefs.map(function(btn) {
-        var html = renderButton(item, btn);
+      renderedButtons = buttonDefs.map(function(btn, idx) {
+        var html = renderButton(item, btn, idx);
         return html;
       }).join('');
       return [openTag, renderedButtons, closingTag].join(' ');

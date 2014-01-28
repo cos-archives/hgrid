@@ -282,7 +282,6 @@ if (typeof jQuery === 'undefined') {
         action: 'upload'
       }];
     },
-    /*jshint unused: false */
     fileButtons: function(folder) {
       return [{
         text: 'Download',
@@ -354,13 +353,11 @@ if (typeof jQuery === 'undefined') {
      * Callback executed after an item is added.
      * @property [onItemAdded]
      */
-    /*jshint unused: false */
     onItemAdded: function(item) {},
     // Dragging related callbacks
-    /*jshint unused: false */
     onDragover: function(evt, item) {},
-    /*jshint unused: false */
     onDragenter: function(evt, item) {},
+    onDrop: function(event, item) {},
     /**
      * Called whenever a file is added for uploaded
      * @param  {Object} file The file object. Has gridElement and gridItem bound to it.
@@ -990,19 +987,19 @@ if (typeof jQuery === 'undefined') {
    */
   HGrid.prototype.updateDropzone = function(item) {
     var self = this;
-    // if upload url or upload method is a function, call it, passing in the item,
+    // if upload url or upload method is a function, call it, passing in the target item,
     // and set dropzone to upload to the result
     if (self.currentTarget) {
       if (typeof this.options.uploadUrl === 'function') {
-        self.dropzone.options.url = self.options.uploadUrl.call(self, self.currentTarget);
+        self.dropzone.options.url = self.options.uploadUrl.call(self, item);
       }
       if (typeof self.options.uploadMethod === 'function') {
-        self.dropzone.options.method = self.options.uploadMethod.call(self, self.currentTarget);
+        self.dropzone.options.method = self.options.uploadMethod.call(self, item);
       }
       if (this.options.uploadAccept) {
         // Override dropzone accept callback. Just calls options.uploadAccept with the right params
         this.dropzone.options.accept = function(file, done) {
-          return self.options.uploadAccept.call(self, file, self.currentTarget, done);
+          return self.options.uploadAccept.call(self, file, item, done);
         };
       }
     }
@@ -1019,6 +1016,9 @@ if (typeof jQuery === 'undefined') {
   HGrid.prototype.dropzoneEvents = {
     drop: function(evt) {
       this.removeHighlight();
+      // update the dropzone options, eg. dropzone.options.url
+      this.updateDropzone(this.currentTarget);
+      this.options.onDrop.call(this, evt, this.currentTarget);
     },
     dragleave: function(evt) {
       this.removeHighlight();
@@ -1043,7 +1043,6 @@ if (typeof jQuery === 'undefined') {
           this.addHighlight(currentTarget);
         }
       }
-      this.updateDropzone(item);
       this.options.onDragover.call(this, evt, item);
     },
     dragend: function(evt) {

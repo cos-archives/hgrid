@@ -11,6 +11,16 @@
     };
   }
 
+  function getMockItem(args) {
+    var item = $.extend({}, {
+      id: 123,
+      name: 'test.txt',
+      kind: 'folder',
+      parentID: 'root'
+    }, args);
+    return item;
+  }
+
   ////////////////////
   // Custom asserts //
   ////////////////////
@@ -309,13 +319,13 @@
     var parent = grid.getData()[0];
     parent._collapsed = false;
     var child = grid.getData()[1];
-    isTrue(grid._collapseFilter(child, {
+    isTrue(HGrid._collapseFilter(child, {
       thisObj: grid,
       rootID: 'root'
     }), 'returns true if parent is not collpased');
     parent._node.collapse();
     child = grid.getData()[1];
-    isFalse(grid._collapseFilter(child, {
+    isFalse(HGrid._collapseFilter(child, {
       thisObj: grid,
       rootID: 'root'
     }), 'returns false if parent is collapsed');
@@ -891,6 +901,20 @@
     grid.updateDropzone(folder);
     equal(grid.dropzone.options.url, 'uploads/' + folder.id);
     equal(grid.dropzone.options.method, 'PUT');
+  });
+
+  module('Buttons', {});
+
+  test('renderButton', function() {
+    var item = getMockItem();
+    var btnDef = {
+      text: 'Test Button',
+      cssClass: 'test-btn',
+      onClick: function() {}
+    };
+    var $btn = $(HGrid._renderButton(item, btnDef));
+    isTrue($btn.hasClass('hg-btn'), 'button has hg-btn class');
+    equal($btn.text().trim(), btnDef.text.trim(), 'text is correct');
   });
 
 })(jQuery);

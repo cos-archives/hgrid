@@ -96,12 +96,21 @@ if (typeof jQuery === 'undefined') {
    * @private
    */
   function renderButton(item, buttonDef) {
-    var cssClass = 'hg-btn ' + button;
+    var cssClass;
+    // For now, buttons are required to have the hg-btn class so that a click
+    // event listener can be attacked to them later
+    if (buttonDef.cssClass) {
+      cssClass = 'hg-btn ' + buttonDef.cssClass;
+    } else {
+      cssClass = 'hg-btn';
+    }
     var openTag = '<button class="' + cssClass + '" data-id="' + item.id + '">';
     var closingTag = '</button>';
     var html = [openTag, buttonDef.text, closingTag].join(' ');
     return html;
   }
+  // Expose for testing purposes
+  HGrid._renderButton = renderButton;
 
   /**
    * Factory function for a SlickGrid formatter for rendering the button column.
@@ -140,6 +149,8 @@ if (typeof jQuery === 'undefined') {
   function collapseFilter(item) {
     return !item._hidden;
   }
+  // Expose collapse filter for testing purposes
+  HGrid._collapseFilter = collapseFilter;
 
   HGrid.COL_NAME = {
     id: 'name',
@@ -1340,6 +1351,4 @@ if (typeof jQuery === 'undefined') {
     return this;
   };
 
-  // Expose collapse filter for testing purposes
-  HGrid.prototype._collapseFilter = collapseFilter;
 })(jQuery, window, document);

@@ -512,7 +512,7 @@
     isTrue(item._collapsed, 'item collapsed after calling its collapse() method');
     isFalse(item._hidden, 'item is visible after calling collapse()');
     isTrue(leaf.getItem()._collapsed, 'child leaf also collapses after parent is collapsed');
-  })
+  });
 
   test('Tree.expand()', function() {
     var root = new HGrid.Tree();
@@ -692,6 +692,45 @@
     equal(child.data.kind, 'file');
     equal(child.depth, 2, 'child depth is 2');
     equal(root.dataView.getItems().length, root.toData().length, 'DataView and Tree have same data length');
+  });
+
+  // TODO: @chrisseto
+  var tree, data;
+  module('Sorting trees', {
+    setup: function() {
+      data = [{
+        name: 'Documents',
+        kind: 'folder',
+        children: [{
+          name: 'b.txt',
+          kind: 'file'
+        }, {
+          name: 'a.txt',
+          kind: 'file'
+        }]
+      }, {
+        name: 'Scripts',
+        kind: 'folder',
+        children: [{
+          name: 'foo.py',
+          kind: 'file'
+        }, {
+          name: 'bar.js',
+          kind: 'file'
+        }]
+      }];
+      tree = new HGrid.Tree.fromObject(data);
+    }
+  });
+
+  test('basic sorting', function() {
+    equal(tree.toData()[0].name, 'Documents');
+    tree.sort();
+    var sortedData = tree.toData();
+    equal(sortedData[0].name, 'Documents');
+    equal(sortedData[1].name, 'a.txt');
+    equal(sortedData[2].name, 'b.txt');
+    ok(false, 'finish me');
   });
 
   module('Events, listeners, callbacks, oh my!', {

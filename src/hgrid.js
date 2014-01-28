@@ -272,15 +272,18 @@ if (typeof jQuery === 'undefined') {
       // Placeholder for error messages
       var errorElem = '<span class="error" data-upload-errormessage></span>';
       // Placeholder for progress bar
-      var progressElem = '<div class="hg-progress"><span class="hg-upload" data-upload-progress></span></div>';
-      return [fileIcon, sanitized(item.name), progressElem, errorElem].join(' ');
+      return [fileIcon, sanitized(item.name), errorElem].join(' ');
     },
     /*jshint unused: false */
     folderButtons: function(file) {
-      return [{
-        text: 'Upload',
-        action: 'upload'
-      }];
+      if (this.options.uploads) {
+        return [{
+          text: 'Upload',
+          action: 'upload'
+        }];
+      } else {
+        return [];
+      }
     },
     fileButtons: function(folder) {
       return [{
@@ -908,8 +911,10 @@ if (typeof jQuery === 'undefined') {
     });
     if (self.options.showButtons) {
       var btnCol = $.extend({}, HGrid.COL_BUTTONS);
-      btnCol.formatter = makeButtonFormatter(self.options.folderButtons,
-        self.options.fileButtons);
+      // Create button formatter, binding self to each function so they have access to the grid
+      // object
+      btnCol.formatter = makeButtonFormatter(self.options.folderButtons.bind(self),
+        self.options.fileButtons.bind(self));
       columns.push(btnCol);
     }
     this.grid = new Slick.Grid(self.element.selector, this.tree.dataView,
@@ -979,13 +984,19 @@ if (typeof jQuery === 'undefined') {
     }
   };
 
+  HGrid.prototype.uploadToFolder = function(item) {
+    this.currentTarget = item;
+    this.updateDropzoneTarget(item);
+    this.dropzone.hiddenFileInput.click();
+  };
+
   HGrid.prototype.currentTarget = null; // The item to upload to
   /**
    * Update the dropzone object's options dynamically. Lazily updates the
    * upload url, method, etc.
-   * @method  updateDropzone
+   * @method  updateDropzoneTarget
    */
-  HGrid.prototype.updateDropzone = function(item) {
+  HGrid.prototype.updateDropzoneTarget = function(item) {
     var self = this;
     // if upload url or upload method is a function, call it, passing in the target item,
     // and set dropzone to upload to the result
@@ -1017,7 +1028,7 @@ if (typeof jQuery === 'undefined') {
     drop: function(evt) {
       this.removeHighlight();
       // update the dropzone options, eg. dropzone.options.url
-      this.updateDropzone(this.currentTarget);
+      this.updateDropzoneTarget(this.currentTarget);
       this.options.onDrop.call(this, evt, this.currentTarget);
     },
     dragleave: function(evt) {
@@ -1163,8 +1174,6 @@ if (typeof jQuery === 'undefined') {
 
   var requiredDropzoneOpts = {
     addRemoveLinks: false,
-    dropDestination: null,
-    uploadMultiple: false,
     previewTemplate: '<div></div>'
   };
 

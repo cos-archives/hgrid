@@ -915,6 +915,24 @@
     var $btn = $(HGrid._renderButton(item, btnDef));
     isTrue($btn.hasClass('hg-btn'), 'button has hg-btn class');
     equal($btn.text().trim(), btnDef.text.trim(), 'text is correct');
+    equal($btn.data('id'), item.id.toString(), 'data-id is correct');
   });
+
+  test('initializing grid with buttons', function() {
+    var grid = new HGrid('#myGrid', {
+      fileButtons: function(file) {
+        return [{
+          text: 'Test button ' + file.id,
+          onClick: function(item) {}
+        }];
+      }
+    });
+    var item = getMockItem();
+    grid.addItem(item);
+    // equal(grid.buttons.file.length, 1);
+    equal(grid.buttons.file[item.id].text, 'Test button ' + item.id);
+    ok(grid.buttons.file[item.id].onClick);
+  });
+
 
 })(jQuery);

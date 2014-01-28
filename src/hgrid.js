@@ -117,7 +117,7 @@ if (typeof jQuery === 'undefined') {
    * @class  makeButtonFormatter
    * @private
    * @param  {Function} folderFunc Function that returns an array of button definitions for a folder
-   * @param  {Function} fileFunc   Function that reutns an array of button definitions for a file
+   * @param  {Function} fileFunc   Function that returns an array of button definitions for a file
    * @return {Function}            A formatter function
    */
   function makeButtonFormatter(folderFunc, fileFunc) {

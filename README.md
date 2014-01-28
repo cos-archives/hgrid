@@ -52,7 +52,6 @@ Example:
 var grid = new HGrid('#myGrid', {
   data: files, 
   uploads: true,
-  dragDrop: true,
   maxFilesize: 10,  // MB
   // Mimetypes or file extensions
   acceptedFiles: ['image/*', 'application/pdf', '.py'],
@@ -63,20 +62,20 @@ var grid = new HGrid('#myGrid', {
   uploadUrl: function(item) {  // {id: 3, name: 'My bucket', kind: 'folder'}
     return 'files/' + item.id;
   },
-  uploadParams: {}
+  uploadParams: {}  // TODO
   // Returns where to send request for deletion
   deleteUrl: function(item) {
     return 'files/' + item.id + '/remove';
   },
-  deleteMethod: 'delete',
-  deleteParams: {},
-  downloadUrl: function(item) {
+  deleteMethod: 'delete',  // TODO
+  deleteParams: {}, // TODO
+  downloadUrl: function(item) { // TODO
     return 'download/' + item.name;
   },
   // Check if a file is ok to upload
-  // done is a callbaack that takes an error msg
+  // done is a callback that takes an error msg
   // if no msg, then accept the file
-  accept: function(file, folderItem, done){
+  uploadAccept: function(file, folder, done){ // TODO
     if (file.name === 'justinbieber.jpg') {
       done('nope');
     } else{

@@ -61,7 +61,6 @@ if (typeof jQuery === 'undefined') {
     var formatter = function(row, cell, value, columnDef, item) {
       // Opening and closing tags that surround a row
       var openTag = '<span class="hg-item" data-id="' + item.id + '">';
-
       var closingTag = '</span>';
       var indent = item.depth * indentWidth;
       // indenting span
@@ -335,6 +334,16 @@ if (typeof jQuery === 'undefined') {
      * @property [uploadComplete] 
      */
     uploadComplete: function(file, item) {},
+    /**
+     * Called before a file gets uploaded. If `done` is called with a string argument,
+     * An error is thrown with the message. If `done` is called with no arguments,
+     * the file is accepted.
+     * @property [uploadAccept] 
+     * @param  {Object} file   The file object
+     * @param  {Object} folder The folder item being uploaded to
+     * @param  {Function} done Called to either accept or reject a file.
+     */
+    uploadAccept: function(file, folder, done) {return done();},
     /**
      * Additional initialization. Useful for adding listeners.
      * @property {Function} init
@@ -860,6 +869,22 @@ if (typeof jQuery === 'undefined') {
   };
 
   HGrid.prototype.currentTarget = null; // The item to upload to
+  HGrid.prototype.updateDropzone = function(item) {
+    var self = this;
+    // if upload url or upload method is a function, call it, passing in the item,
+    // and set dropzone to upload to the result
+    if (typeof this.options.uploadUrl === 'function') {
+      this.dropzone.options.url = this.options.uploadUrl(this.currentTarget);
+    }
+    if (typeof this.options.uploadMethod === 'function') {
+      this.dropzone.options.uploadMethod = this.options.uploadMethod(this.currentTarget);
+    }
+    if (this.options.uploadAccept) {
+      this.dropzone.options.accept = function(file, done) {
+        return self.options.uploadAccept.call(self, file, self.currentTarget, done);
+      };
+    }
+  };
   /**
    * DropZone events that the grid subscribes to.
    * For each function, `this` refers to the HGrid object.
@@ -895,12 +920,8 @@ if (typeof jQuery === 'undefined') {
         if (currentTarget.allowUploads || typeof currentTarget.allowUploads === 'undefined') {
           this.addHighlight(currentTarget);
         }
-        // if upload url is a function, call it, passing in the item,
-        // and set dropzone to upload to the result
-        if (typeof this.options.uploadUrl === 'function') {
-          this.dropzone.options.url = this.options.uploadUrl(currentTarget);
-        }
       }
+      this.updateDropzone(item);
       this.options.onDragover.call(this, evt, item);
     },
     dragend: function(evt) {

@@ -58,7 +58,7 @@ if (typeof jQuery === 'undefined') {
    *                                 to render the folder and file display text.
    */
   function makeNameFormatter(folderFunc, fileFunc, indentWidth) {
-    var formatter = function(row, cell, value, columnDef, item) {
+    var formatter = function(row, cell, value, colDef, item) {
       // Opening and closing tags that surround a row
       var openTag = '<span class="hg-item" data-id="' + item.id + '">';
       var closingTag = '</span>';
@@ -70,6 +70,47 @@ if (typeof jQuery === 'undefined') {
       } else {
         return [openTag, spacer, fileFunc(item), closingTag].join(' ');
       }
+    };
+    return formatter;
+  }
+
+  HGrid.prototype.FILE_ACTIONS = {
+    'download': function(item) {
+      this.downloadFile(item);
+    },
+    'delete': function(item) {
+      this.deleteFile(item);
+    }
+  };
+  HGrid.prototype.FOLDER_ACTIONS = {
+    'upload': function(folder) {
+      this.uploadToFolder(folder);
+    }
+  };
+
+  function renderButton(item, buttonDef) {
+    var cssClass = buttonDef.cssClass || 'hg-btn';
+    var openTag = '<button class="' + cssClass + '" data-id="' + item.id + '">';
+    var closingTag = '</button>';
+    var html = [openTag, buttonDef.text, closingTag].join(' ');
+    return html;
+  }
+
+  function makeButtonFormatter(folderFunc, fileFunc) {
+    var formatter = function(row, cell, value, colDef, item) {
+      var openTag = '<span class="hg-buttons" data-id="' + item.id + '">';
+      var closingTag = '</span>';
+      var buttonDefs, renderedButtons;
+      if (item.kind === FOLDER) {
+        buttonDefs = folderFunc(item);
+      } else {
+        buttonDefs = fileFunc(item);
+      }
+      renderedButtons = buttonDefs.map(function(btn) {
+        var html = renderButton(item, btn);
+        return html;
+      }).join('');
+      return [openTag, renderedButtons, closingTag].join(' ');
     };
     return formatter;
   }
@@ -91,6 +132,12 @@ if (typeof jQuery === 'undefined') {
     field: 'name',
     cssClass: 'cell-title',
     defaultSortAsc: true
+  };
+  HGrid.COL_BUTTONS = {
+    id: 'actions',
+    name: 'Actions',
+    cssClass: 'cell-title',
+    width: 50
   };
 
   /**
@@ -125,6 +172,7 @@ if (typeof jQuery === 'undefined') {
     // ajaxOptions: {},
     // lazyLoad: false,
     columns: [HGrid.COL_NAME],
+    showButtons: true,
     // dropZonePreviewsContainer: null,
     // dropzoneOptions: null,
     // navLevel: null,
@@ -191,6 +239,23 @@ if (typeof jQuery === 'undefined') {
       var progressElem = '<div class="hg-progress"><span class="hg-upload" data-upload-progress></span></div>';
       return [fileIcon, sanitized(item.name), progressElem, errorElem].join(' ');
     },
+    /*jshint unused: false */
+    folderButtons: function(file) {
+      return [{
+        text: 'Upload',
+        action: 'upload'
+      }];
+    },
+    /*jshint unused: false */
+    fileButtons: function(folder) {
+      return [{
+        text: 'Download',
+        action: 'download'
+      }, {
+        text: 'Delete',
+        action: 'delete'
+      }];
+    },
     /**
      * Additional options passed to Slick.Grid constructor
      * See: https://github.com/mleibman/SlickGrid/wiki/Grid-Options
@@ -201,7 +266,8 @@ if (typeof jQuery === 'undefined') {
       asyncEditorLoading: false,
       enableCellNavigation: false,
       enableColumnReorder: false, // column reordering requires jquery-ui.sortable
-      forceFitColumns: true
+      forceFitColumns: true,
+      fullWidthRows: true
     },
     /**
      * URL to send upload requests to. Can be either a string of a function
@@ -799,6 +865,12 @@ if (typeof jQuery === 'undefined') {
       }
       return col;
     });
+    if (self.options.showButtons) {
+      var btnCol = $.extend({}, HGrid.COL_BUTTONS);
+      btnCol.formatter = makeButtonFormatter(self.options.folderButtons,
+        self.options.fileButtons);
+      columns.push(btnCol);
+    }
     this.grid = new Slick.Grid(self.element.selector, this.tree.dataView,
       columns,
       self.options.slickgridOptions);

@@ -94,24 +94,25 @@ var grid = new HGrid('#myGrid', {
 
 Predefined actions:
 
-- `download`
+- `download`: Sends a get request. Must have `downloadUrl` option defined.
 - `upload`: Opens filepicker to upload to a folder
 - `delete`: Sends request to delete a file
 
 ```javascript
 var grid = new HGrid('#myGrid', {
   data: myData,
-  folderButtons: function(folder) {
-    return [
-      {template: 'Upload', action: 'upload'}
-    ]
-  },
   fileButtons: function(file) {
     return [
-      {template: 'Download', action: 'download'},
-      {template: 'Delete', action: 'delete'},
-      {template: '<a class="btn" href="http://www.example.com/">Custom button</a>'}
+      {text: 'Download', action: 'download'},
+      {text: 'Delete', action: 'delete'},
+      {text: 'Custom button', cssClass: 'btn', 
+          onClick: function(item) { alert(item.name); }}
     ];
+  },
+  folderButtons: function(folder) {
+    return [
+      {text: 'Upload', action: 'upload'}
+    ]
   }
 });
 ```

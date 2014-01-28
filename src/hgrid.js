@@ -88,14 +88,29 @@ if (typeof jQuery === 'undefined') {
     }
   };
 
+  /**
+   * Render the html for a button, given an item and buttonDef. buttonDef is an
+   * object of the form {text: "My button", cssClass: "btn btn-primary",
+   *                     onClick: function(item) {alert(item.name); }}
+   * @class  renderButton
+   * @private
+   */
   function renderButton(item, buttonDef) {
-    var cssClass = buttonDef.cssClass || 'hg-btn';
+    var cssClass = 'hg-btn ' + button;
     var openTag = '<button class="' + cssClass + '" data-id="' + item.id + '">';
     var closingTag = '</button>';
     var html = [openTag, buttonDef.text, closingTag].join(' ');
     return html;
   }
 
+  /**
+   * Factory function for a SlickGrid formatter for rendering the button column.
+   * @class  makeButtonFormatter
+   * @private
+   * @param  {Function} folderFunc Function that returns an array of button definitions for a folder
+   * @param  {Function} fileFunc   Function that reutns an array of button definitions for a file
+   * @return {Function}            A formatter function
+   */
   function makeButtonFormatter(folderFunc, fileFunc) {
     var formatter = function(row, cell, value, colDef, item) {
       var openTag = '<span class="hg-buttons" data-id="' + item.id + '">';

@@ -869,20 +869,28 @@ if (typeof jQuery === 'undefined') {
   };
 
   HGrid.prototype.currentTarget = null; // The item to upload to
+  /**
+   * Update the dropzone object's options dynamically. Lazily updates the 
+   * upload url, method, etc.
+   * @method  updateDropzone
+   */
   HGrid.prototype.updateDropzone = function(item) {
     var self = this;
     // if upload url or upload method is a function, call it, passing in the item,
     // and set dropzone to upload to the result
-    if (typeof this.options.uploadUrl === 'function') {
-      this.dropzone.options.url = this.options.uploadUrl(this.currentTarget);
-    }
-    if (typeof this.options.uploadMethod === 'function') {
-      this.dropzone.options.uploadMethod = this.options.uploadMethod(this.currentTarget);
-    }
-    if (this.options.uploadAccept) {
-      this.dropzone.options.accept = function(file, done) {
-        return self.options.uploadAccept.call(self, file, self.currentTarget, done);
-      };
+    if (self.currentTarget){
+      if (typeof this.options.uploadUrl === 'function') {
+        self.dropzone.options.url = self.options.uploadUrl.call(self, self.currentTarget);
+      }
+      if (typeof self.options.uploadMethod === 'function') {
+        self.dropzone.options.method = self.options.uploadMethod.call(self, self.currentTarget);
+      }
+      if (this.options.uploadAccept) {
+        // Override dropzone accept callback. Just calls options.uploadAccept with the right params
+        this.dropzone.options.accept = function(file, done) {
+          return self.options.uploadAccept.call(self, file, self.currentTarget, done);
+        };
+      }  
     }
   };
   /**
@@ -1019,9 +1027,7 @@ if (typeof jQuery === 'undefined') {
     addRemoveLinks: false,
     dropDestination: null,
     uploadMultiple: false,
-    previewTemplate: '<div class="dz-preview">' +
-      '<div class="dz-progress"><span class="dz-upload" data-dz-uploadprogress></span></div>' +
-      '</div>'
+    previewTemplate: '<div></div>'
   };
 
   /**
@@ -1031,11 +1037,16 @@ if (typeof jQuery === 'undefined') {
    * @private
    */
   HGrid.prototype._initDropzone = function() {
-    var uploadUrl;
+    var uploadUrl, uploadMethod;
     if (typeof this.options.uploadUrl === 'string') {
       uploadUrl = this.options.uploadUrl;
-    } else { // uploadUrl is a function, so will compute the upload url dynamically
-      uploadUrl = '/';
+    } else { // uploadUrl is a function, so compute the url lazily; 
+      uploadUrl = '/'; // placeholder
+    }
+    if (typeof this.options.uploadMethod === 'string'){
+      uploadMethod = this.options.uploadMethod;
+    } else { // uploadMethod is a function, so compute the upload url lazily
+      uploadMethod = 'POST'; // placeholder
     }
     // Build up the options object, combining the HGrid options, required options,
     // and additional options
@@ -1045,7 +1056,7 @@ if (typeof jQuery === 'undefined') {
         acceptedFiles: this.options.acceptedFiles ?
           this.options.acceptedFiles.join(',') : null,
         maxFilesize: this.options.maxFilesize,
-        method: this.options.uploadMethod
+        method: uploadMethod
       },
       requiredDropzoneOpts,
       this.options.dropzoneOptions);
@@ -1162,6 +1173,8 @@ if (typeof jQuery === 'undefined') {
    * Only one refresh is made to the grid after adding all the items.
    * @param {Array} items Array of items with "name", "kind", and "parentID".
    */
+  // FIXME: This method is slow, because the DataView's idx:id map needs to be updated
+  // on every insert
   HGrid.prototype.addItems = function(items) {
     var self = this;
     this.batchUpdate(function() {

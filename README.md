@@ -55,11 +55,11 @@ var grid = new HGrid('#myGrid', {
   maxFilesize: 10,  // MB
   // Mimetypes or file extensions
   acceptedFiles: ['image/*', 'application/pdf', '.py'],
-  uploadMethod: function(item) {
+  uploadMethod: function(folder) {
     return item.uploadMethod || 'post';
   },
   // Returns where to send request for upload
-  uploadUrl: function(item) {  // {id: 3, name: 'My bucket', kind: 'folder'}
+  uploadUrl: function(folder) {  // {id: 3, name: 'My bucket', kind: 'folder'}
     return 'files/' + item.id;
   },
   uploadParams: {}  // TODO

@@ -801,12 +801,16 @@
   module('Dropzone callbacks', {
     setup: function() {
       myGrid = new HGrid('#myGrid', {
-        uploads: true,
+        // uploads: true,
         data: testData
       });
       myGrid.currentTarget = myGrid.getData()[0];
       file = getMockFile();
       file.gridElement = myGrid.getRowElement(myGrid.getData()[1].id);
+    },
+    teardown: function() {
+      myGrid.destroy();
+      // myGrid.dropzone.destroy();
     }
   });
 
@@ -869,6 +873,24 @@
     });
     grid.currentTarget = folder;
     grid.dropzoneEvents.complete.call(grid, file);
+  });
+
+  test('updateDropzone', function() {
+    var grid = new HGrid('#myGrid', {
+      data: testData,
+      uploads: true,
+      uploadUrl: function(folder) {
+        return 'uploads/' + folder.id;
+      },
+      uploadMethod: function(folder) {
+        return 'PUT';
+      }
+    });
+    var folder = grid.getData()[0];
+    grid.currentTarget = folder;
+    grid.updateDropzone(folder);
+    equal(grid.dropzone.options.url, 'uploads/' + folder.id);
+    equal(grid.dropzone.options.method, 'PUT');
   });
 
 })(jQuery);

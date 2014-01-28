@@ -190,6 +190,7 @@
     ok(myGrid.element instanceof jQuery, 'myGrid.element is a jQuery element');
     ok(myGrid.grid instanceof Slick.Grid, 'has a SlickGrid object');
     ok(myGrid.tree instanceof HGrid.Tree, 'has a HGrid.Tree');
+    ok(typeof myGrid.buttons === 'object', 'has a buttons object');
   });
 
   test('Getting data', function() {
@@ -559,7 +560,7 @@
     });
     equal(t1.data.language, 'python');
     equal(t1.id, 0);
-  })
+  });
 
   test('Depths', function() {
     var root = new HGrid.Tree();
@@ -636,7 +637,7 @@
       _node: tree,
       lang: 'python'
     }]);
-  })
+  });
 
   test('Constructing leaf from object', function() {
     var file = HGrid.Leaf.fromObject({
@@ -908,31 +909,36 @@
   test('renderButton', function() {
     var item = getMockItem();
     var btnDef = {
+      id: 'testbtn',
       text: 'Test Button',
       cssClass: 'test-btn',
       onClick: function() {}
     };
-    var $btn = $(HGrid._renderButton(item, btnDef));
+    var $btn = $(HGrid._renderButton(item, btnDef, 3));
     isTrue($btn.hasClass('hg-btn'), 'button has hg-btn class');
     equal($btn.text().trim(), btnDef.text.trim(), 'text is correct');
-    equal($btn.data('id'), item.id.toString(), 'data-id is correct');
+    equal($btn.data('item-id'), item.id.toString(), 'data-item-id is correct');
+    equal($btn.data('btn-idx'), '3', 'data-btn-idx is correct');
   });
 
-  test('initializing grid with buttons', function() {
+  test('_getButtonCallback', function() {
+    expect(2);
+    var item = getMockItem({
+      kind: 'file'
+    });
     var grid = new HGrid('#myGrid', {
       fileButtons: function(file) {
         return [{
           text: 'Test button ' + file.id,
-          onClick: function(item) {}
+          onClick: function(evt, file) {
+            deepEqual(file, item, 'correct item was passed in');
+          }
         }];
       }
     });
-    var item = getMockItem();
-    grid.addItem(item);
-    // equal(grid.buttons.file.length, 1);
-    equal(grid.buttons.file[item.id].text, 'Test button ' + item.id);
-    ok(grid.buttons.file[item.id].onClick);
+    var callback = grid._getButtonCallback(item, 0);
+    ok(typeof callback === 'function', 'return value is a callback');
+    callback({}, item);
   });
-
 
 })(jQuery);

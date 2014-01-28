@@ -23,6 +23,8 @@ if (typeof jQuery === 'undefined') {
   }
   HGridError.prototype = new Error();
 
+  function noop() {}
+
   /////////////////////
   // Private Members //
   /////////////////////
@@ -74,19 +76,27 @@ if (typeof jQuery === 'undefined') {
     return formatter;
   }
 
+  // Default button actions
+  // So a button definition can be defined like:
+  // {text: 'My Download Button', action: 'download'}
+  //    as a shorthand for
+  // {text: 'My Download Button', onClick: function(evt, item) {this.downloadFile(item);}}
   HGrid.prototype.FILE_ACTIONS = {
-    'download': function(item) {
+    /*jshint unused: false */
+    'download': function(evt, item) {
       this.downloadFile(item);
     },
-    'delete': function(item) {
+    'delete': function(evt, item) {
       this.deleteFile(item);
     }
   };
   HGrid.prototype.FOLDER_ACTIONS = {
-    'upload': function(folder) {
-      this.uploadToFolder(folder);
+    'upload': function(evt, item) {
+      this.uploadToFolder(item);
     }
   };
+
+  var BTN_CLASS = 'hg-btn';
 
   /**
    * Render the html for a button, given an item and buttonDef. buttonDef is an
@@ -100,9 +110,9 @@ if (typeof jQuery === 'undefined') {
     // For now, buttons are required to have the hg-btn class so that a click
     // event listener can be attacked to them later
     if (buttonDef.cssClass) {
-      cssClass = 'hg-btn ' + buttonDef.cssClass;
+      cssClass = BTN_CLASS + ' ' + buttonDef.cssClass;
     } else {
-      cssClass = 'hg-btn';
+      cssClass = BTN_CLASS;
     }
     var openTag = '<button data-btn-idx="' + btnIdx + '" class="' + cssClass + '" data-item-id="' + item.id + '">';
     var closingTag = '</button>';
@@ -815,6 +825,10 @@ if (typeof jQuery === 'undefined') {
      * @type {Dropzone}
      */
     this.dropzone = null;
+    this.buttons = {
+      file: [],
+      folder: []
+    };
     this.init();
   }
 
@@ -860,6 +874,10 @@ if (typeof jQuery === 'undefined') {
     return this;
   };
 
+  /**
+   * Set the CSS class for the grid.
+   * @method  setCSSClass
+   */
   HGrid.prototype.setCSSClass = function(cls) {
     var self = this;
     if (Array.isArray(cls)) {
@@ -1070,6 +1088,21 @@ if (typeof jQuery === 'undefined') {
     }
   };
 
+  HGrid.prototype._getButtonCallback = function(item, btnIdx) {
+    var callback, btnDef;
+    if (item.kind === FOLDER) {
+      // the button definitions, e.g. {text: 'My button', onClick: function() {}}
+      btnDef = this.options.folderButtons.call(this, item)[btnIdx];
+      // If button definition defines onClick, use that. If it defines
+      // action, use that. Otherwise fall back to noop
+      callback = btnDef.onClick || this.FOLDER_ACTIONS[btnDef.action] || noop;
+    } else {
+      btnDef = this.options.fileButtons.call(this, item)[btnIdx];
+      callback = btnDef.onClick || this.FILE_ACTIONS[btnDef.action] || noop;
+    }
+    return callback;
+  };
+
   /**
    * Wires up all the event handlers.
    * @method  _initListeners
@@ -1091,7 +1124,17 @@ if (typeof jQuery === 'undefined') {
         self.dropzone.on(callbackName, fn);
       }
     }
-    return this;
+
+    // Add listeners for buttons
+    // TODO: Hard to test. Rethink..
+    self.element.find('.' + BTN_CLASS).on('click', function(evt) {
+      var $btn = $(this);
+      var btnIdx = $btn.data('btn-idx');
+      var item = self.getItemFromEvent(evt);
+      var callback = self._getButtonCallback(item, btnIdx);
+      callback.call(self, evt, item);
+    });
+    return self;
   };
 
   /**

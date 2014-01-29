@@ -208,7 +208,7 @@ if (typeof jQuery === 'undefined') {
     // ajaxOptions: {},
     // lazyLoad: false,
     columns: [HGrid.COL_NAME],
-    showButtons: true,
+    showButtons: false,
     // dropZonePreviewsContainer: null,
     // dropzoneOptions: null,
     // navLevel: null,

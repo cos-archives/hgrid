@@ -909,21 +909,6 @@
 
   module('Buttons', {});
 
-  test('renderButton', function() {
-    var item = getMockItem();
-    var btnDef = {
-      id: 'testbtn',
-      text: 'Test Button',
-      cssClass: 'test-btn',
-      onClick: function() {}
-    };
-    var $btn = $(HGrid._renderButton(item, btnDef, 3));
-    isTrue($btn.hasClass('hg-btn'), 'button has hg-btn class');
-    equal($btn.text().trim(), btnDef.text.trim(), 'text is correct');
-    equal($btn.data('item-id'), item.id.toString(), 'data-item-id is correct');
-    equal($btn.data('btn-idx'), '3', 'data-btn-idx is correct');
-  });
-
   test('_getButtonCallback', function() {
     expect(2);
     var item = getMockItem({
@@ -944,7 +929,7 @@
     callback({}, item);
   });
 
-  module('Formatter helpers', {});
+  module('Predefined columns (HGrid.Columns)', {});
 
   test('defaultRenderFile', function() {
     var item = getMockItem();
@@ -968,6 +953,23 @@
     equal($elem.data('id'), item.id, 'has correct data-id attribute');
     isTrue($elem.find('span.hg-indent').length > 0, 'has indent element');
     isTrue($elem.find('i.hg-folder').length > 0, 'has icon with hg-folder class');
+  });
+
+  module('Formatting helpers (HGrid.Format)', {});
+
+  test('renderButton', function() {
+    var item = getMockItem();
+    var btnDef = {
+      id: 'testbtn',
+      text: 'Test Button',
+      cssClass: 'test-btn',
+      onClick: function() {}
+    };
+    var $btn = $(HGrid.Format.button(item, btnDef, 3));
+    isTrue($btn.hasClass('hg-btn'), 'button has hg-btn class');
+    equal($btn.text().trim(), btnDef.text.trim(), 'text is correct');
+    equal($btn.data('item-id'), item.id.toString(), 'data-item-id is correct');
+    equal($btn.data('btn-idx'), '3', 'data-btn-idx is correct');
   });
 
 })(jQuery);

@@ -44,7 +44,7 @@
 
 ### Column schemas
 
-At a minimum, a column schema should define `id`, `name`, `renderFolder`, and `renderFile`.
+Columns are defined by objects that have--at a minimum--`id`, `name`, `renderFolder`, and `renderFile` properties.
 
 `renderFolder` and `renderFile` are functions that return the HTML for a given folder or file, respectively.
 
@@ -72,6 +72,8 @@ var grid = new HGrid('#myGrid', {
   ...
 }); 
 ```
+
+NOTE: Column schemas can additionally take any [Slickgrid column options](https://github.com/mleibman/SlickGrid/wiki/Column-Options).
 
 #### Formatting helpers
 

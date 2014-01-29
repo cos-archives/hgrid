@@ -107,6 +107,7 @@ if (typeof jQuery === 'undefined') {
    */
   function renderButton(item, buttonDef, btnIdx) {
     var cssClass;
+    btnIdx = btnIdx || 0;
     // For now, buttons are required to have the hg-btn class so that a click
     // event listener can be attacked to them later
     if (buttonDef.cssClass) {
@@ -119,8 +120,14 @@ if (typeof jQuery === 'undefined') {
     var html = [openTag, buttonDef.text, closingTag].join(' ');
     return html;
   }
-  // Expose for testing purposes
-  HGrid._renderButton = renderButton;
+
+  function renderButtons(item, buttonDefs) {
+    var renderedButtons = buttonDefs.map(function(btn, idx) {
+      var html = renderButton(item, btn, idx);
+      return html;
+    }).join('');
+    return renderedButtons;
+  }
 
   /**
    * Factory function for a SlickGrid formatter for rendering the button column.
@@ -193,13 +200,17 @@ if (typeof jQuery === 'undefined') {
     withIndent: withIndent,
     asItem: asItem,
     makeIndentElem: makeIndentElem,
-    sanitized: sanitized
+    sanitized: sanitized,
+    button: renderButton,
+    buttons: renderButtons
   };
 
-  // Default column definitions
+  // Predefined column schemas
   HGrid.Columns = {
     defaultRenderFolder: defaultRenderFolder,
     defaultRenderFile: defaultRenderFile,
+
+    // Name field schema
     Name: {
       id: 'name',
       name: 'Name',
@@ -207,11 +218,36 @@ if (typeof jQuery === 'undefined') {
       renderFolder: defaultRenderFolder,
       renderFile: defaultRenderFile
     },
+
+    // Actions buttons schema
     Actions: {
       id: 'actions',
       name: 'Actions',
-      cssClass: 'cell-title',
-      width: 50
+      cssClass: 'hg-cell',
+      width: 50,
+      renderFolder: function(row) {
+        var buttonDefs = [];
+        if (this.options.uploads) {
+          buttonDefs.push({
+            text: 'Upload',
+            action: 'upload'
+          });
+        }
+        if (buttonDefs) {
+          return renderButtons(row, buttonDefs);
+        }
+        return '';
+      },
+      renderFile: function(row) {
+        var buttonDefs = [{
+          text: 'Download',
+          action: 'download'
+        }, {
+          text: 'Delete',
+          action: 'delete'
+        }];
+        return renderButtons(row, buttonDefs);
+      }
     }
   };
 
@@ -231,30 +267,11 @@ if (typeof jQuery === 'undefined') {
      * @type {Boolean}
      */
     uploads: false,
-    // Root URL to get data at
-    // ajaxSource: null,
-    // URL where to retrieve a folder's contents (only used if using ajaxSource)
-    // itemUrl: function(ajaxSource, item) {
-    //   return ajaxSource + item.id.toString();
-    // },
-    // Callback on AJAX success
-    // ajaxOnSuccess: null,
-    // Callback on AJAX error
-    // ajaxOnError: null,
-    // Callback on AJAX complete
-    // ajaxOnComplete: null,
-    // Additional options to be passed into $.ajax when sending AJAX requests
-    // ajaxOptions: {},
-    // lazyLoad: false,
+    /**
+     * Array of column schemas
+     * @property [columns]
+     */
     columns: [HGrid.Columns.Name],
-    // dropZonePreviewsContainer: null,
-    // dropzoneOptions: null,
-    // navLevel: null,
-    // CSS selector for the breadcrumb box
-    // breadcrumbBox: null,
-    // clickUploadElement: true,
-    // topCrumb: true,
-    // navigation: true,
     /**
      * @property  [width] Width of the grid
      */
@@ -280,27 +297,6 @@ if (typeof jQuery === 'undefined') {
      * @property indent
      */
     indent: DEFAULT_INDENT,
-
-    /*jshint unused: false */
-    folderButtons: function(row) {
-      if (this.options.uploads) {
-        return [{
-          text: 'Upload',
-          action: 'upload'
-        }];
-      } else {
-        return [];
-      }
-    },
-    fileButtons: function(row) {
-      return [{
-        text: 'Download',
-        action: 'download'
-      }, {
-        text: 'Delete',
-        action: 'delete'
-      }];
-    },
     /**
      * Additional options passed to Slick.Grid constructor
      * See: https://github.com/mleibman/SlickGrid/wiki/Grid-Options

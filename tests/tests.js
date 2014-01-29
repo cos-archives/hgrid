@@ -173,7 +173,7 @@
   });
 
   test('Changing column text by changing the defaultNameColumn object', function() {
-    HGrid.Format.defaultNameColumn.name = 'My Filename';
+    HGrid.Columns.Name.name = 'My Filename';
     var grid = new HGrid('#myGrid');
     var cols = grid.grid.getColumns();
     equal(cols[0].name, 'My Filename');
@@ -948,7 +948,7 @@
 
   test('defaultRenderFile', function() {
     var item = getMockItem();
-    var html = HGrid.defaultRenderFile(item);
+    var html = HGrid.Columns.defaultRenderFile(item);
     ok(typeof html === 'string', 'renderer returns a string');
     var $elem = $(html);
     isTrue($elem.hasClass('hg-item'), 'has hg-item class');
@@ -961,7 +961,7 @@
     var item = getMockItem({
       kind: HGrid.FOLDER
     });
-    var html = HGrid.defaultRenderFolder(item);
+    var html = HGrid.Columns.defaultRenderFolder(item);
     ok(typeof html === 'string', 'renderer returns a string');
     var $elem = $(html);
     isTrue($elem.hasClass('hg-item'), 'has hg-item class');

@@ -13,6 +13,9 @@ if (typeof jQuery === 'undefined') {
 
   var BTN_CLASS = 'hg-btn';
   var DEFAULT_INDENT = 15;
+  var ROOT_ID = 'root';
+  var FILE = 'file';
+  var FOLDER = 'folder';
 
   /**
    * Custom Error for HGrid-related errors.
@@ -28,49 +31,15 @@ if (typeof jQuery === 'undefined') {
 
   function noop() {}
 
-  /////////////////////
-  // Private Members //
-  /////////////////////
-  var ROOT_ID = 'root';
-  var FILE = 'file';
-  var FOLDER = 'folder';
+  ////////////////
+  // Formatting //
+  ////////////////
 
-
-  // TODO: expose this function as a helper?
   /**
    * Sanitize a value to be displayed as HTML.
    */
   function sanitized(value) {
     return value.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
-  }
-
-  /**
-   * Factory that returns a SlickGrid formatter function that uses
-   * the passed in folder rendering function and file rendering function.
-   *
-   * See: https://github.com/mleibman/SlickGrid/blob/gh-pages/examples/example2-formatters.html
-   * @class  makeNameFormatter
-   * @private
-   * @param  {Function} folderFunc Function that returns the HTML for a folder.
-   * @param  {Function} fileFunc   Function that returns the HTML for a file.
-   * @return {Function}            A SlickGrid formatter function, used by Slick.Data.DataView
-   *                                 to render the folder and file display text.
-   */
-  function makeNameFormatter(folderFunc, fileFunc, indentWidth) {
-    var formatter = function(row, cell, value, colDef, item) {
-      // Opening and closing tags that surround a row
-      var openTag = '<span class="hg-item" data-id="' + item.id + '">';
-      var closingTag = '</span>';
-      var indent = item.depth * indentWidth;
-      // indenting span
-      var spacer = makeIndentElem(indent);
-      if (item.kind === FOLDER) {
-        return [openTag, spacer, folderFunc(item), closingTag].join(' ');
-      } else {
-        return [openTag, spacer, fileFunc(item), closingTag].join(' ');
-      }
-    };
-    return formatter;
   }
 
   /**
@@ -81,8 +50,11 @@ if (typeof jQuery === 'undefined') {
   }
 
   /**
-   * Adds an span element that indents an item element, given an item.
+   * Adds a span element that indents an item element, given an item.
    * `item` must have a depth property.
+   * @param {Object} item
+   * @param {String} html The inner HTML
+   * @return {String} The rendered HTML
    */
   function withIndent(item, html, indentWidth) {
     indentWidth = indentWidth || DEFAULT_INDENT;
@@ -92,9 +64,16 @@ if (typeof jQuery === 'undefined') {
     return spacer + html;
   }
 
+  /**
+   * Surrounds HTML with a span with class='hg-item' and 'data-id' attribute
+   * equal to the item's id
+   * @param  {Object} item The item object
+   * @param  {string} html The inner HTML
+   * @return {String}      The rendered HTML
+   */
   function asItem(item, html) {
-    var openTag = '<span class="hg-item" data-id="' + item.id + '">';
-    var closingTag = '</span>';
+    var openTag = '<div class="hg-item" data-id="' + item.id + '">';
+    var closingTag = '</div>';
     return [openTag, html, closingTag].join('');
   }
 
@@ -170,41 +149,14 @@ if (typeof jQuery === 'undefined') {
     return formatter;
   }
 
-  /**
-   * Filter used by SlickGrid for collapsing/expanding folder.
-   *
-   * @class  collapseFilter
-   * @private
-   * @returns {Boolean} Whether to display the item or not.
-   */
-  function collapseFilter(item) {
-    return !item._hidden;
-  }
-  // Expose collapse filter for testing purposes
-  HGrid._collapseFilter = collapseFilter;
-
-  HGrid.COL_NAME = {
-    id: 'name',
-    name: 'Name',
-    field: 'name',
-    cssClass: 'cell-title',
-    defaultSortAsc: true
-  };
-  HGrid.COL_BUTTONS = {
-    id: 'actions',
-    name: 'Actions',
-    cssClass: 'cell-title',
-    width: 50
-  };
-
 
   /**
    * Default rendering function that renders a file item to HTML.
-   * @property defaultRenderFile
+   * @class defaultRenderFile
    * @param  {Object} item The file as an item object.
    * @return {String}      HTML for the file.
    */
-  HGrid.defaultRenderFile = function(item, args) {
+  function defaultRenderFile(item, args) {
     args = args || {};
     var fileIcon = '<i class="hg-file"></i>';
     // Placeholder for error messages
@@ -212,15 +164,15 @@ if (typeof jQuery === 'undefined') {
     // Placeholder for progress bar
     var innerContent = [fileIcon, sanitized(item.name), errorElem].join('');
     return asItem(item, withIndent(item, innerContent, args.indent));
-  };
+  }
 
   /**
    * Default rendering function that renders a folder item to HTML.
-   * @property defaultRenderFolder
+   * @class defaultRenderFolder
    * @param  {Object} item The folder as an item object.
    * @return {String}      HTML for the folder.
    */
-  HGrid.defaultRenderFolder = function(item, args) {
+  function defaultRenderFolder(item, args) {
     args = args || {};
     var name = sanitized(item.name);
     // Placeholder for error messages
@@ -233,20 +185,33 @@ if (typeof jQuery === 'undefined') {
     // Concatenate the expander, folder icon, and the folder name
     var innerContent = [expander, folderIcon, errorElem, name].join(' ');
     return asItem(item, withIndent(item, innerContent, args.indent));
-  };
+  }
 
-  // Helpers public interface
+  // Formatting helpers public interface
   // TODO: test these
   HGrid.Format = {
     withIndent: withIndent,
     asItem: asItem,
     makeIndentElem: makeIndentElem,
-    defaultNameColumn: {
+    sanitized: sanitized
+  };
+
+  // Default column definitions
+  HGrid.Columns = {
+    defaultRenderFolder: defaultRenderFolder,
+    defaultRenderFile: defaultRenderFile,
+    Name: {
       id: 'name',
       name: 'Name',
       cssClass: 'hg-cell',
-      renderFolder: HGrid.defaultRenderFolder,
-      renderFile: HGrid.defaultRenderFile
+      renderFolder: defaultRenderFolder,
+      renderFile: defaultRenderFile
+    },
+    Actions: {
+      id: 'actions',
+      name: 'Actions',
+      cssClass: 'cell-title',
+      width: 50
     }
   };
 
@@ -281,8 +246,7 @@ if (typeof jQuery === 'undefined') {
     // Additional options to be passed into $.ajax when sending AJAX requests
     // ajaxOptions: {},
     // lazyLoad: false,
-    columns: [HGrid.Format.defaultNameColumn],
-    showButtons: false,
+    columns: [HGrid.Columns.Name],
     // dropZonePreviewsContainer: null,
     // dropzoneOptions: null,
     // navLevel: null,
@@ -1296,6 +1260,19 @@ if (typeof jQuery === 'undefined') {
     });
     return self;
   };
+
+  /**
+   * Filter used by SlickGrid for collapsing/expanding folder.
+   *
+   * @class  collapseFilter
+   * @private
+   * @returns {Boolean} Whether to display the item or not.
+   */
+  function collapseFilter(item) {
+    return !item._hidden;
+  }
+  // Expose collapse filter for testing purposes
+  HGrid._collapseFilter = collapseFilter;
 
   /**
    * Sets up the DataView with the filter function. Must be executed after

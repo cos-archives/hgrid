@@ -938,7 +938,7 @@ if (typeof jQuery === 'undefined') {
           return renderFile.call(self, item, rendererArgs);
         }
       }
-      // Fallback to returning te value
+      // Fallback to returning the value
       return value;
     };
     return formatter;

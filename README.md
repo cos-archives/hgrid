@@ -1,10 +1,8 @@
 # HGrid.js
 
-## Demo
+*Full documentation to come*
 
-TODO
-
-## Usage
+## Quickstart
 
 1. Include jQuery:
 
@@ -42,7 +40,94 @@ TODO
   var myGrid = new HGrid('#myGrid', {data: files});
   ```
 
-### File management
+## Columns 
+
+### Column schemas
+
+At a minimum, a column schema should define `id`, `name`, `renderFolder`, and `renderFile`.
+
+`renderFolder` and `renderFile` are functions that return the HTML for a given folder or file, respectively.
+
+```javascript
+var nameColumn = {id: 'name', name: 'Name', 
+  // receives `row` containing all the item information
+  renderFolder: function(row) { 
+    return '<div class="folder">' + row.name + "</div>";
+  },
+  renderFile: function(row) {
+    return '<div class="file">' + row.name + "</div>";
+  },
+  sortable: true,
+};
+
+var filesizeColumn = {id: 'size', name: 'Filesize',
+  renderFolder: function(row) {return '';} // Folders don't have a file size
+  renderFile: function(row) {return row.filesize.toString(); },
+  sortable: true,
+  comparator: function(val1, val2) {...}
+};
+
+var grid = new HGrid('#myGrid', {
+  columns: [nameColumn, filesizeColumn],
+  ...
+}); 
+```
+
+#### Formatting helpers
+
+HGrid comes with a number of functions for rendering a row's HTML.
+
+For example, `HGrid.Format.withIndent` adds a span element with a width based on an item's `depth` property.
+
+```javascript
+var item = {id: 123, name: 'My Documents', kind: 'folder', depth: 3};
+
+var nameColumn = {id: 'name', name: 'Name',
+  renderFolder: function(row) {
+    var itemHtml = '<em>' + row.name + '</em>';
+    var itemWithIndent = HGrid.Format.withIndent(row, itemHtml);
+    // => '<span class="hg-indent" style="width:45"></span><em>My Documents</em>'
+    return itemWithIndent;
+  },
+  renderFile: ...
+};
+```
+
+Available helpers
+
+- `HGrid.Format.withIndent(row, html, [indentWidth])`: Adds an indenting span based on the a row's `depth` property.
+- `HGrid.Format.asItem(row, html)`: Surrounds `html` with `<div class="hg-item" data-id=123>`
+- `HGrid.Format.button(row, buttonDef)`: Render a button. TODO
+- `HGrid.Format.buttons(row, buttonDefs)`: Render a series of buttons.  TODO
+
+### Using predefined column schemas
+
+HGrid comes with a few predefined column schemas.
+
+- `HGrid.Columns.Name`: Included by default. Formats files and folders with proper indent, icon, and `name` field.
+- `HGrid.Columns.Actions`: TODO
+
+Usage:
+
+```javascript
+var grid = new HGrid('#myGrid', {
+  columns: [HGrid.Columns.Name,
+            HGrid.Columns.Actions]
+  ...
+});
+```
+
+## Configuring buttons 
+
+Predefined actions:
+
+- `download`: Sends a get request. Must have `downloadUrl` option defined.
+- `upload`: Opens filepicker to upload to a folder
+- `delete`: Sends request to delete a file
+
+TODO
+
+## File management
 
 HGrid exposes a number of options and callbacks to allow uploading data as well as removing data.
 
@@ -90,32 +175,15 @@ var grid = new HGrid('#myGrid', {
 });
 ```
 
-## Adding buttons 
 
-Predefined actions:
+#### Event Callbacks 
 
-- `download`: Sends a get request. Must have `downloadUrl` option defined.
-- `upload`: Opens filepicker to upload to a folder
-- `delete`: Sends request to delete a file
+- `onClick: function(event, element, item)`: Called when grid is clicked. By default, toggles the collapsed state of `item`.
+- `onAdd: function(item, grid)`
+- `onDragover: function(event, item)`
+- `onDragenter: function(event, item)`
+- `onItemAdded: function(item)`: Called whenever a new row is added to the grid.
 
-```javascript
-var grid = new HGrid('#myGrid', {
-  data: myData,
-  fileButtons: function(file) {
-    return [
-      {text: 'Download', action: 'download'},
-      {text: 'Delete', action: 'delete'},
-      {text: 'Custom button', cssClass: 'btn', 
-          onClick: function(item) { alert(item.name); }}
-    ];
-  },
-  folderButtons: function(folder) {
-    return [
-      {text: 'Upload', action: 'upload'}
-    ]
-  }
-});
-```
 
 ### Adding other listeners
 
@@ -154,38 +222,19 @@ var grid = new HGrid('#myGrid', {
 
 TODO
 
-#### Callbacks 
-
-- `onClick: function(event, element, item)`: Called when grid is clicked. By default, toggles the collapsed state of `item`.
-- `onAdd: function(item, grid)`
-- `onDragover: function(event, item)`
-- `onDragenter: function(event, item)`
-- `onItemAdded: function(item)`: Called whenever a new row is added to the grid.
-
-*Full documentation to come*
-
 ## Styling the Grid
 
-CSS Classes
+Default CSS Classes
 
 - `hgrid`
 - `hg-item`: Includes an item's indent spacer element, icon, and name
 - `hg-folder`
 - `hg-file`
 - `hg-row-highlight`
+- `hg-upload-processing`
 - `hg-upload-started`: Added to a row after a file is added and upload has started
 - `hg-upload-error`: Added to a row if an error occurs during upload.
 
-### Rendering File and Folder HTML
-
-TODO: document `renderFile(item)` and `renderFolder(item)` options
-
-## Modifying default columns
-
-```
-// Modifying the `Name` column header text
-HGrid.COL_NAME.name = 'Name of file'
-```
 
 ## Accessing SlickGrid and DropZone objects directly
 

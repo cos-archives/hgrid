@@ -884,7 +884,7 @@
     grid.dropzoneEvents.complete.call(grid, file);
   });
 
-  test('updateDropzone', function() {
+  test('setUploadTarget', function() {
     expect(3);
     var grid = new HGrid('#myGrid', {
       data: testData,
@@ -899,7 +899,7 @@
     });
     var folder = grid.getData()[0];
     grid.currentTarget = folder;
-    grid.updateDropzone(folder);
+    grid.setUploadTarget(folder);
     equal(grid.dropzone.options.url, 'uploads/' + folder.id);
     equal(grid.dropzone.options.method, 'PUT');
   });

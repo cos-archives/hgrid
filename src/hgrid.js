@@ -475,6 +475,9 @@ if (typeof jQuery === 'undefined') {
   ///////////////////////////////////
 
   var idCounter = 0; // Ensure unique IDs among trees and leaves
+  function getUID() {
+    return idCounter++;
+  }
   /**
    * A tree node. If constructed with no args, the node is
    * considered a root,
@@ -507,7 +510,7 @@ if (typeof jQuery === 'undefined') {
       if (data.id) {
         this.id = data.id;
       } else {
-        this.id = idCounter++; // set id then increment counter
+        this.id = getUID();
       }
       // Depth and dataView will be set by parent after being added as a subtree
       this.depth = null;
@@ -729,7 +732,7 @@ if (typeof jQuery === 'undefined') {
     if (data.id) {
       this.id = data.id;
     } else {
-      this.id = idCounter++; // Set id then increment counter
+      this.id = getUID(); // Set id then increment counter
     }
     this.parentID = null; // Set by parent
     this.depth = null;

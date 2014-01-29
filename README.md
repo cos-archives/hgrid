@@ -67,9 +67,9 @@ var grid = new HGrid('#myGrid', {
   deleteUrl: function(item) {
     return 'files/' + item.id + '/remove';
   },
-  deleteMethod: 'delete',  // TODO
+  deleteMethod: 'delete', 
   deleteParams: {}, // TODO
-  downloadUrl: function(item) { // TODO
+  downloadUrl: function(item) {
     return 'download/' + item.name;
   },
   // Check if a file is ok to upload

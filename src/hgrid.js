@@ -84,15 +84,15 @@ if (typeof jQuery === 'undefined') {
   HGrid.prototype.FILE_ACTIONS = {
     /*jshint unused: false */
     'download': function(evt, item) {
-      this.downloadFile(item);
+      this.options.onClickDownload.call(this, evt, item);
     },
     'delete': function(evt, item) {
-      this.deleteFile(item);
+      this.options.onClickDelete.call(this, evt, item);
     }
   };
   HGrid.prototype.FOLDER_ACTIONS = {
     'upload': function(evt, item) {
-      this.uploadToFolder(item);
+      this.options.onClickUpload.call(this, evt, item);
     }
   };
 
@@ -275,7 +275,7 @@ if (typeof jQuery === 'undefined') {
       return [fileIcon, sanitized(item.name), errorElem].join(' ');
     },
     /*jshint unused: false */
-    folderButtons: function(file) {
+    folderButtons: function(row) {
       if (this.options.uploads) {
         return [{
           text: 'Upload',
@@ -285,7 +285,7 @@ if (typeof jQuery === 'undefined') {
         return [];
       }
     },
-    fileButtons: function(folder) {
+    fileButtons: function(row) {
       return [{
         text: 'Download',
         action: 'download'
@@ -351,6 +351,17 @@ if (typeof jQuery === 'undefined') {
       }
       event.stopImmediatePropagation();
       // console.log(new Date() - then);
+    },
+    onClickDownload: function(event, item, options) {
+      this.downloadItem(item, options);
+    },
+    onClickDelete: function(event, item, options) {
+      this.removeItem(item.id);
+      this.deleteFile(item, options);
+    },
+    onClickUpload: function(event, item, options) {
+      // Open up a filepicker for the folder
+      this.uploadToFolder(item);
     },
     /**
      * Callback executed after an item is added.
@@ -444,6 +455,14 @@ if (typeof jQuery === 'undefined') {
     uploadAccept: function(file, folder, done) {
       return done();
     },
+    /**
+     * Returns the url where to download and item
+     * @param  {Object} row The row object
+     * @return {String} The download url
+     */
+    downloadUrl: function(item) {},
+    deleteUrl: function(item) {},
+    deleteMethod: function(item) {},
     /**
      * Additional initialization. Useful for adding listeners.
      * @property {Function} init
@@ -909,6 +928,7 @@ if (typeof jQuery === 'undefined') {
       }
       return col;
     });
+    // TODO:
     if (self.options.showButtons) {
       var btnCol = $.extend({}, HGrid.COL_BUTTONS);
       // Create button formatter, binding self to each function so they have access to the grid
@@ -986,17 +1006,60 @@ if (typeof jQuery === 'undefined') {
 
   HGrid.prototype.uploadToFolder = function(item) {
     this.currentTarget = item;
-    this.updateDropzoneTarget(item);
+    this.setUploadTarget(item);
     this.dropzone.hiddenFileInput.click();
   };
 
+  // TODO: untested
+  HGrid.prototype.downloadItem = function(item) {
+    var url;
+    if (typeof this.options.downloadUrl === 'function') {
+      url = this.options.downloadUrl(item);
+    } else {
+      url = this.options.downloadUrl;
+    }
+    if (url) {
+      window.location = url;
+    }
+    return this;
+  };
+
+  /**
+   * Send a delete request to an item's download URL.
+   */
+  // TODO: untested
+  HGrid.prototype.deleteFile = function(item, ajaxOptions) {
+    var url, method;
+    // TODO: repetition here
+    if (typeof this.options.deleteUrl === 'function') {
+      url = this.options.deleteUrl(item);
+    } else {
+      url = this.options.deleteUrl;
+    }
+    if (typeof this.options.deleteMethod === 'function') {
+      method = this.options.deleteMethod(item);
+    } else {
+      method = this.options.deleteMethod;
+    }
+    var options = $.extend({}, {
+      url: url,
+      type: method
+    }, ajaxOptions);
+    var promise = null;
+    if (url) {
+      promise = $.ajax(options);
+    }
+    return promise;
+  };
+
   HGrid.prototype.currentTarget = null; // The item to upload to
+
   /**
    * Update the dropzone object's options dynamically. Lazily updates the
    * upload url, method, etc.
-   * @method  updateDropzoneTarget
+   * @method  setUploadTarget
    */
-  HGrid.prototype.updateDropzoneTarget = function(item) {
+  HGrid.prototype.setUploadTarget = function(item) {
     var self = this;
     // if upload url or upload method is a function, call it, passing in the target item,
     // and set dropzone to upload to the result
@@ -1010,7 +1073,8 @@ if (typeof jQuery === 'undefined') {
       if (this.options.uploadAccept) {
         // Override dropzone accept callback. Just calls options.uploadAccept with the right params
         this.dropzone.options.accept = function(file, done) {
-          return self.options.uploadAccept.call(self, file, item, done);
+          var ret = self.options.uploadAccept.call(self, file, item, done);
+          return ret;
         };
       }
     }
@@ -1028,7 +1092,7 @@ if (typeof jQuery === 'undefined') {
     drop: function(evt) {
       this.removeHighlight();
       // update the dropzone options, eg. dropzone.options.url
-      this.updateDropzoneTarget(this.currentTarget);
+      this.setUploadTarget(this.currentTarget);
       this.options.onDrop.call(this, evt, this.currentTarget);
     },
     dragleave: function(evt) {
@@ -1070,6 +1134,7 @@ if (typeof jQuery === 'undefined') {
         kind: HGrid.FILE,
         parentID: currentTarget.id
       });
+      this.updateButtonListeners();
       var rowElem = this.getRowElement(addedItem.id),
         $rowElem = $(rowElem);
       // Save the item data and HTML element on the file object
@@ -1078,7 +1143,7 @@ if (typeof jQuery === 'undefined') {
       this.options.uploadAdded.call(this, file, file.gridItem);
       return addedItem;
     },
-    thumbnail: function(file, dataUrl) {},
+    thumbnail: noop,
     // Just delegate error function to options.uploadError
     error: function(file, message) {
       return this.options.uploadError.call(this, file, message, file.gridItem);
@@ -1094,6 +1159,7 @@ if (typeof jQuery === 'undefined') {
       return this.options.uploadSuccess.call(this, file, file.gridItem);
     },
     complete: function(file) {
+      this.updateButtonListeners();
       return this.options.uploadComplete.call(this, file, file.gridItem);
     }
   };
@@ -1135,14 +1201,37 @@ if (typeof jQuery === 'undefined') {
       }
     }
 
+    this.updateButtonListeners();
+  };
+
+  function hasEventListener(elem, eventName) {
+    var events = $._data($(elem)[0], 'events');
+    if (events && events.click) {
+      return events[eventName];
+    } else {
+      return false;
+    }
+  }
+
+  /**
+   * Bind 'click' listeners to each of the buttons.
+   */
+  HGrid.prototype.updateButtonListeners = function() {
+    var self = this;
     // Add listeners for buttons
     // TODO: Hard to test. Rethink..
-    self.element.find('.' + BTN_CLASS).on('click', function(evt) {
-      var $btn = $(this);
-      var btnIdx = $btn.data('btn-idx');
-      var item = self.getItemFromEvent(evt);
-      var callback = self._getButtonCallback(item, btnIdx);
-      callback.call(self, evt, item);
+    self.element.find('.' + BTN_CLASS).each(function() {
+      var elem = this;
+      // TODO: This shouldn't be necessary
+      if (!hasEventListener(elem, 'click')) {
+        $(elem).on('click', function(evt) {
+          var $btn = $(this);
+          var btnIdx = $btn.data('btn-idx');
+          var item = self.getItemFromEvent(evt);
+          var callback = self._getButtonCallback(item, btnIdx);
+          callback.call(self, evt, item);
+        });
+      }
     });
     return self;
   };

@@ -16,7 +16,8 @@
       id: 123,
       name: 'test.txt',
       kind: 'folder',
-      parentID: 'root'
+      parentID: 'root',
+      depth: 1
     }, args);
     return item;
   }
@@ -171,8 +172,8 @@
     containsText('.slick-header', 'Name', 'name column is in DOM');
   });
 
-  test('Changing column text', function() {
-    HGrid.COL_NAME.name = 'My Filename';
+  test('Changing column text by changing the defaultNameColumn object', function() {
+    HGrid.Format.defaultNameColumn.name = 'My Filename';
     var grid = new HGrid('#myGrid');
     var cols = grid.grid.getColumns();
     equal(cols[0].name, 'My Filename');
@@ -256,7 +257,9 @@
     var item = myGrid.getData()[0];
     var $elem = $(myGrid.getRowElement(item.id));
     isTrue($elem.hasClass('slick-row'), 'is a SlickGrid row');
-    equal($elem.find('.hg-item').attr('data-id'), item.id.toString(), 'is the row for the correct item');
+    window.elem = $elem;
+    equal($elem.find('.hg-item').attr('data-id'), item.id, 'is the row for the correct item');
+    isTrue($elem.find('.slick-cell.hg-cell').length > 0, 'cell has hg-cell class');
   });
 
   test('Expanding item', function() {
@@ -939,6 +942,32 @@
     var callback = grid._getButtonCallback(item, 0);
     ok(typeof callback === 'function', 'return value is a callback');
     callback({}, item);
+  });
+
+  module('Formatter helpers', {});
+
+  test('defaultRenderFile', function() {
+    var item = getMockItem();
+    var html = HGrid.defaultRenderFile(item);
+    ok(typeof html === 'string', 'renderer returns a string');
+    var $elem = $(html);
+    isTrue($elem.hasClass('hg-item'), 'has hg-item class');
+    equal($elem.data('id'), item.id, 'has correct data-id attribute');
+    isTrue($elem.find('span.hg-indent').length > 0, 'has indent element');
+    isTrue($elem.find('i.hg-file').length > 0, 'has icon with hg-file class');
+  });
+
+  test('defaultRenderFolder', function() {
+    var item = getMockItem({
+      kind: HGrid.FOLDER
+    });
+    var html = HGrid.defaultRenderFolder(item);
+    ok(typeof html === 'string', 'renderer returns a string');
+    var $elem = $(html);
+    isTrue($elem.hasClass('hg-item'), 'has hg-item class');
+    equal($elem.data('id'), item.id, 'has correct data-id attribute');
+    isTrue($elem.find('span.hg-indent').length > 0, 'has indent element');
+    isTrue($elem.find('i.hg-folder').length > 0, 'has icon with hg-folder class');
   });
 
 })(jQuery);

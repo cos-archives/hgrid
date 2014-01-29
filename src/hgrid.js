@@ -11,6 +11,9 @@ if (typeof jQuery === 'undefined') {
   window.HGrid = HGrid;
   window.HGridError = HGridError;
 
+  var BTN_CLASS = 'hg-btn';
+  var DEFAULT_INDENT = 15;
+
   /**
    * Custom Error for HGrid-related errors.
    *
@@ -32,12 +35,6 @@ if (typeof jQuery === 'undefined') {
   var FILE = 'file';
   var FOLDER = 'folder';
 
-  /**
-   * Render a spacer element given an indent value in pixels.
-   */
-  function makeIndentElem(indent) {
-    return '<span class="hg-indent" style="width:' + indent + 'px"></span>';
-  }
 
   // TODO: expose this function as a helper?
   /**
@@ -76,6 +73,32 @@ if (typeof jQuery === 'undefined') {
     return formatter;
   }
 
+  /**
+   * Render a spacer element given an indent value in pixels.
+   */
+  function makeIndentElem(indent) {
+    return '<span class="hg-indent" style="width:' + indent + 'px"></span>';
+  }
+
+  /**
+   * Adds an span element that indents an item element, given an item.
+   * `item` must have a depth property.
+   */
+  function withIndent(item, html, indentWidth) {
+    indentWidth = indentWidth || DEFAULT_INDENT;
+    var indent = item.depth * indentWidth;
+    // indenting span
+    var spacer = makeIndentElem(indent);
+    return spacer + html;
+  }
+
+  function asItem(item, html) {
+    var openTag = '<span class="hg-item" data-id="' + item.id + '">';
+    var closingTag = '</span>';
+    return [openTag, html, closingTag].join('');
+  }
+
+
   // Default button actions
   // So a button definition can be defined like:
   // {text: 'My Download Button', action: 'download'}
@@ -95,8 +118,6 @@ if (typeof jQuery === 'undefined') {
       this.options.onClickUpload.call(this, evt, item);
     }
   };
-
-  var BTN_CLASS = 'hg-btn';
 
   /**
    * Render the html for a button, given an item and buttonDef. buttonDef is an
@@ -176,6 +197,59 @@ if (typeof jQuery === 'undefined') {
     width: 50
   };
 
+
+  /**
+   * Default rendering function that renders a file item to HTML.
+   * @property defaultRenderFile
+   * @param  {Object} item The file as an item object.
+   * @return {String}      HTML for the file.
+   */
+  HGrid.defaultRenderFile = function(item, args) {
+    args = args || {};
+    var fileIcon = '<i class="hg-file"></i>';
+    // Placeholder for error messages
+    var errorElem = '<span class="error" data-upload-errormessage></span>';
+    // Placeholder for progress bar
+    var innerContent = [fileIcon, sanitized(item.name), errorElem].join('');
+    return asItem(item, withIndent(item, innerContent, args.indent));
+  };
+
+  /**
+   * Default rendering function that renders a folder item to HTML.
+   * @property defaultRenderFolder
+   * @param  {Object} item The folder as an item object.
+   * @return {String}      HTML for the folder.
+   */
+  HGrid.defaultRenderFolder = function(item, args) {
+    args = args || {};
+    var name = sanitized(item.name);
+    // Placeholder for error messages
+    var errorElem = '<span class="error" data-upload-errormessage></span>';
+    // The + / - button for expanding/collapsing a folder
+    var expander = item._collapsed ? '<span class="toggle expand"></span>' :
+      '<span class="toggle collapse"></span>';
+    // The folder icon
+    var folderIcon = ' <i class="hg-folder"></i>';
+    // Concatenate the expander, folder icon, and the folder name
+    var innerContent = [expander, folderIcon, errorElem, name].join(' ');
+    return asItem(item, withIndent(item, innerContent, args.indent));
+  };
+
+  // Helpers public interface
+  // TODO: test these
+  HGrid.Format = {
+    withIndent: withIndent,
+    asItem: asItem,
+    makeIndentElem: makeIndentElem,
+    defaultNameColumn: {
+      id: 'name',
+      name: 'Name',
+      cssClass: 'hg-cell',
+      renderFolder: HGrid.defaultRenderFolder,
+      renderFile: HGrid.defaultRenderFile
+    }
+  };
+
   /**
    * Default options object
    * @class  defaults
@@ -207,7 +281,7 @@ if (typeof jQuery === 'undefined') {
     // Additional options to be passed into $.ajax when sending AJAX requests
     // ajaxOptions: {},
     // lazyLoad: false,
-    columns: [HGrid.COL_NAME],
+    columns: [HGrid.Format.defaultNameColumn],
     showButtons: false,
     // dropZonePreviewsContainer: null,
     // dropzoneOptions: null,
@@ -241,39 +315,8 @@ if (typeof jQuery === 'undefined') {
      * Width to indent items (in px)*
      * @property indent
      */
-    indent: 15,
-    /**
-     * Render a folder to HTML.
-     * @property renderFolder
-     * @type {Function}
-     * @param  {Object} item The folder as an item object.
-     * @return {String}      HTML for the folder.
-     */
-    renderFolder: function(item) {
-      var name = sanitized(item.name);
-      // Placeholder for error messages
-      var errorElem = '<span class="error" data-upload-errormessage></span>';
-      // The + / - button for expanding/collapsing a folder
-      var expander = item._collapsed ? '<span class="toggle expand"></span>' :
-        '<span class="toggle collapse"></span>';
-      // The folder icon
-      var folderIcon = ' <span class="hg-folder"></span>';
-      // Concatenate the expander, folder icon, and the folder name
-      return [expander, folderIcon, errorElem, name].join(' ');
-    },
-    /**
-     * Render a file to HTML.
-     * @property renderFile
-     * @param  {Object} item The file as an item object.
-     * @return {String}      HTML for the file.
-     */
-    renderFile: function(item) {
-      var fileIcon = '<span class="hg-file"></span>';
-      // Placeholder for error messages
-      var errorElem = '<span class="error" data-upload-errormessage></span>';
-      // Placeholder for progress bar
-      return [fileIcon, sanitized(item.name), errorElem].join(' ');
-    },
+    indent: DEFAULT_INDENT,
+
     /*jshint unused: false */
     folderButtons: function(row) {
       if (this.options.uploads) {
@@ -912,6 +955,31 @@ if (typeof jQuery === 'undefined') {
     return this;
   };
 
+  // HGrid renderFolder and renderFile (in column def) => SlickGrid Formatter
+  HGrid.prototype.makeFormatter = function(renderFolder, renderFile, args) {
+    var self = this;
+    var formatter = function(row, cell, value, colDef, item) {
+      var rendererArgs = {
+        colDef: colDef,
+        row: row,
+        cell: cell,
+        indent: args.indent
+      };
+      if (item.kind === FOLDER) {
+        if (typeof renderFolder === 'function') {
+          return renderFolder.call(self, item, rendererArgs);
+        }
+      } else {
+        if (typeof renderFile === 'function') {
+          return renderFile.call(self, item, rendererArgs);
+        }
+      }
+      // Fallback to returning te value
+      return value;
+    };
+    return formatter;
+  };
+
   /**
    * Constructs a Slick.Grid and Slick.Data.DataView from the data.
    * Sets this.grid.
@@ -920,26 +988,17 @@ if (typeof jQuery === 'undefined') {
    */
   HGrid.prototype._initSlickGrid = function() {
     var self = this;
-    // Create the formatter function
-    var formatter = makeNameFormatter(self.options.renderFolder, self.options.renderFile, self.options.indent);
-    // Set the name column's formatter
-    // TODO: Rethink this. Should the format be specified explicitly
-    // instead of setting it automatically?
     var columns = self.options.columns.map(function(col) {
-      if (col.id === 'name' && !('formatter' in col)) {
-        col.formatter = formatter;
+      if (!('formatter' in col)) {
+        // Create the formatter function from the columns definition's
+        // "renderFolder" and "renderFile" properties
+        col.formatter = self.makeFormatter.call(self, col.renderFolder,
+          col.renderFile, {
+            indent: self.options.indent
+          });
       }
       return col;
     });
-    // TODO:
-    if (self.options.showButtons) {
-      var btnCol = $.extend({}, HGrid.COL_BUTTONS);
-      // Create button formatter, binding self to each function so they have access to the grid
-      // object
-      btnCol.formatter = makeButtonFormatter(self.options.folderButtons.bind(self),
-        self.options.fileButtons.bind(self));
-      columns.push(btnCol);
-    }
     this.grid = new Slick.Grid(self.element.selector, this.tree.dataView,
       columns,
       self.options.slickgridOptions);
@@ -955,7 +1014,6 @@ if (typeof jQuery === 'undefined') {
   /**
    * Get the row element for an item, given its id.
    * @method  getRowElement
-   * @return {jQuery}    The jQuery element for the grid row.
    */
   HGrid.prototype.getRowElement = function(id) {
     return this.grid.getCellNode(this.getDataView().getRowById(id), 0).parentNode;

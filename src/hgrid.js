@@ -370,17 +370,13 @@ if (typeof jQuery === 'undefined') {
      * @param  {Object} file The file object. Has gridElement and gridItem bound to it.
      * @param  {Object} item The added item
      */
-    uploadAdded: function(file, item) {
-      $(file.gridElement).addClass('hg-upload-started');
-      // TODO: Add cancel upload link to actions
-    },
+    uploadAdded: function(file, item) {},
     /**
      * Called whenever a file gets processed.
      * @property {Function} [uploadProcessing]
      */
     /*jshint unused: false */
     uploadProcessing: function(file, item) {
-      $(file.gridElement).addClass('hg-upload-processing');
       // TODO: display Cancel upload button text
     },
     /**
@@ -394,7 +390,6 @@ if (typeof jQuery === 'undefined') {
     uploadError: function(file, message, item) {
       // The row element for the added file is stored on the file object
       var $rowElem = $(file.gridElement);
-      $rowElem.addClass('hg-upload-error').removeClass('hg-upload-processing');
       var msg;
       if (typeof message !== 'string' && message.error) {
         msg = message.error;
@@ -427,10 +422,7 @@ if (typeof jQuery === 'undefined') {
      * @property [uploadSuccess]
      */
     /*jshint unused: false */
-    uploadSuccess: function(file, item) {
-      $(file.gridElement).addClass('hg-upload-success')
-        .removeClass('hg-upload-processing');
-    },
+    uploadSuccess: function(file, item) {},
     /**
      * Called when an upload completes (whether it is successful or not)
      * @property [uploadComplete]
@@ -1036,8 +1028,11 @@ if (typeof jQuery === 'undefined') {
       this.removeHighlight();
     },
     'onSort': function(evt, args) {
+      // column to sort
       var col = args.sortCol;
-      this.tree.sort(col.field, args.sortAsc);
+      // key to sort on
+      var key = col.field || col.key;
+      this.tree.sort(key, args.sortAsc);
       this.tree.updateDataView(true);
       this.options.onSort.call(this, evt, col, args);
     }
@@ -1132,7 +1127,8 @@ if (typeof jQuery === 'undefined') {
    * For each function, `this` refers to the HGrid object.
    * These listeners are responsible for any setup that needs to occur before executing
    * the callbacks in `options`. For example, adding a new row item to the grid, setting the
-   * current upload target, and passing necessary arguments to the options callbacks.
+   * current upload target, adding special CSS classes
+   * and passing necessary arguments to the options callbacks.
    * @attribute  dropzoneEvents
    * @type {Object}
    */
@@ -1189,15 +1185,18 @@ if (typeof jQuery === 'undefined') {
       // Save the item data and HTML element on the file object
       file.gridItem = addedItem;
       file.gridElement = rowElem;
+      $rowElem.addClass('hg-upload-started');
       this.options.uploadAdded.call(this, file, file.gridItem);
       return addedItem;
     },
     thumbnail: noop,
     // Just delegate error function to options.uploadError
     error: function(file, message) {
+      $rowElem.addClass('hg-upload-error').removeClass('hg-upload-processing');
       return this.options.uploadError.call(this, file, message, file.gridItem);
     },
     processing: function(file) {
+      $(file.gridElement).addClass('hg-upload-processing');
       this.options.uploadProcessing.call(this, file, file.gridItem);
       return this;
     },
@@ -1205,6 +1204,8 @@ if (typeof jQuery === 'undefined') {
       return this.options.uploadProgress.call(this, file, progress, bytesSent, file.gridItem);
     },
     success: function(file) {
+      $(file.gridElement).addClass('hg-upload-success')
+        .removeClass('hg-upload-processing');
       return this.options.uploadSuccess.call(this, file, file.gridItem);
     },
     complete: function(file) {

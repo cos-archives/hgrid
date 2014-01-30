@@ -141,29 +141,6 @@
     equal(foo.name, 'foo.py', 'retrieved correct item');
   });
 
-  test('CSS', function() {
-    var grid = new HGrid('#myGrid', {
-      data: testData
-    });
-    isTrue(grid.element.hasClass('hgrid'), 'container class defaults to "hgrid"');
-    grid.destroy();
-    var another = new HGrid('#myGrid', {
-      data: testData,
-      cssClass: 'my-hgrid'
-    });
-    isTrue(grid.element.hasClass('my-hgrid'), 'user-specified css class');
-    another.destroy();
-    var classes = ['my-hgrid', 'my-table'];
-    var multiClassGrid = new HGrid('#myGrid', {
-      data: testData,
-      cssClass: classes
-    });
-    // Check that the element has each class
-    classes.forEach(function(cls) {
-      isTrue(multiClassGrid.element.hasClass(cls));
-    });
-  });
-
   test('Default columns', function() {
     var grid = new HGrid('#myGrid');
     var cols = grid.grid.getColumns();

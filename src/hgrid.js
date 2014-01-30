@@ -208,7 +208,7 @@ if (typeof jQuery === 'undefined') {
     Name: {
       id: 'name',
       name: 'Name',
-      value: 'name',
+      field: 'name',
       cssClass: 'hg-cell',
       folderView: defaultFolderView,
       fileView: defaultFileView,
@@ -276,12 +276,7 @@ if (typeof jQuery === 'undefined') {
      * Height of the grid div in px or 'auto' (to disable vertical scrolling).*
      * @property [height]
      */
-    height: 'auto',
-    /**
-     * CSS class to apply to the grid element. Can also be an array of multiple classes.
-     * @property [cssClass]
-     */
-    cssClass: 'hgrid',
+    height: 300,
     /**
      * CSS class applied for a highlighted row.
      * @property [highlightClass]
@@ -857,7 +852,6 @@ if (typeof jQuery === 'undefined') {
   HGrid.prototype.init = function() {
     this.setHeight(this.options.height)
       .setWidth(this.options.width)
-      .setCSSClass(this.options.cssClass)
       ._initSlickGrid()
       ._initDataView();
 
@@ -885,22 +879,6 @@ if (typeof jQuery === 'undefined') {
   // TODO: always update column widths after setting width.
   HGrid.prototype.setWidth = function(width) {
     this.element.css('width', width);
-    return this;
-  };
-
-  /**
-   * Set the CSS class for the grid.
-   * @method  setCSSClass
-   */
-  HGrid.prototype.setCSSClass = function(cls) {
-    var self = this;
-    if (Array.isArray(cls)) {
-      cls.forEach(function(c) {
-        self.element.addClass(c);
-      });
-    } else {
-      self.element.addClass(cls);
-    }
     return this;
   };
 

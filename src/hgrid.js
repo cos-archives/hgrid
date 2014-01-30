@@ -145,22 +145,20 @@ if (typeof jQuery === 'undefined') {
     return asItem(item, withIndent(item, innerContent, args.indent));
   }
 
-  var FN = {};
+  var tpl_fn_cache = {};
   var tpl = function(template, data) {
     /*jshint quotmark:false */
     if (!template) {
       return '';
     }
-
-    FN[template] = FN[template] || new Function("_",
+    tpl_fn_cache[template] = tpl_fn_cache[template] || new Function("_",
       "return '" + template
       .replace(/\n/g, "\\n")
       .replace(/\r/g, "\\r")
       .replace(/'/g, "\\'")
       .replace(/<%\s*(\w+)\s*%>/g, "'+(_.$1?(_.$1+'').replace(/&/g,'&amp;').replace(/\"/g,'&quot;').replace(/</g,'&lt;').replace(/>/g,'&gt;'):(_.$1===0?0:''))+'") + "'"
     );
-
-    return FN[template](data);
+    return tpl_fn_cache[template](data);
   };
 
   // Formatting helpers public interface
@@ -906,7 +904,8 @@ if (typeof jQuery === 'undefined') {
 
   // HGrid renderFolder and renderFile (in column def) => SlickGrid Formatter
   HGrid.prototype.makeFormatter = function(renderFolder, renderFile, args) {
-    var self = this;
+    var self = this,
+      view;
     var formatter = function(row, cell, value, colDef, item) {
       var rendererArgs = {
         colDef: colDef,
@@ -915,16 +914,15 @@ if (typeof jQuery === 'undefined') {
         indent: args.indent
       };
       if (item.kind === FOLDER) {
-        if (typeof renderFolder === 'function') {
-          return renderFolder.call(self, item, rendererArgs);
-        }
+        view = renderFolder;
       } else {
-        if (typeof renderFile === 'function') {
-          return renderFile.call(self, item, rendererArgs);
-        }
+        view = renderFile;
+      }
+      if (typeof view === 'function') {
+        return view.call(self, item, rendererArgs);
       }
       // Use template
-      return HGrid.Format.tpl(renderFolder, item);
+      return HGrid.Format.tpl(view, item);
     };
     return formatter;
   };

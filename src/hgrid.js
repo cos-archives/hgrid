@@ -352,7 +352,7 @@ if (typeof jQuery === 'undefined') {
       if (this.canToggle(element)) {
         this.toggleCollapse(item);
       }
-      event.stopImmediatePropagation();
+      // event.stopImmediatePropagation();
       // console.log(new Date() - then);
     },
     onClickDownload: function(event, item, options) {
@@ -466,6 +466,8 @@ if (typeof jQuery === 'undefined') {
     downloadUrl: function(item) {},
     deleteUrl: function(item) {},
     deleteMethod: function(item) {},
+
+    listeners: [],
     /**
      * Additional initialization. Useful for adding listeners.
      * @property {Function} init
@@ -1155,7 +1157,6 @@ if (typeof jQuery === 'undefined') {
         kind: HGrid.FILE,
         parentID: currentTarget.id
       });
-      this.updateButtonListeners();
       var rowElem = this.getRowElement(addedItem.id),
         $rowElem = $(rowElem);
       // Save the item data and HTML element on the file object
@@ -1180,7 +1181,6 @@ if (typeof jQuery === 'undefined') {
       return this.options.uploadSuccess.call(this, file, file.gridItem);
     },
     complete: function(file) {
-      this.updateButtonListeners();
       return this.options.uploadComplete.call(this, file, file.gridItem);
     }
   };
@@ -1222,39 +1222,16 @@ if (typeof jQuery === 'undefined') {
       }
     }
 
-    this.updateButtonListeners();
-  };
-
-  function hasEventListener(elem, eventName) {
-    var events = $._data($(elem)[0], 'events');
-    if (events && events.click) {
-      return events[eventName];
-    } else {
-      return false;
+    // Attach extra listeners from options.listeners
+    var userCallback = function(evt) {
+      var row = self.getItemFromEvent(evt);
+      return evt.data.listenerObj.callback.call(self, evt, row);
+    };
+    for (var i = 0, listener; listener = this.options.listeners[i]; i++) {
+      self.element.on('click', '.test', {
+        listenerObj: listener
+      }, userCallback);
     }
-  }
-
-  /**
-   * Bind 'click' listeners to each of the buttons.
-   */
-  HGrid.prototype.updateButtonListeners = function() {
-    var self = this;
-    // Add listeners for buttons
-    // TODO: Hard to test. Rethink..
-    self.element.find('.' + BTN_CLASS).each(function() {
-      var elem = this;
-      // TODO: This shouldn't be necessary
-      if (!hasEventListener(elem, 'click')) {
-        $(elem).on('click', function(evt) {
-          var $btn = $(this);
-          var btnIdx = $btn.data('btn-idx');
-          var item = self.getItemFromEvent(evt);
-          var callback = self._getButtonCallback(item, btnIdx);
-          callback.call(self, evt, item);
-        });
-      }
-    });
-    return self;
   };
 
   /**

@@ -200,6 +200,16 @@ var grid = new HGrid('#myGrid', {
 });
 ```
 
+You can also pass in a `listeners` array.
+
+```javascript
+var grid = new HGrid('#myGrid', {
+  listeners: [{selector: '.my-button', on: 'click', 
+              callback: function(evt, row) {alert('Clicked on' + row.name); }}
+              ]
+});
+```
+
 ### Overriding Slickgrid or Dropzone options
 
 ```javascript

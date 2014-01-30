@@ -40,7 +40,7 @@
   var myGrid = new HGrid('#myGrid', {data: files});
   ```
 
-## Columns 
+## Rows and Columns 
 
 ### Using Predefined Column Schemas
 
@@ -63,7 +63,7 @@ var grid = new HGrid('#myGrid', {
 
 ```javascript
 // Customize the column header text
-HGrid.Columns.Name.name = "Item Name"
+HGrid.Columns.Name.text = "Item Name"
 var grid = new HGrid('#myGrid', {
   columns: [HGrid.Columns.Name]
 });
@@ -73,7 +73,7 @@ var grid = new HGrid('#myGrid', {
 
 Column schemas are just objects that have--at a minimum--the following properties:
 
-- `name`: The text to show in the column header
+- `text`: The text to show in the column header
 - `folderView`: Either a function that renders the HTML for a folder or a microtemplate.
 - `fileView`: Either a function that render the HTML for a file or a microtemplate.
 
@@ -86,14 +86,14 @@ Examples:
 ```javascript
 // Custom column schemas
 var myCustomNameColumn = {
-  name: 'Name', 
+  text: 'Name', 
   folderView: '<div class="folder">{{ name }}</div?>' // Using a microtemplate
   fileView: '<div class="file">{{ name }}</div?>'
   sortable: true,
   sortkey: 'name' // property of item object on which to sort on
 };
 
-var filesizeColumn = {name: 'Filesize',
+var filesizeColumn = {text: 'Filesize',
   // receives `row` containing all the item information
   fileView: function(row) {return row.filesize.toString(); },
   folderView: function(row) {return '';} // Folders don't have a file size
@@ -115,10 +115,10 @@ For example, `HGrid.Format.withIndent` adds a span element with a width based on
 ```javascript
 var item = {id: 123, name: 'My Documents', kind: 'folder', depth: 3};
 
-var nameColumn = {id: 'name', name: 'Name',
+var nameColumn = {text: 'Name',
   folderView: function(row) {
-    var itemHtml = HGrid.Format.tpl('<em>{{ name }}</em?>', row);
-    var itemWithIndent = HGrid.Format.withIndent(row, itemHtml);
+    var html = HGrid.Format.tpl('<em>{{ name }}</em?>', row);
+    var itemWithIndent = HGrid.Format.withIndent(row, html);
     // => '<span class="hg-indent" style="width:45"></span><em>My Documents</em>'
     return itemWithIndent;
   },
@@ -151,20 +151,20 @@ var grid = new HGrid('#myGrid', {
   maxFilesize: 10,  // MB
   // Mimetypes or file extensions
   acceptedFiles: ['image/*', 'application/pdf', '.py'],
-  uploadMethod: function(folder) {
-    return item.uploadMethod || 'post';
+  uploadMethod: function(row) {
+    return row.uploadMethod || 'post';
   },
   // Can be a string or a function that returns where to send request for upload
-  uploadUrl: function(item) {  // item => {id: 3, name: 'My bucket', kind: 'folder'}
-    return 'files/' + item.id;
+  uploadUrl: function(row) {  // row => {id: 3, name: 'My bucket', kind: 'folder'}
+    return 'files/' + row.id;
   },
   // Returns where to send request for deletion
-  deleteUrl: function(item) {
-    return 'files/' + item.id + '/remove';
+  deleteUrl: function(row) {
+    return 'files/' + row.id + '/remove';
   },
   deleteMethod: 'delete', 
-  downloadUrl: function(item) {
-    return 'download/' + item.name;
+  downloadUrl: function(row) {
+    return 'download/' + row.name;
   }
 });
 ```

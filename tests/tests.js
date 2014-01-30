@@ -157,6 +157,14 @@
     containsText('.slick-header', 'My Filename', 'custom column name is in DOM');
   });
 
+  test('Column header text can be set using the `text` property', function() {
+    HGrid.Columns.Name.text = 'Custom Header';
+    var grid = new HGrid('#myGrid');
+    var cols = grid.grid.getColumns();
+    equal(cols[0].name, 'Custom Header');
+    containsText('.slick-header', 'Custom Header', 'custom column name is in DOM');
+  });
+
   test('Options and attributes', function() {
     // passed in options
     deepEqual(myGrid.options.data, testData);

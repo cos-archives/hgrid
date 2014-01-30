@@ -966,6 +966,9 @@ if (typeof jQuery === 'undefined') {
             indent: self.options.indent
           });
       }
+      if ('text' in col) {
+        col.name = col.text;
+      }
       return col;
     });
     var options = $.extend({}, requiredSlickgridOptions, self.options.slickgridOptions);

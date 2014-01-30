@@ -332,8 +332,8 @@ if (typeof jQuery === 'undefined') {
      * By default, expand or collapse the item.
      * @property [onClick]
      */
-    onClick: function(event, element, item) {
-      if (this.canToggle(element)) {
+    onClick: function(event, item, $elem) {
+      if (this.canToggle($elem)) {
         this.toggleCollapse(item);
       }
     },
@@ -358,6 +358,13 @@ if (typeof jQuery === 'undefined') {
     onDragover: function(evt, item) {},
     onDragenter: function(evt, item) {},
     onDrop: function(event, item) {},
+    /**
+     *  Called when a column is sorted.
+     *  @param {Object} event
+     *  @param {Object} column The column definition for the sorted column.
+     *  @param {Object} args SlickGrid sorting args.
+     */
+    onSort: function(event, column, args) {},
     /**
      * Called whenever a file is added for uploaded
      * @param  {Object} file The file object. Has gridElement and gridItem bound to it.
@@ -973,13 +980,6 @@ if (typeof jQuery === 'undefined') {
     this.grid = new Slick.Grid(self.element.selector, this.tree.dataView,
       columns,
       options);
-    this.grid.onSort.subscribe(function(evt, args) {
-      var col = args.sortCol;
-      self.tree.sort(col.field, args.sortAsc);
-      self.tree.updateDataView(true);
-      self.grid.invalidate();
-      self.grid.render();
-    });
     return this;
   };
 
@@ -1024,7 +1024,7 @@ if (typeof jQuery === 'undefined') {
     'onClick': function(evt, args) {
       var $elem = $(evt.target);
       var item = this.getDataView().getItem(args.row);
-      this.options.onClick.call(this, event, $elem, item);
+      this.options.onClick.call(this, evt, item, $elem);
       return this;
     },
 
@@ -1034,6 +1034,12 @@ if (typeof jQuery === 'undefined') {
     },
     'onMouseLeave': function(evt, args) {
       this.removeHighlight();
+    },
+    'onSort': function(evt, args) {
+      var col = args.sortCol;
+      this.tree.sort(col.field, args.sortAsc);
+      this.tree.updateDataView(true);
+      this.options.onSort.call(this, evt, col, args);
     }
   };
 

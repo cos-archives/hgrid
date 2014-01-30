@@ -948,9 +948,9 @@
 
   module('Predefined columns (HGrid.Columns)', {});
 
-  test('defaultRenderFile', function() {
+  test('defaultFileView', function() {
     var item = getMockItem();
-    var html = HGrid.Columns.defaultRenderFile(item);
+    var html = HGrid.Columns.defaultFileView(item);
     ok(typeof html === 'string', 'renderer returns a string');
     var $elem = $(html);
     isTrue($elem.hasClass('hg-item'), 'has hg-item class');
@@ -959,11 +959,11 @@
     isTrue($elem.find('i.hg-file').length > 0, 'has icon with hg-file class');
   });
 
-  test('defaultRenderFolder', function() {
+  test('defaultFolderView', function() {
     var item = getMockItem({
       kind: HGrid.FOLDER
     });
-    var html = HGrid.Columns.defaultRenderFolder(item);
+    var html = HGrid.Columns.defaultFolderView(item);
     ok(typeof html === 'string', 'renderer returns a string');
     var $elem = $(html);
     isTrue($elem.hasClass('hg-item'), 'has hg-item class');

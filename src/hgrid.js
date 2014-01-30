@@ -110,11 +110,11 @@ if (typeof jQuery === 'undefined') {
 
   /**
    * Default rendering function that renders a file item to HTML.
-   * @class defaultRenderFile
+   * @class defaultFileView
    * @param  {Object} item The file as an item object.
    * @return {String}      HTML for the file.
    */
-  function defaultRenderFile(item, args) {
+  function defaultFileView(item, args) {
     args = args || {};
     var fileIcon = '<i class="hg-file"></i>';
     // Placeholder for error messages
@@ -126,11 +126,11 @@ if (typeof jQuery === 'undefined') {
 
   /**
    * Default rendering function that renders a folder item to HTML.
-   * @class defaultRenderFolder
+   * @class defaultFolderView
    * @param  {Object} item The folder as an item object.
    * @return {String}      HTML for the folder.
    */
-  function defaultRenderFolder(item, args) {
+  function defaultFolderView(item, args) {
     args = args || {};
     var name = sanitized(item.name);
     // Placeholder for error messages
@@ -201,16 +201,18 @@ if (typeof jQuery === 'undefined') {
 
   // Predefined column schemas
   HGrid.Columns = {
-    defaultRenderFolder: defaultRenderFolder,
-    defaultRenderFile: defaultRenderFile,
+    defaultFolderView: defaultFolderView,
+    defaultFileView: defaultFileView,
 
     // Name field schema
     Name: {
       id: 'name',
       name: 'Name',
+      value: 'name',
       cssClass: 'hg-cell',
-      renderFolder: defaultRenderFolder,
-      renderFile: defaultRenderFile
+      folderView: defaultFolderView,
+      fileView: defaultFileView,
+      sortable: true
     },
 
     // Actions buttons schema
@@ -219,7 +221,7 @@ if (typeof jQuery === 'undefined') {
       name: 'Actions',
       cssClass: 'hg-cell',
       width: 50,
-      renderFolder: function() {
+      folderView: function() {
         var buttonDefs = [];
         if (this.options.uploads) {
           buttonDefs.push({
@@ -232,7 +234,7 @@ if (typeof jQuery === 'undefined') {
         }
         return '';
       },
-      renderFile: function() {
+      fileView: function() {
         var buttonDefs = [{
           text: 'Download',
           action: 'download'
@@ -902,8 +904,9 @@ if (typeof jQuery === 'undefined') {
     return this;
   };
 
-  // HGrid renderFolder and renderFile (in column def) => SlickGrid Formatter
-  HGrid.prototype.makeFormatter = function(renderFolder, renderFile, args) {
+  // TODO: test me
+  // HGrid folderView and fileView (in column def) => SlickGrid Formatter
+  HGrid.prototype.makeFormatter = function(folderView, fileView, args) {
     var self = this,
       view;
     var formatter = function(row, cell, value, colDef, item) {
@@ -914,9 +917,9 @@ if (typeof jQuery === 'undefined') {
         indent: args.indent
       };
       if (item.kind === FOLDER) {
-        view = renderFolder;
+        view = folderView;
       } else {
-        view = renderFile;
+        view = fileView;
       }
       if (typeof view === 'function') {
         return view.call(self, item, rendererArgs);
@@ -947,9 +950,9 @@ if (typeof jQuery === 'undefined') {
     var columns = self.options.columns.map(function(col) {
       if (!('formatter' in col)) {
         // Create the formatter function from the columns definition's
-        // "renderFolder" and "renderFile" properties
-        col.formatter = self.makeFormatter.call(self, col.renderFolder,
-          col.renderFile, {
+        // "folderView" and "fileView" properties
+        col.formatter = self.makeFormatter.call(self, col.folderView,
+          col.fileView, {
             indent: self.options.indent
           });
       }

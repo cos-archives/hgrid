@@ -71,25 +71,25 @@ var grid = new HGrid('#myGrid', {
 
 ### Custom Column Schemas
 
-Columns are defined by objects that have--at a minimum--`id`, `name`, `renderFolder`, and `renderFile` properties.
+Columns are defined by objects that have--at a minimum--`id`, `name`, `folderView`, and `fileView` properties.
 
-`renderFolder` and `renderFile` are functions that return the HTML for a given folder or file, respectively.
+`folderView` and `fileView` are functions that return the HTML for a given folder or file, respectively.
 
 ```javascript
 var nameColumn = {id: 'name', name: 'Name', 
   // receives `row` containing all the item information
-  renderFolder: function(row) { 
+  folderView: function(row) { 
     return '<div class="folder">' + row.name + "</div>";
   },
-  renderFile: function(row) {
+  fileView: function(row) {
     return '<div class="file">' + row.name + "</div>";
   },
   sortable: true,
 };
 
 var filesizeColumn = {id: 'size', name: 'Filesize',
-  renderFolder: function(row) {return '';} // Folders don't have a file size
-  renderFile: function(row) {return row.filesize.toString(); },
+  folderView: function(row) {return '';} // Folders don't have a file size
+  fileView: function(row) {return row.filesize.toString(); },
   sortable: true,
   comparator: function(val1, val2) {...}
 };
@@ -112,13 +112,13 @@ For example, `HGrid.Format.withIndent` adds a span element with a width based on
 var item = {id: 123, name: 'My Documents', kind: 'folder', depth: 3};
 
 var nameColumn = {id: 'name', name: 'Name',
-  renderFolder: function(row) {
+  folderView: function(row) {
     var itemHtml = '<em>' + row.name + '</em>';
     var itemWithIndent = HGrid.Format.withIndent(row, itemHtml);
     // => '<span class="hg-indent" style="width:45"></span><em>My Documents</em>'
     return itemWithIndent;
   },
-  renderFile: ...
+  fileView: ...
 };
 ```
 

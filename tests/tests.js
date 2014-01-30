@@ -959,4 +959,10 @@
     equal($btn.data('hg-action'), 'noop', 'default action is noop');
   });
 
+  test('tpl', function() {
+    equal(HGrid.Format.tpl('Hello <% name %>', {
+      name: 'world'
+    }), 'Hello world');
+  });
+
 })(jQuery);

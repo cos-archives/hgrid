@@ -975,7 +975,7 @@
   });
 
   test('tpl', function() {
-    equal(HGrid.Format.tpl('Hello <% name %>', {
+    equal(HGrid.Format.tpl('Hello {{ name }}', {
       name: 'world'
     }), 'Hello world');
   });

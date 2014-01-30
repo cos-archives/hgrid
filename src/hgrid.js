@@ -156,7 +156,7 @@ if (typeof jQuery === 'undefined') {
       .replace(/\n/g, "\\n")
       .replace(/\r/g, "\\r")
       .replace(/'/g, "\\'")
-      .replace(/<%\s*(\w+)\s*%>/g, "'+(_.$1?(_.$1+'').replace(/&/g,'&amp;').replace(/\"/g,'&quot;').replace(/</g,'&lt;').replace(/>/g,'&gt;'):(_.$1===0?0:''))+'") + "'"
+      .replace(/\{\{\s*(\w+)\s*\}\}/g, "'+(_.$1?(_.$1+'').replace(/&/g,'&amp;').replace(/\"/g,'&quot;').replace(/</g,'&lt;').replace(/>/g,'&gt;'):(_.$1===0?0:''))+'") + "'"
     );
     return tpl_fn_cache[template](data);
   };
@@ -1029,9 +1029,9 @@ if (typeof jQuery === 'undefined') {
     },
     'onSort': function(evt, args) {
       var col = args.sortCol; // column to sort
-      var key = col.field || col.key; // key to sort on
+      var key = col.field || col.sortkey; // key to sort on
       if (!key) {
-        throw new HGridError('Sortable column does not define a `key` to sort on.');
+        throw new HGridError('Sortable column does not define a `sortkey` to sort on.');
       }
       this.tree.sort(key, args.sortAsc);
       this.tree.updateDataView(true);

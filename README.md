@@ -154,20 +154,18 @@ var grid = new HGrid('#myGrid', {
   uploadUrl: function(folder) {  // {id: 3, name: 'My bucket', kind: 'folder'}
     return 'files/' + item.id;
   },
-  uploadParams: {}  // TODO
   // Returns where to send request for deletion
   deleteUrl: function(item) {
     return 'files/' + item.id + '/remove';
   },
   deleteMethod: 'delete', 
-  deleteParams: {}, // TODO
   downloadUrl: function(item) {
     return 'download/' + item.name;
   },
   // Check if a file is ok to upload
   // done is a callback that takes an error msg
   // if no msg, then accept the file
-  uploadAccept: function(file, folder, done){ // TODO
+  uploadAccept: function(file, folder, done){
     if (file.name === 'justinbieber.jpg') {
       done('nope');
     } else{
@@ -247,6 +245,9 @@ Default CSS Classes
 - `hg-item`: Includes an item's indent spacer element, icon, and name
 - `hg-folder`
 - `hg-file`
+- `hg-toggle`
+- `hg-expand`
+- `hg-collapse`
 - `hg-row-highlight`
 - `hg-upload-processing`
 - `hg-upload-started`: Added to a row after a file is added and upload has started

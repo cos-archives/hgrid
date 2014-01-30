@@ -136,8 +136,8 @@ if (typeof jQuery === 'undefined') {
     // Placeholder for error messages
     var errorElem = '<span class="error" data-upload-errormessage></span>';
     // The + / - button for expanding/collapsing a folder
-    var expander = item._collapsed ? '<span class="toggle expand"></span>' :
-      '<span class="toggle collapse"></span>';
+    var expander = item._collapsed ? '<span class="hg-toggle hg-expand"></span>' :
+      '<span class="hg-toggle hg-collapse"></span>';
     // The folder icon
     var folderIcon = ' <i class="hg-folder"></i>';
     // Concatenate the expander, folder icon, and the folder name
@@ -279,14 +279,7 @@ if (typeof jQuery === 'undefined') {
      * See: https://github.com/mleibman/SlickGrid/wiki/Grid-Options
      * @property [slickgridOptions]
      */
-    slickgridOptions: {
-      editable: false,
-      asyncEditorLoading: false,
-      enableCellNavigation: false,
-      enableColumnReorder: false, // column reordering requires jquery-ui.sortable
-      forceFitColumns: true,
-      fullWidthRows: true
-    },
+    slickgridOptions: {},
     /**
      * URL to send upload requests to. Can be either a string of a function
      * that receives a data item.
@@ -917,6 +910,15 @@ if (typeof jQuery === 'undefined') {
     return formatter;
   };
 
+  var requiredSlickgridOptions = {
+    editable: false,
+    asyncEditorLoading: false,
+    enableCellNavigation: false,
+    enableColumnReorder: false, // column reordering requires jquery-ui.sortable
+    forceFitColumns: true,
+    fullWidthRows: true
+  };
+
   /**
    * Constructs a Slick.Grid and Slick.Data.DataView from the data.
    * Sets this.grid.
@@ -936,9 +938,10 @@ if (typeof jQuery === 'undefined') {
       }
       return col;
     });
+    var options = $.extend({}, requiredSlickgridOptions, self.options.slickgridOptions);
     this.grid = new Slick.Grid(self.element.selector, this.tree.dataView,
       columns,
-      self.options.slickgridOptions);
+      options);
     return this;
   };
 
@@ -1387,7 +1390,7 @@ if (typeof jQuery === 'undefined') {
   };
 
   HGrid.prototype.canToggle = function($elem) {
-    return $elem.hasClass('toggle');
+    return $elem.hasClass('hg-toggle');
   };
 
   /**

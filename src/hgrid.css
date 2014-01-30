@@ -18,7 +18,7 @@
     background: url('../images/drag-handle.png') no-repeat center center;
 }
 
-.toggle, .hg-folder, .hg-file {
+.hg-toggle, .hg-folder, .hg-file {
     height: 16px;
     width: 16px;
     display: inline-block;
@@ -26,7 +26,7 @@
     padding-right: 3px;
 }
 
-.toggle.expand {
+.hg-toggle.hg-expand {
     background: url('./images/expand.gif') no-repeat center center;
 }
 
@@ -39,11 +39,11 @@
     margin-left: 10px;
 }
 
-.toggle.collapse {
+.hg-toggle.hg-collapse {
     background: url('./images/collapse.gif') no-repeat center center;
 }
 
-.toggle.spacer {
+.hg-toggle.spacer {
     width: 32px;
 }
 

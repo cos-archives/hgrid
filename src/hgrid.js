@@ -1028,10 +1028,11 @@ if (typeof jQuery === 'undefined') {
       this.removeHighlight();
     },
     'onSort': function(evt, args) {
-      // column to sort
-      var col = args.sortCol;
-      // key to sort on
-      var key = col.field || col.key;
+      var col = args.sortCol; // column to sort
+      var key = col.field || col.key; // key to sort on
+      if (!key) {
+        throw new HGridError('Sortable column does not define a `key` to sort on.');
+      }
       this.tree.sort(key, args.sortAsc);
       this.tree.updateDataView(true);
       this.options.onSort.call(this, evt, col, args);

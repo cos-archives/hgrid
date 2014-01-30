@@ -65,14 +65,14 @@ if (typeof jQuery === 'undefined') {
   }
 
   /**
-   * Surrounds HTML with a span with class='hg-item' and 'data-id' attribute
+   * Surrounds HTML with a span with class='hg-item-content' and 'data-id' attribute
    * equal to the item's id
    * @param  {Object} item The item object
    * @param  {string} html The inner HTML
    * @return {String}      The rendered HTML
    */
   function asItem(item, html) {
-    var openTag = '<div class="hg-item" data-id="' + item.id + '">';
+    var openTag = '<div class="hg-item-content" data-id="' + item.id + '">';
     var closingTag = '</div>';
     return [openTag, html, closingTag].join('');
   }
@@ -208,7 +208,7 @@ if (typeof jQuery === 'undefined') {
     Name: {
       id: 'name',
       name: 'Name',
-      field: 'name',
+      sortkey: 'name',
       cssClass: 'hg-cell',
       folderView: defaultFolderView,
       itemView: defaultItemView,
@@ -332,8 +332,8 @@ if (typeof jQuery === 'undefined') {
      * By default, expand or collapse the item.
      * @property [onClick]
      */
-    onClick: function(event, item, $elem) {
-      if (this.canToggle($elem)) {
+    onClick: function(event, item) {
+      if (this.canToggle(event.target)) {
         this.toggleCollapse(item);
       }
     },
@@ -932,7 +932,7 @@ if (typeof jQuery === 'undefined') {
         view = itemView;
       }
       if (typeof view === 'function') {
-        return view.call(self, item, rendererArgs);
+        return view.call(self, item, rendererArgs); // Returns the rendered HTML
       }
       // Use template
       return HGrid.Format.tpl(view, item);
@@ -1025,12 +1025,10 @@ if (typeof jQuery === 'undefined') {
    */
   HGrid.prototype.slickEvents = {
     'onClick': function(evt, args) {
-      var $elem = $(evt.target);
       var item = this.getDataView().getItem(args.row);
-      this.options.onClick.call(this, evt, item, $elem);
+      this.options.onClick.call(this, evt, item);
       return this;
     },
-
     'onCellChange': function(evt, args) {
       this.getDataView().updateItem(args.item.id, args.item);
       return this;
@@ -1449,8 +1447,8 @@ if (typeof jQuery === 'undefined') {
     return item._collapsed;
   };
 
-  HGrid.prototype.canToggle = function($elem) {
-    return $elem.hasClass('hg-toggle');
+  HGrid.prototype.canToggle = function(elem) {
+    return $(elem).hasClass('hg-toggle');
   };
 
   /**

@@ -242,8 +242,7 @@
     var item = myGrid.getData()[0];
     var $elem = $(myGrid.getRowElement(item.id));
     isTrue($elem.hasClass('slick-row'), 'is a SlickGrid row');
-    window.elem = $elem;
-    equal($elem.find('.hg-item').attr('data-id'), item.id, 'is the row for the correct item');
+    equal($elem.find('.hg-item-content').attr('data-id'), item.id, 'is the row for the correct item');
     isTrue($elem.find('.slick-cell.hg-cell').length > 0, 'cell has hg-cell class');
   });
 
@@ -704,7 +703,6 @@
         }]
       }];
       tree = new HGrid.Tree.fromObject(data);
-      window.tree = tree;
     }
   });
 
@@ -717,7 +715,15 @@
     equal(sortedData[2].name, 'b.txt');
   });
 
-  module('Events, listeners, callbacks, oh my!', {
+  test('sorting descending', function() {
+    tree.sort('name', false);
+    var sorted = tree.toData();
+    equal(sorted[0].name, 'Scripts');
+    equal(sorted[1].name, 'foo.py');
+    equal(sorted[2].name, 'bar.js');
+  });
+
+  module('Slickgrid events', {
     setup: function() {
       myGrid = new HGrid('#myGrid', {
         data: testData
@@ -737,14 +743,24 @@
   }
 
   test('onClick callback', function() {
-    expect(2);
-    myGrid.options.onClick = function(event, item, element) {
-      ok(element instanceof jQuery, 'element was set to a jQuery element');
+    expect(1);
+    myGrid.options.onClick = function(event, item) {
       ok(typeof item === 'object', 'item was set to an item object');
     };
     // Trigger the Slick event
     triggerSlick(myGrid.grid.onClick, {
       row: 2
+    });
+  });
+
+  test('onSort callback', function() {
+    expect(1);
+    var column = myGrid.grid.getColumns()[0];
+    myGrid.options.onSort = function(event, colDef) {
+      deepEqual(colDef, column, 'column arg is correct');
+    };
+    triggerSlick(myGrid.grid.onSort, {
+      sortCol: column
     });
   });
 
@@ -760,8 +776,9 @@
       ok(this instanceof HGrid, 'context object is HGrid instance');
     };
     myGrid.addItem(newItem);
-
   });
+
+
 
   module('Tree-DataView binding', {
     teardown: function() {
@@ -937,7 +954,7 @@
     var html = HGrid.Columns.defaultItemView(item);
     ok(typeof html === 'string', 'renderer returns a string');
     var $elem = $(html);
-    isTrue($elem.hasClass('hg-item'), 'has hg-item class');
+    isTrue($elem.hasClass('hg-item-content'), 'has hg-item-content class');
     equal($elem.data('id'), item.id, 'has correct data-id attribute');
     isTrue($elem.find('span.hg-indent').length > 0, 'has indent element');
     isTrue($elem.find('i.hg-file').length > 0, 'has icon with hg-file class');
@@ -950,7 +967,7 @@
     var html = HGrid.Columns.defaultFolderView(item);
     ok(typeof html === 'string', 'renderer returns a string');
     var $elem = $(html);
-    isTrue($elem.hasClass('hg-item'), 'has hg-item class');
+    isTrue($elem.hasClass('hg-item-content'), 'has hg-item-content class');
     equal($elem.data('id'), item.id, 'has correct data-id attribute');
     isTrue($elem.find('span.hg-indent').length > 0, 'has indent element');
     isTrue($elem.find('i.hg-folder').length > 0, 'has icon with hg-folder class');
@@ -972,6 +989,27 @@
     equal($btn.data('hg-action'), 'myaction', 'has correct action');
   });
 
+  test('withIndent', function() {
+    var depth = 4;
+    var item = getMockItem({
+      depth: depth
+    });
+    var html = '<p>test</p>';
+    var withIndent = HGrid.Format.withIndent(item, html);
+    var $elem = $(withIndent);
+    isTrue($elem.length > 0, 'has .hg-indent element');
+    equal($elem.css('width'), 15 * depth + 'px', 'width is correct');
+  });
+
+  test('asItem', function() {
+    var item = getMockItem();
+    var html = '<p>test</p>';
+    var itemHtml = HGrid.Format.asItem(item, html);
+    var $elem = $(itemHtml);
+    equal($elem.data('id'), item.id, 'has data-id');
+    isTrue($elem.hasClass('hg-item-content'), 'has hg-item-content class');
+  });
+
   test('renderButton default action', function() {
     var btnDef = {
       id: 'testbtn',
@@ -987,5 +1025,6 @@
       name: 'world'
     }), 'Hello world');
   });
+
 
 })(jQuery);

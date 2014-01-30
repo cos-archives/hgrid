@@ -221,6 +221,7 @@ if (typeof jQuery === 'undefined') {
       name: 'Actions',
       cssClass: 'hg-cell',
       width: 50,
+      sortable: false,
       folderView: function() {
         var buttonDefs = [];
         if (this.options.uploads) {
@@ -581,6 +582,34 @@ if (typeof jQuery === 'undefined') {
   };
 
   /**
+   * Sort the tree in place, on a key.
+   * @method  sort
+   */
+  Tree.prototype.sort = function(key, asc) {
+    this.children.sort(function(child1, child2) {
+      var res, val1 = child1.data[key],
+        val2 = child2.data[key];
+      var sign = asc ? 1 : -1;
+      var ret = (val1 === val2 ? 0 : (val1 > val2 ? 1 : -1)) * sign;
+      if (ret !== 0) {
+        return ret;
+      }
+      return 0;
+    });
+    for (var i = 0, child; child = this.children[i]; i++) {
+      child.sort(key, asc);
+    }
+  };
+
+  // TODO: test me
+  Tree.prototype.sortCmp = function(cmp) {
+    this.children.sort(cmp);
+    for (var i = 0, child; child = this.children[i]; i++) {
+      child.sortCmp(key);
+    }
+  };
+
+  /**
    * Computes the index in the DataView where to insert an item, based on
    * the item's parentID property.
    * @private
@@ -623,11 +652,13 @@ if (typeof jQuery === 'undefined') {
    * Update the dataview with this tree's data. This should only be called on
    * a root node.
    */
-  Tree.prototype.updateDataView = function() {
+  Tree.prototype.updateDataView = function(onlySetItems) {
     if (!this.dataView) {
       throw new HGridError('Tree does not have a DataView. updateDataView must be called on a root node.');
     }
-    this.ensureDataView();
+    if (!onlySetItems) {
+      this.ensureDataView();
+    }
     this.dataView.beginUpdate();
     this.dataView.setItems(this.toData());
     this.dataView.endUpdate();
@@ -794,6 +825,8 @@ if (typeof jQuery === 'undefined') {
     return this;
   };
 
+  Leaf.prototype.sort = function(key) {};
+
 
   ///////////
   // HGrid //
@@ -940,6 +973,13 @@ if (typeof jQuery === 'undefined') {
     this.grid = new Slick.Grid(self.element.selector, this.tree.dataView,
       columns,
       options);
+    this.grid.onSort.subscribe(function(evt, args) {
+      var col = args.sortCol;
+      self.tree.sort(col.field, args.sortAsc);
+      self.tree.updateDataView(true);
+      self.grid.invalidate();
+      self.grid.render();
+    });
     return this;
   };
 
@@ -1099,6 +1139,8 @@ if (typeof jQuery === 'undefined') {
     },
     dragleave: function(evt) {
       this.removeHighlight();
+      var item = this.getItemFromEvent(evt);
+      this.options.onDragleave.call(this, evt, item);
     },
     // Set the current upload target upon dragging a file onto the grid
     dragenter: function(evt) {
@@ -1298,7 +1340,7 @@ if (typeof jQuery === 'undefined') {
     }
     // Build up the options object, combining the HGrid options, required options,
     // and additional options
-    var dropzoneOptions = $.extend({
+    var dropzoneOptions = $.extend({}, {
         url: uploadUrl,
         // Dropzone expects comma separated list
         acceptedFiles: this.options.acceptedFiles ?

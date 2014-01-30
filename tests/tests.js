@@ -671,7 +671,6 @@
     equal(root.dataView.getItems().length, root.toData().length, 'DataView and Tree have same data length');
   });
 
-  // TODO: @chrisseto
   var tree, data;
   module('Sorting trees', {
     setup: function() {
@@ -697,17 +696,17 @@
         }]
       }];
       tree = new HGrid.Tree.fromObject(data);
+      window.tree = tree;
     }
   });
 
   test('basic sorting', function() {
     equal(tree.toData()[0].name, 'Documents');
-    tree.sort();
+    tree.sort('name', true);
     var sortedData = tree.toData();
     equal(sortedData[0].name, 'Documents');
     equal(sortedData[1].name, 'a.txt');
     equal(sortedData[2].name, 'b.txt');
-    ok(false, 'finish me');
   });
 
   module('Events, listeners, callbacks, oh my!', {

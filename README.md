@@ -218,7 +218,6 @@ var grid = new HGrid('#myGrid', {
 
 - `width`: The width of the grid in px
 - `height`: The height of the grid in px or "auto".
-- `cssClass`: CSS class to apply to the grid. Can also be an array of classes. By default, the `"hgrid"` class will be added to the element.
 - `indent`: Width to indent items in px. Defaults to 15px.
 
 TODO
@@ -235,7 +234,6 @@ Default CSS Classes
 - `hg-toggle`: Used in `HGrid.Columns.Name` column to make an item toggle-able
 - `hg-expand`
 - `hg-collapse`
-- `hg-row-highlight`
 - `hg-row-highlight`
 - `hg-upload-processing`
 - `hg-upload-started`: Added to a row after a file is added and upload has started

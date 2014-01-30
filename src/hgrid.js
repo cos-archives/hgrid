@@ -940,6 +940,26 @@ if (typeof jQuery === 'undefined') {
     return formatter;
   };
 
+  // Hgrid column schemas => Slickgrid columns
+  HGrid.prototype._makeSlickgridColumns = function(colSchemas) {
+    var self = this;
+    var columns = colSchemas.map(function(col) {
+      if (!('formatter' in col)) {
+        // Create the formatter function from the columns definition's
+        // "folderView" and "fileView" properties
+        col.formatter = self.makeFormatter.call(self, col.folderView,
+          col.fileView, {
+            indent: self.options.indent
+          });
+      }
+      if ('text' in col) { // Use 'text' instead of 'name' for column header text
+        col.name = col.text;
+      }
+      return col;
+    });
+    return columns;
+  };
+
   var requiredSlickgridOptions = {
     editable: false,
     asyncEditorLoading: false,
@@ -957,25 +977,13 @@ if (typeof jQuery === 'undefined') {
    */
   HGrid.prototype._initSlickGrid = function() {
     var self = this;
-    var columns = self.options.columns.map(function(col) {
-      if (!('formatter' in col)) {
-        // Create the formatter function from the columns definition's
-        // "folderView" and "fileView" properties
-        col.formatter = self.makeFormatter.call(self, col.folderView,
-          col.fileView, {
-            indent: self.options.indent
-          });
-      }
-      if ('text' in col) {
-        col.name = col.text;
-      }
-      return col;
-    });
+    // Convert column schemas to Slickgrid column definitions
+    var columns = self._makeSlickgridColumns(self.options.columns);
     var options = $.extend({}, requiredSlickgridOptions, self.options.slickgridOptions);
-    this.grid = new Slick.Grid(self.element.selector, this.tree.dataView,
+    self.grid = new Slick.Grid(self.element.selector, self.tree.dataView,
       columns,
       options);
-    return this;
+    return self;
   };
 
   HGrid.prototype.removeHighlight = function() {

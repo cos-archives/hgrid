@@ -6,7 +6,9 @@
 </head>
 <body>
 
-<div id="myGrid"></div>
+<h1>HGrid: Custom Button Example</h1>
+
+<div class='hgrid' id="myGrid"></div>
 
 <script src="../lib/jquery-1.10.2.js"></script>
 <script src="../dist/hgrid.js"></script>
@@ -46,8 +48,7 @@ function fileViewButtons(row) {
 var grid = new HGrid('#myGrid', {
   data: myData,
   columns: [HGrid.Columns.Name,
-            {id: 'mybtns', name: 'My Buttons',
-            fileView: fileViewButtons},
+            {text: 'My Buttons',itemView: fileViewButtons},
             ],
 
 });

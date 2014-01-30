@@ -14,7 +14,7 @@ if (typeof jQuery === 'undefined') {
   var BTN_CLASS = 'hg-btn';
   var DEFAULT_INDENT = 15;
   var ROOT_ID = 'root';
-  var FILE = 'file';
+  var ITEM = 'item';
   var FOLDER = 'folder';
 
   /**
@@ -110,39 +110,39 @@ if (typeof jQuery === 'undefined') {
 
   /**
    * Default rendering function that renders a file item to HTML.
-   * @class defaultFileView
-   * @param  {Object} item The file as an item object.
-   * @return {String}      HTML for the file.
+   * @class defaultItemView
+   * @param  {Object} item The item data object.
+   * @return {String}      HTML for the item.
    */
-  function defaultFileView(item, args) {
+  function defaultItemView(row, args) {
     args = args || {};
     var fileIcon = '<i class="hg-file"></i>';
     // Placeholder for error messages
     var errorElem = '&nbsp;<span class="error" data-upload-errormessage></span>';
     // Placeholder for progress bar
-    var innerContent = [fileIcon, sanitized(item.name), errorElem].join('');
-    return asItem(item, withIndent(item, innerContent, args.indent));
+    var innerContent = [fileIcon, sanitized(row.name), errorElem].join('');
+    return asItem(row, withIndent(row, innerContent, args.indent));
   }
 
   /**
-   * Default rendering function that renders a folder item to HTML.
+   * Default rendering function that renders a folder row to HTML.
    * @class defaultFolderView
-   * @param  {Object} item The folder as an item object.
+   * @param  {Object} row The folder data object.
    * @return {String}      HTML for the folder.
    */
-  function defaultFolderView(item, args) {
+  function defaultFolderView(row, args) {
     args = args || {};
-    var name = sanitized(item.name);
+    var name = sanitized(row.name);
     // Placeholder for error messages
     var errorElem = '&nbsp;<span class="error" data-upload-errormessage></span>';
     // The + / - button for expanding/collapsing a folder
-    var expander = item._collapsed ? '<span class="hg-toggle hg-expand"></span>' :
+    var expander = row._collapsed ? '<span class="hg-toggle hg-expand"></span>' :
       '<span class="hg-toggle hg-collapse"></span>';
     // The folder icon
     var folderIcon = ' <i class="hg-folder"></i>';
     // Concatenate the expander, folder icon, and the folder name
     var innerContent = [expander, folderIcon, errorElem, name].join(' ');
-    return asItem(item, withIndent(item, innerContent, args.indent));
+    return asItem(row, withIndent(row, innerContent, args.indent));
   }
 
   var tpl_fn_cache = {};
@@ -202,7 +202,7 @@ if (typeof jQuery === 'undefined') {
   // Predefined column schemas
   HGrid.Columns = {
     defaultFolderView: defaultFolderView,
-    defaultFileView: defaultFileView,
+    defaultItemView: defaultItemView,
 
     // Name field schema
     Name: {
@@ -211,7 +211,7 @@ if (typeof jQuery === 'undefined') {
       field: 'name',
       cssClass: 'hg-cell',
       folderView: defaultFolderView,
-      fileView: defaultFileView,
+      itemView: defaultItemView,
       sortable: true
     },
 
@@ -235,7 +235,7 @@ if (typeof jQuery === 'undefined') {
         }
         return '';
       },
-      fileView: function() {
+      itemView: function() {
         var buttonDefs = [{
           text: 'Download',
           action: 'download'
@@ -513,8 +513,8 @@ if (typeof jQuery === 'undefined') {
    * Example input:
    * ```
    * [{name: 'Documents', kind: 'folder',
-   *  children: [{name: 'mydoc.txt', type: 'file'}]},
-   *  {name: 'rootfile.txt', kind: 'file'}
+   *  children: [{name: 'mydoc.txt', type: 'item'}]},
+   *  {name: 'rootfile.txt', kind: 'item'}
    *  ]
    *  ```
    *
@@ -536,7 +536,7 @@ if (typeof jQuery === 'undefined') {
     }
     for (var i = 0, len = children.length; i < len; i++) {
       var child = children[i];
-      if (child.kind === FILE) {
+      if (child.kind === ITEM) {
         leaf = Leaf.fromObject(child);
         tree.add(leaf);
       } else {
@@ -879,7 +879,7 @@ if (typeof jQuery === 'undefined') {
 
   HGrid.ROOT_ID = ROOT_ID;
   HGrid.FOLDER = FOLDER;
-  HGrid.FILE = FILE;
+  HGrid.ITEM = ITEM;
 
   HGrid.prototype.init = function() {
     this.setHeight(this.options.height)
@@ -915,8 +915,8 @@ if (typeof jQuery === 'undefined') {
   };
 
   // TODO: test me
-  // HGrid folderView and fileView (in column def) => SlickGrid Formatter
-  HGrid.prototype.makeFormatter = function(folderView, fileView, args) {
+  // HGrid folderView and itemView (in column def) => SlickGrid Formatter
+  HGrid.prototype.makeFormatter = function(folderView, itemView, args) {
     var self = this,
       view;
     var formatter = function(row, cell, value, colDef, item) {
@@ -929,7 +929,7 @@ if (typeof jQuery === 'undefined') {
       if (item.kind === FOLDER) {
         view = folderView;
       } else {
-        view = fileView;
+        view = itemView;
       }
       if (typeof view === 'function') {
         return view.call(self, item, rendererArgs);
@@ -946,9 +946,9 @@ if (typeof jQuery === 'undefined') {
     var columns = colSchemas.map(function(col) {
       if (!('formatter' in col)) {
         // Create the formatter function from the columns definition's
-        // "folderView" and "fileView" properties
+        // "folderView" and "itemView" properties
         col.formatter = self.makeFormatter.call(self, col.folderView,
-          col.fileView, {
+          col.itemView, {
             indent: self.options.indent
           });
       }
@@ -1189,7 +1189,7 @@ if (typeof jQuery === 'undefined') {
       // Add a new row
       var addedItem = this.addItem({
         name: file.name,
-        kind: HGrid.FILE,
+        kind: HGrid.ITEM,
         parentID: currentTarget.id
       });
       var rowElem = this.getRowElement(addedItem.id),

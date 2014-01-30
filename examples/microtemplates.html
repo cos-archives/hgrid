@@ -46,7 +46,7 @@ var grid = new HGrid('#myGrid', {data: myData,
                         HGrid.Columns.Name,
                         {name: 'File size',
                           sortable: true, key: 'size',
-                          fileView: '<em>{{ size }} KB</em>'}
+                          itemView: '<em>{{ size }} KB</em>'}
                       ],
                       width: 500, height: 200});
 

@@ -29,11 +29,11 @@
     data: [
       {name: 'Documents', kind: 'folder', 
       children: [
-        {name: 'mydoc.txt', kind: 'file'},
+        {name: 'mydoc.txt', kind: 'item'},
       ]},
       {name: 'Music', kind: 'folder',
       children: [
-        {name: 'psycho-killer.mp3', kind: 'file'}
+        {name: 'psycho-killer.mp3', kind: 'item'}
       ]}
     ]
   };
@@ -75,7 +75,7 @@ Column schemas are just objects that have--at a minimum--the following propertie
 
 - `text`: The text to show in the column header
 - `folderView`: Either a function that renders the HTML for a folder or a microtemplate.
-- `fileView`: Either a function that render the HTML for a file or a microtemplate.
+- `itemView`: Either a function that render the HTML for a file or a microtemplate.
 
 To make a column sortable, provide `sortable=true` and a `sortkey` on which to sort the data.
 
@@ -87,15 +87,15 @@ Examples:
 // Custom column schemas
 var myCustomNameColumn = {
   text: 'Name', 
-  folderView: '<div class="folder">{{ name }}</div?>' // Using a microtemplate
-  fileView: '<div class="file">{{ name }}</div?>'
+  folderView: '<div class="folder {{cssClass}}">{{ name }}</div?>' // Using a microtemplate
+  itemView: '<div class="file {{cssClass}}">{{ name }}</div?>'
   sortable: true,
   sortkey: 'name' // property of item object on which to sort on
 };
 
 var filesizeColumn = {text: 'Filesize',
   // receives `row` containing all the item information
-  fileView: function(row) {return row.filesize.toString(); },
+  itemView: function(row) {return row.filesize.toString(); },
   folderView: function(row) {return '';} // Folders don't have a file size
   sortable: true, sortkey: 'size'
 };
@@ -122,7 +122,7 @@ var nameColumn = {text: 'Name',
     // => '<span class="hg-indent" style="width:45"></span><em>My Documents</em>'
     return itemWithIndent;
   },
-  fileView: ...
+  itemView: ...
 };
 ```
 

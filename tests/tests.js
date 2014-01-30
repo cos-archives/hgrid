@@ -15,7 +15,7 @@
     var item = $.extend({}, {
       id: 123,
       name: 'test.txt',
-      kind: 'folder',
+      kind: HGrid.FOLDER,
       parentID: 'root',
       depth: 1
     }, args);
@@ -55,24 +55,24 @@
   var testData = {
     data: [{
       name: 'Documents',
-      kind: 'folder',
+      kind: HGrid.FOLDER,
       children: [{
         name: 'Scripts',
-        kind: 'folder',
+        kind: HGrid.FOLDER,
         children: [{
           name: 'foo.py',
-          kind: 'file'
+          kind: HGrid.ITEM
         }]
       }, {
         name: 'mydoc.txt',
-        kind: 'file'
+        kind: HGrid.ITEM
       }]
     }, {
       name: 'Music',
-      kind: 'folder',
+      kind: HGrid.FOLDER,
       children: [{
         name: 'bar.mp3',
-        kind: 'folder'
+        kind: HGrid.FOLDER
       }]
     }]
   },
@@ -107,11 +107,11 @@
     var items = {
       data: [{
         name: 'foo.py',
-        kind: 'file',
+        kind: HGrid.ITEM,
         lang: 'python'
       }, {
         name: 'bar.js',
-        kind: 'file',
+        kind: HGrid.ITEM,
         lang: 'javascript'
       }]
     };
@@ -126,11 +126,11 @@
     var items = {
       data: [{
         name: 'foo.py',
-        kind: 'file',
+        kind: HGrid.ITEM,
         id: 'file1'
       }, {
         name: 'bar.js',
-        kind: 'file',
+        kind: HGrid.ITEM,
         id: 'file2'
       }]
     };
@@ -202,7 +202,7 @@
     var newItem = {
       parentID: parentItem.id,
       name: 'New folder',
-      kind: 'folder'
+      kind: HGrid.FOLDER
     };
 
     var addedItem = myGrid.addItem(newItem); // Returns the added item
@@ -250,10 +250,10 @@
   test('Expanding item', function() {
     var dat = {
       data: [{
-        kind: 'folder',
+        kind: HGrid.FOLDER,
         name: 'Docs',
         children: [{
-          kind: 'file',
+          kind: HGrid.ITEM,
           name: 'mydoc.txt'
         }]
       }]
@@ -272,10 +272,10 @@
   test('Toggle collapse', function() {
     var dat = {
       data: [{
-        kind: 'folder',
+        kind: HGrid.FOLDER,
         name: 'Docs',
         children: [{
-          kind: 'file',
+          kind: HGrid.ITEM,
           name: 'mydoc.txt'
         }]
       }]
@@ -295,10 +295,10 @@
     var myData = {
       data: [{
         name: 'Parent',
-        kind: 'folder',
+        kind: HGrid.FOLDER,
         children: [{
           name: 'Child',
-          kind: 'file'
+          kind: HGrid.ITEM
         }]
       }]
     };
@@ -324,7 +324,7 @@
     var grid = new HGrid('#myGrid');
     var addedItem = grid.addItem({
       name: 'First',
-      kind: 'folder'
+      kind: HGrid.FOLDER
     });
     containsText('.slick-cell', addedItem.name, 'Item added to DOM');
   });
@@ -352,7 +352,7 @@
   test('Tree and DataView', function() {
     var root = new HGrid.Tree();
     ok(root.dataView, 'root has a dataView attribute');
-    var subtree = new HGrid.Tree('Docs', 'folder');
+    var subtree = new HGrid.Tree('Docs', HGrid.FOLDER);
     root.add(subtree);
     areIdentical(root.dataView, subtree.dataView);
   });
@@ -362,21 +362,21 @@
     equal(root.id, 'root', 'root id is "root"');
     var tree1 = new HGrid.Tree({
       name: 'My Documents',
-      kind: 'folder'
+      kind: HGrid.FOLDER
     });
     equal(tree1.id, 0);
-    equal(tree1.data.kind, 'folder', 'sets the tree kind');
+    equal(tree1.data.kind, HGrid.FOLDER, 'sets the tree kind');
     var tree2 = new HGrid.Tree({
       name: 'My Music',
-      kind: 'folder'
+      kind: HGrid.FOLDER
     });
     equal(tree2.id, 1);
     var leaf1 = new HGrid.Leaf({
       name: 'foo.py',
-      kind: 'file'
+      kind: HGrid.ITEM
     });
     equal(leaf1.id, 2);
-    equal(leaf1.data.kind, 'file', 'sets the leaf kind');
+    equal(leaf1.data.kind, HGrid.ITEM, 'sets the leaf kind');
   });
 
 
@@ -402,7 +402,7 @@
     equal(root.getItem(), undefined, 'root does not have an item');
     var folder = new HGrid.Tree({
       name: 'Folder 1',
-      kind: 'folder'
+      kind: HGrid.FOLDER
     });
     root.add(folder);
     root.updateDataView();
@@ -416,12 +416,12 @@
     var root = new HGrid.Tree();
     var leaf = new HGrid.Leaf({
       name: 'file.txt',
-      kind: 'file'
+      kind: HGrid.ITEM
     });
     root.add(leaf);
     root.updateDataView();
     var leafItem = leaf.getItem();
-    equal(leafItem.kind, 'file');
+    equal(leafItem.kind, HGrid.ITEM);
     equal(leafItem.parentID, HGrid.ROOT_ID);
   });
 
@@ -543,7 +543,7 @@
   test('Creating trees with metadata', function() {
     var t1 = HGrid.Tree({
       name: 'foo.py',
-      kind: 'folder',
+      kind: HGrid.FOLDER,
       language: 'python'
     });
     equal(t1.data.language, 'python');
@@ -552,10 +552,10 @@
 
   test('Depths', function() {
     var root = new HGrid.Tree();
-    var subtree = new HGrid.Tree('Subtree', 'folder');
-    var subsubtree = new HGrid.Tree('Another subtree', 'folder');
-    var leaf = new HGrid.Leaf('Leaf', 'file');
-    var rootLeaf = new HGrid.Leaf('Root leaf', 'file');
+    var subtree = new HGrid.Tree('Subtree', HGrid.FOLDER);
+    var subsubtree = new HGrid.Tree('Another subtree', HGrid.FOLDER);
+    var leaf = new HGrid.Leaf('Leaf', HGrid.ITEM);
+    var rootLeaf = new HGrid.Leaf('Root leaf', HGrid.ITEM);
     root.add(subtree);
     root.add(rootLeaf);
     subtree.add(subsubtree);
@@ -571,7 +571,7 @@
     ok(root.depth === 0, 'Constructing HGrid.Tree with no args creates a root node');
     var tree = new HGrid.Tree({
       name: 'My Documents',
-      kind: 'folder'
+      kind: HGrid.FOLDER
     });
     ok(tree.depth !== 0, 'A tree with a name and kind is not a root node.');
     root.add(tree);
@@ -587,7 +587,7 @@
     deepEqual(root.toData(), tree.toData(), 'root is excluded from data');
     var leaf = new HGrid.Leaf({
       name: 'foo.py',
-      kind: 'file'
+      kind: HGrid.ITEM
     });
     tree.add(leaf);
     deepEqual(leaf.toData(), {
@@ -613,7 +613,7 @@
   test('Tree.toData() with metadata', function() {
     var tree = new HGrid.Tree({
       name: 'foo.py',
-      kind: 'file',
+      kind: HGrid.ITEM,
       lang: 'python'
     });
     deepEqual(tree.toData(), [{
@@ -630,35 +630,35 @@
   test('Constructing leaf from object', function() {
     var file = HGrid.Leaf.fromObject({
       name: 'foo.py',
-      kind: 'file'
+      kind: HGrid.ITEM
     });
     ok(file instanceof HGrid.Leaf, 'fromObject returns a HGrid.Leaf');
     equal(file.data.name, 'foo.py');
-    equal(file.data.kind, 'file');
+    equal(file.data.kind, HGrid.ITEM);
   });
 
   test('Constructing tree from object', function() {
     var data = [{
       name: 'Documents',
-      kind: 'folder',
+      kind: HGrid.FOLDER,
       children: [{
         name: 'mydoc.txt',
-        kind: 'file'
+        kind: HGrid.ITEM
       }, {
         name: 'Scripts',
-        kind: 'folder',
+        kind: HGrid.FOLDER,
         children: [{
           name: 'script.py',
-          kind: 'file'
+          kind: HGrid.ITEM
         }, {
           name: 'JS scripts',
-          kind: 'folder',
+          kind: HGrid.FOLDER,
           children: []
         }]
       }]
     }, {
       name: 'rootfile.js',
-      kind: 'file'
+      kind: HGrid.ITEM
     }];
     var root = HGrid.Tree.fromObject(data);
     root.updateDataView();
@@ -669,12 +669,12 @@
     equal(subtree.dataView, root.dataView, 'root and subtree point to the same DataView');
     equal(subtree.depth, 1, 'subtree depth is 1');
     equal(subtree.data.name, 'Documents');
-    equal(subtree.data.kind, 'folder');
+    equal(subtree.data.kind, HGrid.FOLDER);
     var child = subtree.children[0];
     ok(child instanceof HGrid.Leaf, 'file is an HGrid.Leaf');
     equal(child.dataView, root.dataView, 'leaf and root point to the same DataView');
     equal(child.data.name, 'mydoc.txt');
-    equal(child.data.kind, 'file');
+    equal(child.data.kind, HGrid.ITEM);
     equal(child.depth, 2, 'child depth is 2');
     equal(root.dataView.getItems().length, root.toData().length, 'DataView and Tree have same data length');
   });
@@ -684,23 +684,23 @@
     setup: function() {
       data = [{
         name: 'Documents',
-        kind: 'folder',
+        kind: HGrid.FOLDER,
         children: [{
           name: 'b.txt',
-          kind: 'file'
+          kind: HGrid.ITEM
         }, {
           name: 'a.txt',
-          kind: 'file'
+          kind: HGrid.ITEM
         }]
       }, {
         name: 'Scripts',
-        kind: 'folder',
+        kind: HGrid.FOLDER,
         children: [{
           name: 'foo.py',
-          kind: 'file'
+          kind: HGrid.ITEM
         }, {
           name: 'bar.js',
-          kind: 'file'
+          kind: HGrid.ITEM
         }]
       }];
       tree = new HGrid.Tree.fromObject(data);
@@ -753,7 +753,7 @@
     var newItem = {
       parentID: myGrid.getData()[0].id,
       name: 'New folder',
-      kind: 'folder'
+      kind: HGrid.FOLDER
     };
     myGrid.options.onItemAdded = function(item) {
       equal(item.name, newItem.name, 'passes the added item');
@@ -772,10 +772,10 @@
   test('Adding components to a tree in hierarchical order', function() {
     var root = new HGrid.Tree();
     equal(root.dataView.getItems().length, 0);
-    var folder = new HGrid.Tree('Docs', 'folder');
+    var folder = new HGrid.Tree('Docs', HGrid.FOLDER);
     equal(root.dataView.getItems().length, 0);
-    var subfolder = new HGrid.Tree('Scripts', 'folder');
-    var file = new HGrid.Leaf('foo.js', 'file');
+    var subfolder = new HGrid.Tree('Scripts', HGrid.FOLDER);
+    var file = new HGrid.Leaf('foo.js', HGrid.ITEM);
     root.add(folder, true);
     equal(root.dataView.getItems().length, 1);
     folder.add(subfolder, true);
@@ -786,9 +786,9 @@
 
   test('Adding components out of order', function() {
     var root = new HGrid.Tree();
-    var subfolder = new HGrid.Tree('Scripts', 'folder');
-    var file = new HGrid.Leaf('foo.js', 'file');
-    var folder = new HGrid.Tree('Docs', 'folder');
+    var subfolder = new HGrid.Tree('Scripts', HGrid.FOLDER);
+    var file = new HGrid.Leaf('foo.js', HGrid.ITEM);
+    var folder = new HGrid.Tree('Docs', HGrid.FOLDER);
     folder.add(subfolder);
     subfolder.add(file);
     root.add(folder);
@@ -903,7 +903,7 @@
     var folder = grid.getData()[0];
     file.gridItem = grid.addItem({
       name: 'New file',
-      kind: 'file',
+      kind: HGrid.ITEM,
       parentID: folder.id
     });
     grid.currentTarget = folder;
@@ -932,9 +932,9 @@
 
   module('Predefined columns (HGrid.Columns)', {});
 
-  test('defaultFileView', function() {
+  test('defaultItemView', function() {
     var item = getMockItem();
-    var html = HGrid.Columns.defaultFileView(item);
+    var html = HGrid.Columns.defaultItemView(item);
     ok(typeof html === 'string', 'renderer returns a string');
     var $elem = $(html);
     isTrue($elem.hasClass('hg-item'), 'has hg-item class');

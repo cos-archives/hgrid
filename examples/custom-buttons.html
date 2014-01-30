@@ -36,7 +36,7 @@ HGrid.Actions['makeblue'] = {
   }
 };
 
-function renderFileButtons(row) {
+function fileViewButtons(row) {
   // Use the button formatting helper to make a button that can use the
   // custom action
   var buttons = [{text: 'RED', action: 'makered'}, {text: 'BLUE', action: 'makeblue'}];
@@ -47,8 +47,8 @@ var grid = new HGrid('#myGrid', {
   data: myData,
   columns: [HGrid.Columns.Name,
             {id: 'mybtns', name: 'My Buttons',
-            renderFile: renderFileButtons}
-  ]
+            fileView: fileViewButtons},
+            ],
 
 });
 

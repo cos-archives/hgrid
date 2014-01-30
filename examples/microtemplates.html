@@ -2,11 +2,11 @@
 <html>
 <head>
     <link rel="stylesheet" href="../src/hgrid.css" type="text/css" />
-    <title>HGrid: Basic Example With Minimal Configuration</title>
+    <title>HGrid: Microtemplating example</title>
 </head>
 <body>
 
-<div class="hgrid" id="myGrid"></div>
+<div class='hgrid' id="myGrid"></div>
 
 <script src="../lib/jquery-1.10.2.js"></script>
 <script src="../dist/hgrid.js"></script>
@@ -24,7 +24,8 @@ var myData = {
           kind: 'folder',
           children: [{
             name: 'foo.py',
-            kind: 'file'
+            kind: 'file',
+            size: 123
           },
           {name: 'Empty Folder', kind: 'folder'}]
         }, ]
@@ -34,13 +35,20 @@ var myData = {
         children: [{
           name: 'bar.mp3',
           kind: 'file',
-          children: []
+          size: 456
         }]
       }]
     }]
 };
 
-new HGrid('#myGrid', {data: myData, width: 500, height: 200});
+var grid = new HGrid('#myGrid', {data: myData,
+                      columns: [
+                        HGrid.Columns.Name,
+                        {name: 'File size',
+                          sortable: true, key: 'size',
+                          fileView: '<em>{{ size }} KB</em>'}
+                      ],
+                      width: 500, height: 200});
 
 </script>
 </body>

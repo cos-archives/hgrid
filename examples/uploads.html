@@ -8,7 +8,7 @@
 
 <h1>HGrid Uploads Example</h1>
 <p>Drag and drop onto the folders or click an "Upload" button</p>
-<div id="myGrid"></div>
+<div class='hgrid' id="myGrid"></div>
 <p>NOTE: Uploads are not actually saved</p>
 
 <script src="../lib/jquery-1.10.2.js"></script>
@@ -18,7 +18,10 @@
 <script>
 // Initial data
 var folderData = {
-  data: [{name: 'Uploads', kind: 'folder', canUpload: true},
+  data: [{name: 'Uploads', kind: 'folder',  canUpload: true}, // Note: canUpload is NOT a special
+                                                              // property used by HGrid. It is just metadata that the
+                                                              // programmer can use, e.g., in the uploadAccept function
+                                                              // below
         {name: 'Forbidden', kind: 'folder', canUpload: false},
         {name: 'PUT stuff', kind: 'folder', canUpload: true}]
 };
@@ -36,7 +39,7 @@ var grid = new HGrid('#myGrid', {
   columns: [HGrid.Columns.Name,
             HGrid.Columns.ActionButtons],  // Default buttons
   uploads: true,
-  maxFilesize: 20, // MV
+  maxFilesize: 20, // Mb
   uploadAccept: function(file, row, done) {
     if (!row.canUpload) {
       // If done callback is called with an argument, an error is thrown

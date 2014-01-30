@@ -69,38 +69,42 @@ var grid = new HGrid('#myGrid', {
 });
 ```
 
-### Custom Column Schemas
+### Custom Column Schemas, Sorting
 
-Columns are defined by objects that have--at a minimum--`id`, `name`, `folderView`, and `fileView` properties.
+Column schemas are just objects that have--at a minimum--the following properties:
 
-`folderView` and `fileView` are functions that return the HTML for a given folder or file, respectively.
+- `name`: The text to show in the column header
+- `folderView`: Either a function that renders the HTML for a folder or a microtemplate.
+- `fileView`: Either a function that render the HTML for a file or a microtemplate.
+
+To make a column sortable, provide `sortable=true` and a `sortkey` on which to sort the data.
+
+NOTE: Column schemas can additionally take any [Slickgrid column options](https://github.com/mleibman/SlickGrid/wiki/Column-Options).
+
+Examples: 
 
 ```javascript
-var nameColumn = {id: 'name', name: 'Name', 
-  // receives `row` containing all the item information
-  folderView: function(row) { 
-    return '<div class="folder">' + row.name + "</div>";
-  },
-  fileView: function(row) {
-    return '<div class="file">' + row.name + "</div>";
-  },
+// Custom column schemas
+var myCustomNameColumn = {
+  name: 'Name', 
+  folderView: '<div class="folder">{{ name }}</div?>' // Using a microtemplate
+  fileView: '<div class="file">{{ name }}</div?>'
   sortable: true,
+  sortkey: 'name' // property of item object on which to sort on
 };
 
-var filesizeColumn = {id: 'size', name: 'Filesize',
-  folderView: function(row) {return '';} // Folders don't have a file size
+var filesizeColumn = {name: 'Filesize',
+  // receives `row` containing all the item information
   fileView: function(row) {return row.filesize.toString(); },
-  sortable: true,
-  comparator: function(val1, val2) {...}
+  folderView: function(row) {return '';} // Folders don't have a file size
+  sortable: true, sortkey: 'size'
 };
 
 var grid = new HGrid('#myGrid', {
-  columns: [nameColumn, filesizeColumn],
+  columns: [myCustomNameColumn, filesizeColumn],
   ...
 }); 
 ```
-
-NOTE: Column schemas can additionally take any [Slickgrid column options](https://github.com/mleibman/SlickGrid/wiki/Column-Options).
 
 #### Formatting helpers
 
@@ -113,7 +117,7 @@ var item = {id: 123, name: 'My Documents', kind: 'folder', depth: 3};
 
 var nameColumn = {id: 'name', name: 'Name',
   folderView: function(row) {
-    var itemHtml = '<em>' + row.name + '</em>';
+    var itemHtml = HGrid.Format.tpl('<em>{{ name }}</em?>', row);
     var itemWithIndent = HGrid.Format.withIndent(row, itemHtml);
     // => '<span class="hg-indent" style="width:45"></span><em>My Documents</em>'
     return itemWithIndent;
@@ -126,32 +130,32 @@ Available helpers
 
 - `HGrid.Format.withIndent(row, html, [indentWidth])`: Adds an indenting span based on the a row's `depth` property.
 - `HGrid.Format.asItem(row, html)`: Surrounds `html` with `<div class="hg-item" data-id=123>`
-- `HGrid.Format.button(row, buttonDef)`: Render a button. TODO
-- `HGrid.Format.buttons(row, buttonDefs)`: Render a series of buttons.  TODO
+- `HGrid.Format.button(row, buttonDef)`: Render a button.
+- `HGrid.Format.buttons(row, buttonDefs)`: Render a series of buttons.
+- `HGrid.Format.tpl(template, data)`: Microtemplating function.
 
 
-## Buttons and Actions 
+## Actions 
 
 TODO 
 
 ## File management
 
-HGrid exposes a number of options and callbacks to allow uploading data as well as removing data.
-
-Example:
-
 ```javascript
 var grid = new HGrid('#myGrid', {
   data: files, 
   uploads: true,
+  columns: [HGrid.Columns.Name, 
+            HGrid.Columns.ActionButtons]  // Provides file-related buttons
+                                          // (Upload, Download, Delete)
   maxFilesize: 10,  // MB
   // Mimetypes or file extensions
   acceptedFiles: ['image/*', 'application/pdf', '.py'],
   uploadMethod: function(folder) {
     return item.uploadMethod || 'post';
   },
-  // Returns where to send request for upload
-  uploadUrl: function(folder) {  // {id: 3, name: 'My bucket', kind: 'folder'}
+  // Can be a string or a function that returns where to send request for upload
+  uploadUrl: function(item) {  // item => {id: 3, name: 'My bucket', kind: 'folder'}
     return 'files/' + item.id;
   },
   // Returns where to send request for deletion
@@ -161,34 +165,40 @@ var grid = new HGrid('#myGrid', {
   deleteMethod: 'delete', 
   downloadUrl: function(item) {
     return 'download/' + item.name;
-  },
-  // Check if a file is ok to upload
-  // done is a callback that takes an error msg
-  // if no msg, then accept the file
-  uploadAccept: function(file, folder, done){
-    if (file.name === 'justinbieber.jpg') {
-      done('nope');
-    } else{
-      done();
-    }
-  },
-  uploadAdded: function(file, newItem){},
-  uploadSuccess: function(file, newItem){},
-  uploadError: function(file, message, newItem) {},
-  uploadProcessing: function(file, newItem) {},
-  uploadProgress: function(file, progress, bytesSent, newItem) {}
+  }
 });
 ```
 
 
-#### Event Callbacks 
+## Callback Options
 
-- `onClick: function(event, element, item)`: Called when grid is clicked. By default, toggles the collapsed state of `item`.
+### Event Callbacks
+
+- `onClick: function(event, element, item)`: Called when grid item is clicked. By default, toggles the collapsed state of `item`.
 - `onAdd: function(item, grid)`
 - `onDragover: function(event, item)`
 - `onDragenter: function(event, item)`
-- `onItemAdded: function(item)`: Called whenever a new row is added to the grid.
+- `onDragleave: function(event, item)`
+- `onDrop: function(event, item)`
+- `onSort: function(event, column, args)`: Called whenever a column header is clicked to sort the grid.
 
+### Upload-related Callbacks 
+
+- `uploadAdded: function(file, item)`
+- `uploadProcessing function(file, item)`: Called when a file in the upload queue begins processing.
+- `uploadError: function(file, message, item)`: Called when a file upload fails. By default, imputes the error message into any HTML element that has the `data-upload-errormessage` attribute.
+- `uploadProgress: function(file, progress, bytesSent, item)`: Called whenever upload progress changes.
+- `uploadSuccess: function(file, item)`
+- `uploadComplete: function(file, item)`
+- `uploadAccept: function(file, folder, done)`: Validation function that is run before a file gets uploaded. `done` is a function that, if called with a string argument, raises the error message, passes it to `uploadError`, and terminates the upload. If called with no arguments, the upload is allowed. For filetype and filesize checking, use the `acceptedFiles` and `maxFilesize` options.
+
+  ```javascript
+  uploadAccept: function(file, folder, done) {
+    if (file.name === 'muggle.jpg')
+      done('No muggles allowed');
+    done();
+  }
+  ```
 
 ### Adding other listeners
 
@@ -203,17 +213,38 @@ var grid = new HGrid('#myGrid', {
 });
 ```
 
-You can also pass in a `listeners` array.
 
-```javascript
-var grid = new HGrid('#myGrid', {
-  listeners: [{selector: '.my-button', on: 'click', 
-              callback: function(evt, row) {alert('Clicked on' + row.name); }}
-              ]
-});
-```
+### Other Options
+
+- `width`: The width of the grid in px
+- `height`: The height of the grid in px or "auto".
+- `cssClass`: CSS class to apply to the grid. Can also be an array of classes. By default, the `"hgrid"` class will be added to the element.
+- `indent`: Width to indent items in px. Defaults to 15px.
+
+TODO
+
+## Styling the Grid
+
+Default CSS Classes
+
+- `hgrid`
+- `hg-item`: Includes an item's indent spacer element, icon, and name
+- `hg-btn`
+- `hg-folder`
+- `hg-file`: Used in `HGrid.Columns.Name` to render the file icon.
+- `hg-toggle`: Used in `HGrid.Columns.Name` column to make an item toggle-able
+- `hg-expand`
+- `hg-collapse`
+- `hg-row-highlight`
+- `hg-row-highlight`
+- `hg-upload-processing`
+- `hg-upload-started`: Added to a row after a file is added and upload has started
+- `hg-upload-error`: Added to a row if an error occurs during upload.
+
 
 ### Overriding Slickgrid or Dropzone options
+
+You can pass initial options to the Slickgrid or Dropzone constructors like so:
 
 ```javascript
 var grid = new HGrid('#myGrid', {
@@ -226,33 +257,6 @@ var grid = new HGrid('#myGrid', {
   }
 });
 ```
-
-### Other Options
-
-- `width`: The width of the grid in px
-- `height`: The height of the grid in px or "auto".
-- `cssClass`: CSS class to apply to the grid. Can also be an array of classes. By default, the `"hgrid"` class will be added to the element.
-- `indent`: Width to indent items in px. Defaults to 15px.
-- `highlightClass`: Class added to a row when a row is highlighted. Defaults to `hg-row-highlight`.
-
-TODO
-
-## Styling the Grid
-
-Default CSS Classes
-
-- `hgrid`
-- `hg-item`: Includes an item's indent spacer element, icon, and name
-- `hg-folder`
-- `hg-file`
-- `hg-toggle`
-- `hg-expand`
-- `hg-collapse`
-- `hg-row-highlight`
-- `hg-upload-processing`
-- `hg-upload-started`: Added to a row after a file is added and upload has started
-- `hg-upload-error`: Added to a row if an error occurs during upload.
-
 
 ## Accessing SlickGrid and DropZone objects directly
 
@@ -289,9 +293,3 @@ Run tests with grunt.
 Tests are written using the [QUnit](http://qunitjs.com/) framework.
 
 Tests are located in `tests/tests.js`.
-
-
-
-
-
-

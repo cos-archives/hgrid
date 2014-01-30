@@ -118,7 +118,7 @@ if (typeof jQuery === 'undefined') {
     args = args || {};
     var fileIcon = '<i class="hg-file"></i>';
     // Placeholder for error messages
-    var errorElem = '<span class="error" data-upload-errormessage></span>';
+    var errorElem = '&nbsp;<span class="error" data-upload-errormessage></span>';
     // Placeholder for progress bar
     var innerContent = [fileIcon, sanitized(item.name), errorElem].join('');
     return asItem(item, withIndent(item, innerContent, args.indent));
@@ -134,7 +134,7 @@ if (typeof jQuery === 'undefined') {
     args = args || {};
     var name = sanitized(item.name);
     // Placeholder for error messages
-    var errorElem = '<span class="error" data-upload-errormessage></span>';
+    var errorElem = '&nbsp;<span class="error" data-upload-errormessage></span>';
     // The + / - button for expanding/collapsing a folder
     var expander = item._collapsed ? '<span class="hg-toggle hg-expand"></span>' :
       '<span class="hg-toggle hg-collapse"></span>';
@@ -1193,6 +1193,7 @@ if (typeof jQuery === 'undefined') {
     thumbnail: noop,
     // Just delegate error function to options.uploadError
     error: function(file, message) {
+      var $rowElem = $(file.gridElement);
       $rowElem.addClass('hg-upload-error').removeClass('hg-upload-processing');
       return this.options.uploadError.call(this, file, message, file.gridItem);
     },

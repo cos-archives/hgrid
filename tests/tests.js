@@ -730,7 +730,7 @@
 
   test('onClick callback', function() {
     expect(2);
-    myGrid.options.onClick = function(event, element, item) {
+    myGrid.options.onClick = function(event, item, element) {
       ok(element instanceof jQuery, 'element was set to a jQuery element');
       ok(typeof item === 'object', 'item was set to an item object');
     };

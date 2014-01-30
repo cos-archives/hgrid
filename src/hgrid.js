@@ -77,37 +77,15 @@ if (typeof jQuery === 'undefined') {
     return [openTag, html, closingTag].join('');
   }
 
-
-  // Default button actions
-  // So a button definition can be defined like:
-  // {text: 'My Download Button', action: 'download'}
-  //    as a shorthand for
-  // {text: 'My Download Button', onClick: function(evt, item) {this.downloadFile(item);}}
-  HGrid.prototype.FILE_ACTIONS = {
-    /*jshint unused: false */
-    'download': function(evt, item) {
-      this.options.onClickDownload.call(this, evt, item);
-    },
-    'delete': function(evt, item) {
-      this.options.onClickDelete.call(this, evt, item);
-    }
-  };
-  HGrid.prototype.FOLDER_ACTIONS = {
-    'upload': function(evt, item) {
-      this.options.onClickUpload.call(this, evt, item);
-    }
-  };
-
   /**
    * Render the html for a button, given an item and buttonDef. buttonDef is an
    * object of the form {text: "My button", cssClass: "btn btn-primary",
-   *                     onClick: function(item) {alert(item.name); }}
+   *                     onClick: function(evt, item) {alert(item.name); }}
    * @class  renderButton
    * @private
    */
-  function renderButton(item, buttonDef, btnIdx) {
+  function renderButton(buttonDef) {
     var cssClass;
-    btnIdx = btnIdx || 0;
     // For now, buttons are required to have the hg-btn class so that a click
     // event listener can be attacked to them later
     if (buttonDef.cssClass) {
@@ -115,47 +93,20 @@ if (typeof jQuery === 'undefined') {
     } else {
       cssClass = BTN_CLASS;
     }
-    var openTag = '<button data-btn-idx="' + btnIdx + '" class="' + cssClass + '" data-item-id="' + item.id + '">';
+    var action = buttonDef.action || 'noop';
+    var openTag = '<button data-hg-action="' + action + '" class="' + cssClass + '">';
     var closingTag = '</button>';
-    var html = [openTag, buttonDef.text, closingTag].join(' ');
+    var html = [openTag, buttonDef.text, closingTag].join('');
     return html;
   }
 
-  function renderButtons(item, buttonDefs) {
-    var renderedButtons = buttonDefs.map(function(btn, idx) {
-      var html = renderButton(item, btn, idx);
+  function renderButtons(buttonDefs) {
+    var renderedButtons = buttonDefs.map(function(btn) {
+      var html = renderButton(btn);
       return html;
     }).join('');
     return renderedButtons;
   }
-
-  /**
-   * Factory function for a SlickGrid formatter for rendering the button column.
-   * @class  makeButtonFormatter
-   * @private
-   * @param  {Function} folderFunc Function that returns an array of button definitions for a folder
-   * @param  {Function} fileFunc   Function that returns an array of button definitions for a file
-   * @return {Function}            A formatter function
-   */
-  function makeButtonFormatter(folderFunc, fileFunc) {
-    var formatter = function(row, cell, value, colDef, item) {
-      var openTag = '<span class="hg-buttons" data-id="' + item.id + '">';
-      var closingTag = '</span>';
-      var buttonDefs, renderedButtons;
-      if (item.kind === FOLDER) {
-        buttonDefs = folderFunc(item);
-      } else {
-        buttonDefs = fileFunc(item);
-      }
-      renderedButtons = buttonDefs.map(function(btn, idx) {
-        var html = renderButton(item, btn, idx);
-        return html;
-      }).join('');
-      return [openTag, renderedButtons, closingTag].join(' ');
-    };
-    return formatter;
-  }
-
 
   /**
    * Default rendering function that renders a file item to HTML.
@@ -205,6 +156,32 @@ if (typeof jQuery === 'undefined') {
     buttons: renderButtons
   };
 
+  // Predefined actions
+  HGrid.Actions = {
+    download: {
+      on: 'click',
+      callback: function(evt, item) {
+        this.options.onClickDownload.call(this, evt, item);
+      }
+    },
+    delete: {
+      on: 'click',
+      callback: function(evt, item) {
+        this.options.onClickDelete.call(this, evt, item);
+      }
+    },
+    upload: {
+      on: 'click',
+      callback: function(evt, item) {
+        this.options.onClickUpload.call(this, evt, item);
+      }
+    },
+    noop: {
+      on: 'click',
+      callback: noop
+    }
+  };
+
   // Predefined column schemas
   HGrid.Columns = {
     defaultRenderFolder: defaultRenderFolder,
@@ -220,7 +197,7 @@ if (typeof jQuery === 'undefined') {
     },
 
     // Actions buttons schema
-    Actions: {
+    ActionButtons: {
       id: 'actions',
       name: 'Actions',
       cssClass: 'hg-cell',
@@ -234,7 +211,7 @@ if (typeof jQuery === 'undefined') {
           });
         }
         if (buttonDefs) {
-          return renderButtons(row, buttonDefs);
+          return renderButtons(buttonDefs);
         }
         return '';
       },
@@ -246,7 +223,7 @@ if (typeof jQuery === 'undefined') {
           text: 'Delete',
           action: 'delete'
         }];
-        return renderButtons(row, buttonDefs);
+        return renderButtons(buttonDefs);
       }
     }
   };
@@ -978,6 +955,9 @@ if (typeof jQuery === 'undefined') {
    * @method  getRowElement
    */
   HGrid.prototype.getRowElement = function(id) {
+    if (typeof id === 'object') {
+      id = id.id;
+    }
     return this.grid.getCellNode(this.getDataView().getRowById(id), 0).parentNode;
   };
 
@@ -1185,21 +1165,6 @@ if (typeof jQuery === 'undefined') {
     }
   };
 
-  HGrid.prototype._getButtonCallback = function(item, btnIdx) {
-    var callback, btnDef;
-    if (item.kind === FOLDER) {
-      // the button definitions, e.g. {text: 'My button', onClick: function() {}}
-      btnDef = this.options.folderButtons.call(this, item)[btnIdx];
-      // If button definition defines onClick, use that. If it defines
-      // action, use that. Otherwise fall back to noop
-      callback = btnDef.onClick || this.FOLDER_ACTIONS[btnDef.action] || noop;
-    } else {
-      btnDef = this.options.fileButtons.call(this, item)[btnIdx];
-      callback = btnDef.onClick || this.FILE_ACTIONS[btnDef.action] || noop;
-    }
-    return callback;
-  };
-
   /**
    * Wires up all the event handlers.
    * @method  _initListeners
@@ -1228,9 +1193,46 @@ if (typeof jQuery === 'undefined') {
       return evt.data.listenerObj.callback.call(self, evt, row);
     };
     for (var i = 0, listener; listener = this.options.listeners[i]; i++) {
-      self.element.on('click', '.test', {
+      self.element.on(listener.on, listener.selector, {
         listenerObj: listener
       }, userCallback);
+    }
+    this.attachActionListeners();
+  };
+
+  /**
+   * Attaches event listeners based on the actions defined in HGrid.Actions.
+   * For example, if a "spook" action might be defined like so
+   *
+   * ```
+   * HGrid.Actions['spook'] = {
+   *   on: 'click',
+   *   callback: function(evt, row) {
+   *     alert('Boo!')
+   *   }
+   * };
+   *```
+   * and a button is created using HGrid.Format.button
+   * ```
+   * ...
+   * Hgrid.Format.button(item, {text: 'Spook', action: 'spook'})
+   * ```
+   * a "click" event listener will automatically be added to the button with
+   * the defined callback.
+   *
+   * @return {[type]} [description]
+   */
+  HGrid.prototype.attachActionListeners = function() {
+    var self = this;
+    var actionCallback = function(evt) {
+      var row = self.getItemFromEvent(evt);
+      evt.data.actionObj.callback.call(self, evt, row);
+    };
+    for (var actionName in HGrid.Actions) {
+      var actionDef = HGrid.Actions[actionName];
+      this.element.on(actionDef.on, '[data-hg-action="' + actionName + '"]', {
+        actionObj: actionDef
+      }, actionCallback);
     }
   };
 

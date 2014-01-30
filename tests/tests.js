@@ -907,28 +907,6 @@
     equal(grid.dropzone.options.method, 'PUT');
   });
 
-  module('Buttons', {});
-
-  test('_getButtonCallback', function() {
-    expect(2);
-    var item = getMockItem({
-      kind: 'file'
-    });
-    var grid = new HGrid('#myGrid', {
-      fileButtons: function(file) {
-        return [{
-          text: 'Test button ' + file.id,
-          onClick: function(evt, file) {
-            deepEqual(file, item, 'correct item was passed in');
-          }
-        }];
-      }
-    });
-    var callback = grid._getButtonCallback(item, 0);
-    ok(typeof callback === 'function', 'return value is a callback');
-    callback({}, item);
-  });
-
   module('Predefined columns (HGrid.Columns)', {});
 
   test('defaultRenderFile', function() {
@@ -958,18 +936,27 @@
   module('Formatting helpers (HGrid.Format)', {});
 
   test('renderButton', function() {
-    var item = getMockItem();
     var btnDef = {
       id: 'testbtn',
       text: 'Test Button',
       cssClass: 'test-btn',
-      onClick: function() {}
+      action: 'myaction'
     };
-    var $btn = $(HGrid.Format.button(item, btnDef, 3));
+    var $btn = $(HGrid.Format.button(btnDef));
     isTrue($btn.hasClass('hg-btn'), 'button has hg-btn class');
+    isTrue($btn.hasClass('test-btn'), 'has user-defined class');
     equal($btn.text().trim(), btnDef.text.trim(), 'text is correct');
-    equal($btn.data('item-id'), item.id.toString(), 'data-item-id is correct');
-    equal($btn.data('btn-idx'), '3', 'data-btn-idx is correct');
+    equal($btn.data('hg-action'), 'myaction', 'has correct action');
+  });
+
+  test('renderButton default action', function() {
+    var btnDef = {
+      id: 'testbtn',
+      text: 'Test Button',
+      cssClass: 'test-btn'
+    };
+    var $btn = $(HGrid.Format.button(btnDef));
+    equal($btn.data('hg-action'), 'noop', 'default action is noop');
   });
 
 })(jQuery);

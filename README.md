@@ -42,7 +42,34 @@
 
 ## Columns 
 
-### Column schemas
+### Using predefined column schemas
+
+HGrid comes with a few predefined column schemas.
+
+- `HGrid.Columns.Name`: Included by default. Formats files and folders with proper indent, icon, and `name` field.
+- `HGrid.Columns.ActionButtons`: Provides "Download" and "Delete" buttons for files and "Upload" button for folders.
+
+Usage:
+
+```javascript
+var grid = new HGrid('#myGrid', {
+  columns: [HGrid.Columns.Name,
+            HGrid.Columns.ActionButtons]
+  ...
+});
+```
+
+### Modifying predefined column schemas 
+
+```javascript
+// Customize the column header text
+HGrid.Columns.Name.name = "Item Name"
+var grid = new HGrid('#myGrid', {
+  columns: [HGrid.Columns.Name]
+});
+```
+
+### Custom Column Schemas
 
 Columns are defined by objects that have--at a minimum--`id`, `name`, `renderFolder`, and `renderFile` properties.
 
@@ -77,7 +104,7 @@ NOTE: Column schemas can additionally take any [Slickgrid column options](https:
 
 #### Formatting helpers
 
-HGrid comes with a number of functions for rendering a row's HTML.
+The `HGrid.Format` namespace includes a number of functions for rendering a row's HTML.
 
 For example, `HGrid.Format.withIndent` adds a span element with a width based on an item's `depth` property.
 
@@ -102,32 +129,10 @@ Available helpers
 - `HGrid.Format.button(row, buttonDef)`: Render a button. TODO
 - `HGrid.Format.buttons(row, buttonDefs)`: Render a series of buttons.  TODO
 
-### Using predefined column schemas
 
-HGrid comes with a few predefined column schemas.
+## Actions 
 
-- `HGrid.Columns.Name`: Included by default. Formats files and folders with proper indent, icon, and `name` field.
-- `HGrid.Columns.Actions`: TODO
-
-Usage:
-
-```javascript
-var grid = new HGrid('#myGrid', {
-  columns: [HGrid.Columns.Name,
-            HGrid.Columns.Actions]
-  ...
-});
-```
-
-## Configuring buttons 
-
-Predefined actions:
-
-- `download`: Sends a get request. Must have `downloadUrl` option defined.
-- `upload`: Opens filepicker to upload to a folder
-- `delete`: Sends request to delete a file
-
-TODO
+TODO 
 
 ## File management
 

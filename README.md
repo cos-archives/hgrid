@@ -42,7 +42,7 @@
 
 ## Columns 
 
-### Using predefined column schemas
+### Using Predefined Column Schemas
 
 HGrid comes with a few predefined column schemas.
 
@@ -59,7 +59,7 @@ var grid = new HGrid('#myGrid', {
 });
 ```
 
-### Modifying predefined column schemas 
+### Modifying Predefined Column Schemas 
 
 ```javascript
 // Customize the column header text
@@ -130,7 +130,7 @@ Available helpers
 - `HGrid.Format.buttons(row, buttonDefs)`: Render a series of buttons.  TODO
 
 
-## Actions 
+## Buttons and Actions 
 
 TODO 
 

@@ -202,7 +202,7 @@ if (typeof jQuery === 'undefined') {
       name: 'Actions',
       cssClass: 'hg-cell',
       width: 50,
-      renderFolder: function(row) {
+      renderFolder: function() {
         var buttonDefs = [];
         if (this.options.uploads) {
           buttonDefs.push({
@@ -215,7 +215,7 @@ if (typeof jQuery === 'undefined') {
         }
         return '';
       },
-      renderFile: function(row) {
+      renderFile: function() {
         var buttonDefs = [{
           text: 'Download',
           action: 'download'
@@ -325,13 +325,11 @@ if (typeof jQuery === 'undefined') {
      * @property [onClick]
      */
     onClick: function(event, element, item) {
-      // var then = new Date();
       if (this.canToggle(element)) {
         this.toggleCollapse(item);
       }
-      // event.stopImmediatePropagation();
-      // console.log(new Date() - then);
     },
+    /*jshint unused: false */
     onClickDownload: function(event, item, options) {
       this.downloadItem(item, options);
     },

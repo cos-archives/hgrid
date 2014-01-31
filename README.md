@@ -25,8 +25,7 @@
 3. Create a new grid:
 
   ```javascript
-  var files = {
-    data: [
+  var files = [
       {name: 'Documents', kind: 'folder', 
       children: [
         {name: 'mydoc.txt', kind: 'item'},
@@ -35,8 +34,7 @@
       children: [
         {name: 'psycho-killer.mp3', kind: 'item'}
       ]}
-    ]
-  };
+  ]
   var myGrid = new HGrid('#myGrid', {data: files});
   ```
 

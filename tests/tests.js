@@ -1,6 +1,8 @@
 (function($) {
   'use strict';
 
+
+  // Fixtures and vactories
   var counter = 0;
 
   function getMockFile() {
@@ -126,6 +128,20 @@
     });
     equal(grid.getData()[0].lang, 'python', 'can get lang');
     equal(grid.getData()[1].lang, 'javascript', 'can get lang');
+  });
+
+  test('Initializing with array data', function() {
+    var grid = new HGrid('#myGrid', {
+      data: [{
+        name: 'foo',
+        kind: 'folder'
+      }, {
+        name: 'bar',
+        kind: 'file'
+      }]
+    });
+    equal(grid.getData()[0].name, 'foo');
+    equal(grid.getData()[1].name, 'bar');
   });
 
   test('Initializing grid, overriding `id` property', function() {

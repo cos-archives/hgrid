@@ -141,7 +141,7 @@ if (typeof jQuery === 'undefined') {
     // The folder icon
     var folderIcon = ' <i class="hg-folder"></i>';
     // Concatenate the expander, folder icon, and the folder name
-    var innerContent = [expander, folderIcon, errorElem, name].join(' ');
+    var innerContent = [expander, folderIcon, name, errorElem].join(' ');
     return asItem(row, withIndent(row, innerContent, args.indent));
   }
 
@@ -319,6 +319,8 @@ if (typeof jQuery === 'undefined') {
     maxFilesize: 256,
     /**
      * HTTP method to use for uploading.
+     * Can be either a string or a function that receives the item
+     * to upload to and returns the method name.
      */
     uploadMethod: 'POST',
     /**
@@ -846,8 +848,12 @@ if (typeof jQuery === 'undefined') {
       throw new HGridError('Cannot specify both "data" and "ajaxSource"');
     }
     this._defaults = defaults;
-    if (this.options.data) {
-      this.tree = Tree.fromObject(this.options.data.data);
+    if (this.options.data) { // Might be an object with 'data' property or an array
+      if (Array.isArray(this.options.data)) {
+        this.tree = Tree.fromObject(this.options.data);
+      } else {
+        this.tree = Tree.fromObject(this.options.data.data);
+      }
       this.tree.updateDataView(); // Sync Tree with its wrapped dataview
     } else {
       this.tree = new Tree();

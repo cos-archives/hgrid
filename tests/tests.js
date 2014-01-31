@@ -104,12 +104,12 @@
     });
     ok(grid2, 'standard initialization');
 
-    throws(function() {
-      new HGrid('#myGrid', {
-        ajaxSource: '/foo/',
-        data: testData
-      });
-    }, HGridError, 'fails if both ajax url and data are passed to constructor');
+    // throws(function() {
+    //   new HGrid('#myGrid', {
+    //     ajaxSource: '/foo/',
+    //     data: testData
+    //   });
+    // }, HGridError, 'fails if both ajax url and data are passed to constructor');
   });
 
   test('Initializing HGrid with data that has metadata', function() {
@@ -192,14 +192,13 @@
     // passed in options
     deepEqual(myGrid.options.data, testData);
     // Default options
-    deepEqual(myGrid.options.slickGridOptions, myGrid._defaults.slickGridOptions);
+    deepEqual(myGrid.options.slickGridOptions, HGrid._defaults.slickGridOptions);
     equal(myGrid.options.navLevel, null);
-    deepEqual(myGrid.options.columns, myGrid._defaults.columns, 'default columns are used');
+    deepEqual(myGrid.options.columns, HGrid._defaults.columns, 'default columns are used');
     // Attributes
     ok(myGrid.element instanceof jQuery, 'myGrid.element is a jQuery element');
     ok(myGrid.grid instanceof Slick.Grid, 'has a SlickGrid object');
     ok(myGrid.tree instanceof HGrid.Tree, 'has a HGrid.Tree');
-    ok(typeof myGrid.buttons === 'object', 'has a buttons object');
   });
 
   test('Getting data', function() {
@@ -1152,6 +1151,57 @@
       }
     });
     isTrue('myaction' in HGrid.Actions, 'new action was registered');
+  });
+
+  var server;
+  module('Async loading', {
+    setup: function() {
+      server = sinon.fakeServer.create();
+      server.respondWith('GET', '/hgrid/data', [200, {
+          'Content-Type': 'application/json'
+        },
+        JSON.stringify(testData)
+      ]);
+    }
+  });
+  // Sanity check
+  asyncTest('server responds with test data', function() {
+    $.getJSON('/hgrid/data', function(data) {
+      deepEqual(data, testData, 'correct response');
+    })
+      .done(function() {
+        start(); // Start the tests
+      });
+    server.respond();
+  });
+
+  asyncTest('Initializing hgrid with a URL sends an ajax request', function() {
+    this.spy(jQuery, 'ajax');
+    var grid = new HGrid('#myGrid', {
+      data: '/hgrid/data',
+      ajaxOptions: {
+        complete: function() {
+          start();
+        },
+        success: function() {}
+      }
+    });
+    server.respond();
+    sinon.assert.calledOnce(jQuery.ajax, 'ajax request was sent');
+  });
+
+  asyncTest('getFromServer', function() {
+    expect(1);
+    var grid = new HGrid('#myGrid');
+    grid.getFromServer('/hgrid/data', {
+      success: function(data) {
+        deepEqual(data, testData, 'return data is correct');
+      },
+      complete: function() {
+        start();
+      }
+    });
+    server.respond();
   });
 
 })(jQuery);

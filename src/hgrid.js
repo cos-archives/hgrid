@@ -268,6 +268,7 @@ if (typeof jQuery === 'undefined') {
      * @property data
      */
     data: null,
+    ajaxOptions: {},
     /**
      * Enable uploads (requires DropZone)
      * @property [uploads]
@@ -838,6 +839,14 @@ if (typeof jQuery === 'undefined') {
   // HGrid //
   ///////////
 
+  HGrid._defaults = defaults;
+  // Expose Tree and Leaf via the HGrid namespace
+  HGrid.Tree = Tree;
+  HGrid.Leaf = Leaf;
+
+  HGrid.ROOT_ID = ROOT_ID;
+  HGrid.FOLDER = FOLDER;
+  HGrid.ITEM = ITEM;
   /**
    * Construct an HGrid.
    *
@@ -847,50 +856,57 @@ if (typeof jQuery === 'undefined') {
    * @param {Object} options
    */
   function HGrid(selector, options) {
-    this.selector = selector;
-    this.element = $(selector);
+    var self = this;
+    self.selector = selector;
+    self.element = $(selector);
     // Merge defaults with options passed in
-    this.options = $.extend({}, defaults, options);
-    // Can't pass both ajaxSource and data
-    if (this.options.data && this.options.ajaxSource) {
-      throw new HGridError('Cannot specify both "data" and "ajaxSource"');
+    self.options = $.extend({}, defaults, options);
+    self.grid = null; // Set upon calling _initSlickGrid()
+    self.dropzone = null; // Set upon calling _initDropzone()
+    if (typeof self.options.data === 'string') { // data is a URL, get the data asynchronously
+      self.getFromServer(self.options.data, {
+        success: function(data) {
+          self._initData(data);
+          self.init();
+        }
+      });
+    } else { // data is an object
+      self._initData(self.options.data);
+      self.init();
     }
-    this._defaults = defaults;
-    if (this.options.data) { // Might be an object with 'data' property or an array
-      if (Array.isArray(this.options.data)) {
-        this.tree = Tree.fromObject(this.options.data);
-      } else {
-        this.tree = Tree.fromObject(this.options.data.data);
-      }
-      this.tree.updateDataView(); // Sync Tree with its wrapped dataview
-    } else {
-      this.tree = new Tree();
-    }
-    /**
-     * The Slick.Grid object. This is set upon calling init()
-     * @attribute  grid
-     * @type {Slick.Grid}
-     */
-    this.grid = null;
-    /**
-     * The Dropzone object. This is set upon calling init()
-     * @type {Dropzone}
-     */
-    this.dropzone = null;
-    this.buttons = {
-      file: [],
-      folder: []
-    };
-    this.init();
   }
 
-  // Expose Tree and Leaf via the HGrid namespace
-  HGrid.Tree = Tree;
-  HGrid.Leaf = Leaf;
+  /**
+   * Helper for retrieving JSON data usin AJAX.
+   * @method  getFromServer
+   */
+  HGrid.prototype.getFromServer = function(url, options) {
+    var self = this;
+    options = options || {};
+    var ajaxOpts = $.extend({}, {
+      url: url,
+      contentType: 'application/json',
+      dataType: 'json'
+    }, self.options.ajaxOptions, options);
+    return $.ajax(ajaxOpts);
+  };
 
-  HGrid.ROOT_ID = ROOT_ID;
-  HGrid.FOLDER = FOLDER;
-  HGrid.ITEM = ITEM;
+  HGrid.prototype._initData = function(data) {
+    var self = this;
+    if (data) {
+      // Tree.fromObject expects an Array, but `data` might be an array or an
+      // object with `data' property
+      if (Array.isArray(data)) {
+        self.tree = Tree.fromObject(data);
+      } else {
+        self.tree = Tree.fromObject(data.data);
+      }
+      self.tree.updateDataView(); // Sync Tree with its wrapped dataview
+    } else {
+      self.tree = new Tree();
+    }
+    return self;
+  };
 
   HGrid.prototype.init = function() {
     this.setHeight(this.options.height)

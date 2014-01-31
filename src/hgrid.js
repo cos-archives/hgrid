@@ -12,7 +12,6 @@ if (typeof jQuery === 'undefined') {
   window.HGrid = HGrid;
   window.HGridError = HGridError;
 
-  var BTN_CLASS = 'hg-btn';
   var DEFAULT_INDENT = 15;
   var ROOT_ID = 'root';
   var ITEM = 'item';
@@ -90,9 +89,9 @@ if (typeof jQuery === 'undefined') {
     // For now, buttons are required to have the hg-btn class so that a click
     // event listener can be attacked to them later
     if (buttonDef.cssClass) {
-      cssClass = BTN_CLASS + ' ' + buttonDef.cssClass;
+      cssClass = HGrid.Html.buttonClass + ' ' + buttonDef.cssClass;
     } else {
-      cssClass = BTN_CLASS;
+      cssClass = HGrid.Html.buttonClass;
     }
     var action = buttonDef.action || 'noop';
     var openTag = '<button data-hg-action="' + action + '" class="' + cssClass + '">';
@@ -169,7 +168,8 @@ if (typeof jQuery === 'undefined') {
     folderIcon: ' <i class="hg-folder"></i>',
     fileIcon: '<i class="hg-file"></i>',
     // Placeholder for error messages. Upload error messages will be interpolated here
-    errorElem: '&nbsp;<span class="error" data-upload-errormessage></span>'
+    errorElem: '&nbsp;<span class="error" data-upload-errormessage></span>',
+    buttonClass: 'hg-btn'
   };
 
   // Formatting helpers public interface

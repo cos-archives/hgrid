@@ -1,14 +1,14 @@
 # hgrid.js
 
-[![Build Status](https://travis-ci.org/CenterForOpenScience/hgrid.png?branch=develop)](https://travis-ci.org/CenterForOpenScience/hgrid)
+[![Build Status](https://travis-ci.org/CenterForOpenScience/hgrid.png?branch=master)](https://travis-ci.org/CenterForOpenScience/hgrid)
 
 
 ## Get it now
 
-- Standalone (includes SlickGrid): [Uncompressed](https://raw.github.com/CenterForOpenScience/hgrid/develop/dist/hgrid.js) | [Minified](https://raw.github.com/CenterForOpenScience/hgrid/develop/dist/hgrid.min.js)
-- No bundled dependencies: [Uncompressed](https://raw.github.com/CenterForOpenScience/hgrid/develop/dist/hgrid-nodeps.js) | [Minified](https://raw.github.com/CenterForOpenScience/hgrid/develop/dist/hgrid-nodeps.min.js)
-- hgrid.css: [Uncompressed](https://raw.github.com/CenterForOpenScience/hgrid/develop/dist/hgrid.css) | [Minified](https://raw.github.com/CenterForOpenScience/hgrid/develop/dist/hgrid.min.css)
-- [Images](https://github.com/CenterForOpenScience/hgrid/tree/develop/dist/images)
+- Standalone (includes SlickGrid): [Uncompressed](https://raw.github.com/CenterForOpenScience/hgrid/master/dist/hgrid.js) | [Minified](https://raw.github.com/CenterForOpenScience/hgrid/master/dist/hgrid.min.js)
+- No bundled dependencies: [Uncompressed](https://raw.github.com/CenterForOpenScience/hgrid/master/dist/hgrid-nodeps.js) | [Minified](https://raw.github.com/CenterForOpenScience/hgrid/master/dist/hgrid-nodeps.min.js)
+- hgrid.css: [Uncompressed](https://raw.github.com/CenterForOpenScience/hgrid/master/dist/hgrid.css) | [Minified](https://raw.github.com/CenterForOpenScience/hgrid/master/dist/hgrid.min.css)
+- [Images](https://github.com/CenterForOpenScience/hgrid/tree/master/dist/images)
 
 ## Installation
 

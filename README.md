@@ -2,13 +2,14 @@
 
 [![Build Status](https://travis-ci.org/CenterForOpenScience/hgrid.png?branch=master)](https://travis-ci.org/CenterForOpenScience/hgrid)
 
-
 ## Get it now
 
 - Standalone (includes SlickGrid): [Uncompressed](https://raw.github.com/CenterForOpenScience/hgrid/master/dist/hgrid.js) | [Minified](https://raw.github.com/CenterForOpenScience/hgrid/master/dist/hgrid.min.js)
 - No bundled dependencies: [Uncompressed](https://raw.github.com/CenterForOpenScience/hgrid/master/dist/hgrid-nodeps.js) | [Minified](https://raw.github.com/CenterForOpenScience/hgrid/master/dist/hgrid-nodeps.min.js)
 - hgrid.css: [Uncompressed](https://raw.github.com/CenterForOpenScience/hgrid/master/dist/hgrid.css) | [Minified](https://raw.github.com/CenterForOpenScience/hgrid/master/dist/hgrid.min.css)
 - [Images](https://github.com/CenterForOpenScience/hgrid/tree/master/dist/images)
+
+*Full documentation to come*
 
 ## Installation
 
@@ -38,6 +39,7 @@ Create a new grid.
   ]
   var myGrid = new HGrid('#myGrid', {data: files});
   ```
+
 
 ## Rows and Columns 
 

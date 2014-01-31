@@ -88,9 +88,6 @@
     return equal($(fullSelector).length, 0, msg || '"' + text + '" found in element(s)');
   }
 
-  function areIdentical(x, y, msg) {
-    return ok(x == y, msg || (x + ' and ' + y + ' are identical'));
-  }
   module('Basic', {
     setup: function() {
       myGrid = getMockGrid();
@@ -382,9 +379,12 @@
   test('Tree and DataView', function() {
     var root = new HGrid.Tree();
     ok(root.dataView, 'root has a dataView attribute');
-    var subtree = new HGrid.Tree('Docs', HGrid.FOLDER);
+    var subtree = new HGrid.Tree({
+      name: 'Docs',
+      kind: HGrid.FOLDER
+    });
     root.add(subtree);
-    areIdentical(root.dataView, subtree.dataView);
+    strictEqual(root.dataView, subtree.dataView);
   });
 
   test('Creating Trees and Leaves', function() {

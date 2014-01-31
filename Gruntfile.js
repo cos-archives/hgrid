@@ -50,6 +50,11 @@ module.exports = function(grunt) {
         src: ['src/**/*js'],
         dest: minRelease
       },
+      nodepTarget: {
+        files: {
+          'dist/hgrid-nodeps.min.js': ['src/hgrid.js']
+        }
+      },
       options: {
         banner: '<%= meta.banner %>'
       }
@@ -76,6 +81,9 @@ module.exports = function(grunt) {
         }, {
           src: minRelease,
           dest: latestMinRelease
+        }, {
+          src: 'src/hgrid.js',
+          dest: 'dist/hgrid-nodeps.js'
         }, {
           src: 'src/hgrid.css',
           dest: 'dist/hgrid.css'

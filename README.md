@@ -1,28 +1,29 @@
-# HGrid.js
+# hgrid.js
 
-*Full documentation to come*
+[![Build Status](https://travis-ci.org/CenterForOpenScience/hgrid.png?branch=develop)](https://travis-ci.org/CenterForOpenScience/hgrid)
 
-## Quickstart
 
-1. Include jQuery:
+## Get it now
 
-  ```html
-  <script src="//code.jquery.com/jquery-1.10.2.js"></script>
-  ```
+- Standalone (includes SlickGrid): [Uncompressed](https://raw.github.com/CenterForOpenScience/hgrid/develop/dist/hgrid.js) | [Minified](https://raw.github.com/CenterForOpenScience/hgrid/develop/dist/hgrid.min.js)
+- No bundled dependencies: [Uncompressed](https://raw.github.com/CenterForOpenScience/hgrid/develop/dist/hgrid-nodeps.js) | [Minified](https://raw.github.com/CenterForOpenScience/hgrid/develop/dist/hgrid-nodeps.min.js)
+- hgrid.css: [Uncompressed](https://raw.github.com/CenterForOpenScience/hgrid/develop/dist/hgrid.css) | [Minified](https://raw.github.com/CenterForOpenScience/hgrid/develop/dist/hgrid.min.css)
+- [Images](https://github.com/CenterForOpenScience/hgrid/tree/develop/dist/images)
 
-2. Include HGrid:
+## Installation
+
+Include jQuery and HGrid.
 
   ```html
   <link rel="stylesheet" href="dist/hgrid.css" type="text/css" />
   ```
 
   ```html
+  <script src="//code.jquery.com/jquery-1.10.2.js"></script>
   <script src="dist/hgrid.min.js"></script>
   ```
 
-  NOTE: Makes sure the `images` directory is in the same directory as `hgrid.css`
-
-3. Create a new grid:
+Create a new grid.
 
   ```javascript
   var files = [

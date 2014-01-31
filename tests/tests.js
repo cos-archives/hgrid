@@ -19,7 +19,11 @@
       name: 'test.txt',
       kind: HGrid.FOLDER,
       parentID: 'root',
-      depth: 1
+      depth: 1,
+      _node: new HGrid.Tree({
+        name: 'test.txt',
+        kind: HGrid.Folder
+      })
     }, args);
     return item;
   }

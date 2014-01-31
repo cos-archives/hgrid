@@ -4,8 +4,8 @@
   border: 1px solid gray;
 }
 
-.cell-title {
-    font-weight: bold;
+.hg-cell {
+  font-weight: bold;
 }
 
 .hg-indent {
@@ -15,10 +15,10 @@
 
 .slick-cell.cell-reorder {
     cursor: move;
-    background: url('../images/drag-handle.png') no-repeat center center;
+    background: url('./images/drag-handle.png') no-repeat center center;
 }
 
-.toggle, .hg-folder, .hg-file {
+.hg-toggle, .hg-folder, .hg-file {
     height: 16px;
     width: 16px;
     display: inline-block;
@@ -26,24 +26,25 @@
     padding-right: 3px;
 }
 
-.toggle.expand {
+.hg-toggle.hg-expand {
     background: url('./images/expand.gif') no-repeat center center;
 }
 
 .hg-folder {
     background: url('./images/folder.png') no-repeat left top;
+
 }
 
 .hg-file {
     background: url('./images/file.png') no-repeat left top;
-    margin-left: 10px;
+    margin-left: 5px;
 }
 
-.toggle.collapse {
+.hg-toggle.hg-collapse {
     background: url('./images/collapse.gif') no-repeat center center;
 }
 
-.toggle.spacer {
+.hg-toggle.spacer {
     width: 32px;
 }
 
@@ -56,7 +57,7 @@
   opacity: 50%;
 }
 
-.hg-item .error {
+.hg-item-content .error {
   color: red;
 }
 
@@ -80,6 +81,7 @@
   width: 0%;
   background-color: #8cc657;
 }
+
 
 
 /* slick.grid.css
@@ -137,11 +139,11 @@ classes should alter those!
 }
 
 .slick-sort-indicator-desc {
-  background: url('../images/sort-desc.gif');
+  background: url('./images/sort-desc.gif');
 }
 
 .slick-sort-indicator-asc {
-  background: url('../images/sort-asc.gif');
+  background: url('./images/sort-asc.gif');
 }
 
 .slick-resizable-handle {

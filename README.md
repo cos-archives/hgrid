@@ -15,30 +15,41 @@
 
 Include jQuery and HGrid.
 
-  ```html
-  <link rel="stylesheet" href="dist/hgrid.css" type="text/css" />
-  ```
+```html
+<link rel="stylesheet" href="dist/hgrid.css" type="text/css" />
+```
 
-  ```html
-  <script src="//code.jquery.com/jquery-1.10.2.js"></script>
-  <script src="dist/hgrid.min.js"></script>
-  ```
+NOTE: The `images` directory should be in the same directory as `hgrid.css`.
 
-Create a new grid.
+```html
+<script src="//code.jquery.com/jquery-1.10.2.js"></script>
+<script src="dist/hgrid.min.js"></script>
+```
 
-  ```javascript
-  var files = [
-      {name: 'Documents', kind: 'folder', 
-      children: [
-        {name: 'mydoc.txt', kind: 'item'},
-      ]},
-      {name: 'Music', kind: 'folder',
-      children: [
-        {name: 'psycho-killer.mp3', kind: 'item'}
-      ]}
-  ]
-  var myGrid = new HGrid('#myGrid', {data: files});
-  ```
+## Basic Usage
+
+The input data is an array of objects with `name`, `kind` (either `"folder"` or `"item"`), and `children` properties. `children` is an array of objects of the same form.
+
+Example:
+
+```javascript
+var files = [
+    {name: 'Documents', kind: 'folder', 
+    children: [
+      {name: 'mydoc.txt', kind: 'item'},
+    ]},
+    {name: 'Music', kind: 'folder',
+    children: [
+      {name: 'psycho-killer.mp3', kind: 'item'}
+    ]}
+]
+```
+
+To create a new grid:
+
+```javascript
+var myGrid = new HGrid('#myGrid', {data: files, width: 500, height: 200});
+```
 
 
 ## Rows and Columns 
@@ -141,6 +152,8 @@ Available helpers
 TODO 
 
 ## File management
+
+TODO
 
 ```javascript
 var grid = new HGrid('#myGrid', {

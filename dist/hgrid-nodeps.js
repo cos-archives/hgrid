@@ -4,7 +4,7 @@
  */
 ; // jshint ignore: line
 if (typeof jQuery === 'undefined') {
-  throw 'HGrid requires jQuery to be loaded';
+  throw new Error('HGrid requires jQuery to be loaded');
 }
 (function($, window, document, undefined) {
   'use strict';

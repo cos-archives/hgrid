@@ -26,7 +26,7 @@ NOTE: The `images` directory should be in the same directory as `hgrid.css`.
 <script src="dist/hgrid.min.js"></script>
 ```
 
-## Basic Usage
+## Quickstart
 
 The input data is an array of objects with `name`, `kind` (either `"folder"` or `"item"`), and `children` properties. `children` is an array of objects of the same form.
 
@@ -50,6 +50,25 @@ To create a new grid:
 ```javascript
 var myGrid = new HGrid('#myGrid', {data: files, width: 500, height: 200});
 ```
+
+## Loading Data From A Server
+
+You can pass a URL to the `data` option to load JSON data from a server.
+
+```javascript
+var myGrid = new HGrid('#myGrid', {
+  data: '/get/my/data'
+});
+
+// You can also pass $.ajax options
+var grid = new HGrid('#myGrid' {
+  data: '/get/my/data',
+  ajaxOptions: {
+    success: function(data) {alert('Huzzah!');}
+  }
+});
+```
+
 
 
 ## Rows and Columns 

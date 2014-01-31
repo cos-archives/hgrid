@@ -46,15 +46,15 @@
 
 HGrid comes with a few predefined column schemas.
 
-- `HGrid.Columns.Name`: Included by default. Formats files and folders with proper indent, icon, and `name` field.
-- `HGrid.Columns.ActionButtons`: Provides "Download" and "Delete" buttons for files and "Upload" button for folders.
+- `HGrid.Col.Name`: Included by default. Formats files and folders with proper indent, icon, and `name` field.
+- `HGrid.Col.ActionButtons`: Provides "Download" and "Delete" buttons for files and "Upload" button for folders.
 
 Usage:
 
 ```javascript
 var grid = new HGrid('#myGrid', {
-  columns: [HGrid.Columns.Name,
-            HGrid.Columns.ActionButtons]
+  columns: [HGrid.Col.Name,
+            HGrid.Col.ActionButtons]
   ...
 });
 ```
@@ -63,9 +63,9 @@ var grid = new HGrid('#myGrid', {
 
 ```javascript
 // Customize the column header text
-HGrid.Columns.Name.text = "Item Name"
+HGrid.Col.Name.text = "Item Name"
 var grid = new HGrid('#myGrid', {
-  columns: [HGrid.Columns.Name]
+  columns: [HGrid.Col.Name]
 });
 ```
 
@@ -108,17 +108,17 @@ var grid = new HGrid('#myGrid', {
 
 #### Formatting helpers
 
-The `HGrid.Format` namespace includes a number of functions for rendering a row's HTML.
+The `HGrid.Fmt` namespace includes a number of functions for rendering a row's HTML.
 
-For example, `HGrid.Format.withIndent` adds a span element with a width based on an item's `depth` property.
+For example, `HGrid.Fmt.withIndent` adds a span element with a width based on an item's `depth` property.
 
 ```javascript
 var item = {id: 123, name: 'My Documents', kind: 'folder', depth: 3};
 
 var nameColumn = {text: 'Name',
   folderView: function(row) {
-    var html = HGrid.Format.tpl('<em>{{ name }}</em?>', row);
-    var itemWithIndent = HGrid.Format.withIndent(row, html);
+    var html = HGrid.Fmt.tpl('<em>{{ name }}</em?>', row);
+    var itemWithIndent = HGrid.Fmt.withIndent(row, html);
     // => '<span class="hg-indent" style="width:45"></span><em>My Documents</em>'
     return itemWithIndent;
   },
@@ -128,11 +128,11 @@ var nameColumn = {text: 'Name',
 
 Available helpers
 
-- `HGrid.Format.withIndent(row, html, [indentWidth])`: Adds an indenting span based on the a row's `depth` property.
-- `HGrid.Format.asItem(row, html)`: Surrounds `html` with `<div class="hg-item" data-id=123>`
-- `HGrid.Format.button(row, buttonDef)`: Render a button.
-- `HGrid.Format.buttons(row, buttonDefs)`: Render a series of buttons.
-- `HGrid.Format.tpl(template, data)`: Microtemplating function.
+- `HGrid.Fmt.withIndent(row, html, [indentWidth])`: Adds an indenting span based on the a row's `depth` property.
+- `HGrid.Fmt.asItem(row, html)`: Surrounds `html` with `<div class="hg-item" data-id=123>`
+- `HGrid.Fmt.button(row, buttonDef)`: Render a button.
+- `HGrid.Fmt.buttons(row, buttonDefs)`: Render a series of buttons.
+- `HGrid.Fmt.tpl(template, data)`: Microtemplating function.
 
 
 ## Actions 
@@ -145,8 +145,8 @@ TODO
 var grid = new HGrid('#myGrid', {
   data: files, 
   uploads: true,
-  columns: [HGrid.Columns.Name, 
-            HGrid.Columns.ActionButtons]  // Provides file-related buttons
+  columns: [HGrid.Col.Name, 
+            HGrid.Col.ActionButtons]  // Provides file-related buttons
                                           // (Upload, Download, Delete)
   maxFilesize: 10,  // MB
   // Mimetypes or file extensions
@@ -168,7 +168,6 @@ var grid = new HGrid('#myGrid', {
   }
 });
 ```
-
 
 ## Callback Options
 
@@ -230,8 +229,8 @@ Default CSS Classes
 - `hg-item`: Includes an item's indent spacer element, icon, and name
 - `hg-btn`
 - `hg-folder`
-- `hg-file`: Used in `HGrid.Columns.Name` to render the file icon.
-- `hg-toggle`: Used in `HGrid.Columns.Name` column to make an item toggle-able
+- `hg-file`: Used in `HGrid.Col.Name` to render the file icon.
+- `hg-toggle`: Used in `HGrid.Col.Name` column to make an item toggle-able
 - `hg-expand`
 - `hg-collapse`
 - `hg-row-highlight`

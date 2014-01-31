@@ -145,6 +145,9 @@ if (typeof jQuery === 'undefined') {
     return asItem(row, withIndent(row, innerContent, args.indent));
   }
 
+  /**
+   * Microtemplating function. Adapted from Riot.js (MIT License).
+   */
   var tpl_fn_cache = {};
   var tpl = function(template, data) {
     /*jshint quotmark:false */
@@ -162,8 +165,7 @@ if (typeof jQuery === 'undefined') {
   };
 
   // Formatting helpers public interface
-  // TODO: test these
-  HGrid.Format = {
+  HGrid.Fmt = HGrid.Format = {
     withIndent: withIndent,
     asItem: asItem,
     makeIndentElem: makeIndentElem,
@@ -200,7 +202,7 @@ if (typeof jQuery === 'undefined') {
   };
 
   // Predefined column schemas
-  HGrid.Columns = {
+  HGrid.Col = HGrid.Columns = {
     defaultFolderView: defaultFolderView,
     defaultItemView: defaultItemView,
 
@@ -318,7 +320,6 @@ if (typeof jQuery === 'undefined') {
     /**
      * HTTP method to use for uploading.
      */
-    // TODO: allow this to be a function that receives an item
     uploadMethod: 'POST',
     /**
      * Additional options passed to DropZone constructor
@@ -1023,7 +1024,7 @@ if (typeof jQuery === 'undefined') {
     'onClick': function(evt, args) {
       var item = this.getDataView().getItem(args.row);
       // Expand/collapse item
-      if (this.canToggle(event.target)) {
+      if (this.canToggle(evt.target)) {
         this.toggleCollapse(item);
       }
       this.options.onClick.call(this, evt, item);
@@ -1279,10 +1280,10 @@ if (typeof jQuery === 'undefined') {
    * a "click" event listener will automatically be added to the button with
    * the defined callback.
    *
-   * @return {[type]} [description]
    */
   HGrid.prototype.attachActionListeners = function() {
     var self = this;
+    // This just calls the action's defined callback
     var actionCallback = function(evt) {
       var row = self.getItemFromEvent(evt);
       evt.data.actionObj.callback.call(self, evt, row);
@@ -1293,6 +1294,7 @@ if (typeof jQuery === 'undefined') {
         actionObj: actionDef
       }, actionCallback);
     }
+    return this;
   };
 
   /**
@@ -1335,7 +1337,7 @@ if (typeof jQuery === 'undefined') {
 
   var requiredDropzoneOpts = {
     addRemoveLinks: false,
-    previewTemplate: '<div></div>'
+    previewTemplate: '<div></div>' // just a dummy template because dropzone requires it
   };
 
   /**

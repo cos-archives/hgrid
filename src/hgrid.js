@@ -332,12 +332,8 @@ if (typeof jQuery === 'undefined') {
      * By default, expand or collapse the item.
      * @property [onClick]
      */
-    onClick: function(event, item) {
-      if (this.canToggle(event.target)) {
-        this.toggleCollapse(item);
-      }
-    },
     /*jshint unused: false */
+    onClick: function(event, item) {},
     onClickDownload: function(event, item, options) {
       this.downloadItem(item, options);
     },
@@ -1026,6 +1022,10 @@ if (typeof jQuery === 'undefined') {
   HGrid.prototype.slickEvents = {
     'onClick': function(evt, args) {
       var item = this.getDataView().getItem(args.row);
+      // Expand/collapse item
+      if (this.canToggle(event.target)) {
+        this.toggleCollapse(item);
+      }
       this.options.onClick.call(this, evt, item);
       return this;
     },

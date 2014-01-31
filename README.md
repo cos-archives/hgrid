@@ -174,7 +174,7 @@ var grid = new HGrid('#myGrid', {
 
 ### Event Callbacks
 
-- `onClick: function(event, element, item)`: Called when grid item is clicked. By default, toggles the collapsed state of `item`.
+- `onClick: function(event, item)`: Called when the grid is clicked. If a cell is clicked, `item` will be the data object.
 - `onAdd: function(item, grid)`
 - `onDragover: function(event, item)`
 - `onDragenter: function(event, item)`

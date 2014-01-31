@@ -32,11 +32,12 @@
 
 .hg-folder {
     background: url('./images/folder.png') no-repeat left top;
+
 }
 
 .hg-file {
     background: url('./images/file.png') no-repeat left top;
-    margin-left: 10px;
+    margin-left: 5px;
 }
 
 .hg-toggle.hg-collapse {

@@ -1138,4 +1138,16 @@
     isTrue(spy.calledOnce, 'action callback was triggered');
   });
 
+  test('actions option', function() {
+    var grid = getMockGrid({
+      actions: {
+        myaction: {
+          on: 'click',
+          callback: function() {}
+        }
+      }
+    });
+    isTrue('myaction' in HGrid.Actions, 'new action was registered');
+  });
+
 })(jQuery);

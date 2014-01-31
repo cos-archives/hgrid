@@ -116,11 +116,7 @@ if (typeof jQuery === 'undefined') {
    */
   function defaultItemView(row, args) {
     args = args || {};
-    var fileIcon = '<i class="hg-file"></i>';
-    // Placeholder for error messages
-    var errorElem = '&nbsp;<span class="error" data-upload-errormessage></span>';
-    // Placeholder for progress bar
-    var innerContent = [fileIcon, sanitized(row.name), errorElem].join('');
+    var innerContent = [HGrid.Html.fileIcon, sanitized(row.name), HGrid.Html.errorElem].join('');
     return asItem(row, withIndent(row, innerContent, args.indent));
   }
 
@@ -133,15 +129,15 @@ if (typeof jQuery === 'undefined') {
   function defaultFolderView(row, args) {
     args = args || {};
     var name = sanitized(row.name);
-    // Placeholder for error messages
-    var errorElem = '&nbsp;<span class="error" data-upload-errormessage></span>';
     // The + / - button for expanding/collapsing a folder
-    var expander = row._collapsed ? '<span class="hg-toggle hg-expand"></span>' :
-      '<span class="hg-toggle hg-collapse"></span>';
-    // The folder icon
-    var folderIcon = ' <i class="hg-folder"></i>';
+    var expander;
+    if (row._node.children.length > 0) {
+      expander = row._collapsed ? HGrid.Html.expandElem : HGrid.Html.collapseElem;
+    } else { // Folder is empty
+      expander = '<span></span>';
+    }
     // Concatenate the expander, folder icon, and the folder name
-    var innerContent = [expander, folderIcon, name, errorElem].join(' ');
+    var innerContent = [expander, HGrid.Html.folderIcon, name, HGrid.Html.errorElem].join(' ');
     return asItem(row, withIndent(row, innerContent, args.indent));
   }
 
@@ -162,6 +158,17 @@ if (typeof jQuery === 'undefined') {
       .replace(/\{\{\s*(\w+)\s*\}\}/g, "'+(_.$1?(_.$1+'').replace(/&/g,'&amp;').replace(/\"/g,'&quot;').replace(/</g,'&lt;').replace(/>/g,'&gt;'):(_.$1===0?0:''))+'") + "'"
     );
     return tpl_fn_cache[template](data);
+  };
+
+  HGrid.Html = {
+    // Expand/collapse button
+    expandElem: '<span class="hg-toggle hg-expand"></span>',
+    collapseElem: '<span class="hg-toggle hg-collapse"></span>',
+    // Icons
+    folderIcon: ' <i class="hg-folder"></i>',
+    fileIcon: '<i class="hg-file"></i>',
+    // Placeholder for error messages. Upload error messages will be interpolated here
+    errorElem: '&nbsp;<span class="error" data-upload-errormessage></span>'
   };
 
   // Formatting helpers public interface
@@ -1143,7 +1150,7 @@ if (typeof jQuery === 'undefined') {
    * DropZone events that the grid subscribes to.
    * For each function, `this` refers to the HGrid object.
    * These listeners are responsible for any setup that needs to occur before executing
-   * the callbacks in `options`. For example, adding a new row item to the grid, setting the
+   * the callbacks in `options`, e.g., adding a new row item to the grid, setting the
    * current upload target, adding special CSS classes
    * and passing necessary arguments to the options callbacks.
    * @attribute  dropzoneEvents
@@ -1289,6 +1296,8 @@ if (typeof jQuery === 'undefined') {
    */
   HGrid.prototype.attachActionListeners = function() {
     var self = this;
+    // Register any new actions;
+    $.extend(HGrid.Actions, self.options.actions);
     // This just calls the action's defined callback
     var actionCallback = function(evt) {
       var row = self.getItemFromEvent(evt);

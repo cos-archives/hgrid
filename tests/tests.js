@@ -21,6 +21,39 @@
     }, args);
     return item;
   }
+  var testData = {
+    data: [{
+      name: 'Documents',
+      kind: HGrid.FOLDER,
+      children: [{
+        name: 'Scripts',
+        kind: HGrid.FOLDER,
+        children: [{
+          name: 'foo.py',
+          kind: HGrid.ITEM
+        }]
+      }, {
+        name: 'mydoc.txt',
+        kind: HGrid.ITEM
+      }]
+    }, {
+      name: 'Music',
+      kind: HGrid.FOLDER,
+      children: [{
+        name: 'bar.mp3',
+        kind: HGrid.FOLDER
+      }]
+    }]
+  },
+    myGrid;
+
+  function getMockGrid(args) {
+    var options = $.extend({}, {
+      data: testData
+    }, args);
+    var grid = new HGrid('#myGrid', options);
+    return grid;
+  }
 
   ////////////////////
   // Custom asserts //
@@ -52,36 +85,9 @@
   function areIdentical(x, y, msg) {
     return ok(x == y, msg || (x + ' and ' + y + ' are identical'));
   }
-  var testData = {
-    data: [{
-      name: 'Documents',
-      kind: HGrid.FOLDER,
-      children: [{
-        name: 'Scripts',
-        kind: HGrid.FOLDER,
-        children: [{
-          name: 'foo.py',
-          kind: HGrid.ITEM
-        }]
-      }, {
-        name: 'mydoc.txt',
-        kind: HGrid.ITEM
-      }]
-    }, {
-      name: 'Music',
-      kind: HGrid.FOLDER,
-      children: [{
-        name: 'bar.mp3',
-        kind: HGrid.FOLDER
-      }]
-    }]
-  },
-    myGrid;
   module('Basic', {
     setup: function() {
-      myGrid = new HGrid('#myGrid', {
-        data: testData,
-      });
+      myGrid = getMockGrid();
     },
     teardown: function() {
       myGrid.destroy();
@@ -340,6 +346,11 @@
     var root = myGrid.getNodeByID(HGrid.ROOT_ID);
     ok(root instanceof HGrid.Tree, 'root is a tree');
     equal(root.id, HGrid.ROOT_ID, 'has root id');
+  });
+
+  test('aliases', function() {
+    deepEqual(HGrid.Fmt, HGrid.Format);
+    deepEqual(HGrid.Col, HGrid.Columns);
   });
 
   module('Tree and leaf', {
@@ -743,25 +754,40 @@
   }
 
   test('onClick callback', function() {
-    expect(1);
-    myGrid.options.onClick = function(event, item) {
-      ok(typeof item === 'object', 'item was set to an item object');
-    };
-    // Trigger the Slick event
-    triggerSlick(myGrid.grid.onClick, {
-      row: 2
-    });
+    // Just test that options.onClick was called
+    var spy = this.spy();
+    myGrid.options.onClick = spy;
+    triggerSlick(myGrid.grid.onClick);
+    ok(spy.calledOnce);
   });
 
   test('onSort callback', function() {
-    expect(1);
+    expect(2);
     var column = myGrid.grid.getColumns()[0];
+    this.spy(myGrid.tree, 'sort');
+    this.spy(myGrid.tree, 'updateDataView');
     myGrid.options.onSort = function(event, colDef) {
       deepEqual(colDef, column, 'column arg is correct');
     };
     triggerSlick(myGrid.grid.onSort, {
-      sortCol: column
+      sortCol: column,
+      sortAsc: true
     });
+    ok(myGrid.tree.sort.calledWith(column.sortkey, true), 'sort was called');
+  });
+
+  test('onSort without a sortkey throws exception', function() {
+    throws(function() {
+      triggerSlick(myGrid.grid.onSort, {
+        sortCol: {} // no sortkey
+      });
+    }, HGridError, 'HGrid error is thrown');
+  });
+
+  test('onMouseLeave', function() {
+    this.spy(myGrid, 'removeHighlight');
+    triggerSlick(myGrid.grid.onMouseLeave);
+    ok(myGrid.removeHighlight.calledOnce, 'removes highlight');
   });
 
   test('onItemAdded callback', function() {
@@ -777,8 +803,6 @@
     };
     myGrid.addItem(newItem);
   });
-
-
 
   module('Tree-DataView binding', {
     teardown: function() {
@@ -876,9 +900,25 @@
     containsText('.slick-row', file.name, 'file name is in DOM');
   });
 
-  test('default error callback', function() {
-    var grid = new HGrid('#myGrid', {
-      data: testData
+  test('drop', function() {
+    var spy = this.spy();
+    var grid = getMockGrid({
+      onDrop: spy,
+      uploads: true
+    });
+    this.spy(grid, 'setUploadTarget');
+    var folder = grid.getData()[0];
+    grid.currentTarget = folder;
+    grid.dropzone.emit('drop');
+    isTrue(spy.calledOnce, 'options.onDrop is called');
+    equal(spy.args[0][1], grid.currentTarget, 'second arg is currentTarget');
+    isTrue(grid.setUploadTarget.calledWith(folder), 'upload target is set');
+  });
+
+
+  test('error callback', function() {
+    var grid = getMockGrid({
+      uploads: true
     });
     var message = {
       error: 'Could not upload file'
@@ -938,13 +978,29 @@
       uploadMethod: function(folder) {
         deepEqual(this.getData()[0], folder);
         return 'PUT';
-      }
+      },
     });
     var folder = grid.getData()[0];
     grid.currentTarget = folder;
     grid.setUploadTarget(folder);
-    equal(grid.dropzone.options.url, 'uploads/' + folder.id);
-    equal(grid.dropzone.options.method, 'PUT');
+    equal(grid.dropzone.options.url, 'uploads/' + folder.id, 'upload url was set');
+    equal(grid.dropzone.options.method, 'PUT', 'upload method was set');
+  });
+
+  test('setUploadTarget sets dropzone accept function', function() {
+    var acceptSpy = this.spy();
+    var file = getMockFile();
+    var grid = new HGrid('#myGrid', {
+      data: testData,
+      uploads: true,
+      uploadAccept: acceptSpy
+    });
+    var folder = grid.getData()[0];
+    grid.currentTarget = folder;
+    grid.setUploadTarget(folder);
+    grid.dropzone.options.accept(file, this.spy()); // Call dropzone accept method
+    isTrue(acceptSpy.called, 'dropzone accept function calls grid.options.uploadAccept');
+    equal(acceptSpy.args[0][0], file, 'first argument was the file object');
   });
 
   module('Predefined columns (HGrid.Columns)', {});
@@ -1021,10 +1077,49 @@
   });
 
   test('tpl', function() {
-    equal(HGrid.Format.tpl('Hello {{ name }}', {
+    equal(HGrid.Format.tpl('{{greeting}} {{ name }}', {
+      greeting: 'Hello',
       name: 'world'
     }), 'Hello world');
   });
 
+  module('Actions', {});
+
+  test('download action', function() {
+    this.spy(HGrid.Actions.download, 'callback');
+    var optionSpy = this.spy();
+    var grid = getMockGrid({
+      data: testData,
+      uploads: true,
+      onClickDownload: optionSpy,
+      columns: [HGrid.Columns.Name, HGrid.Columns.ActionButtons]
+    });
+    // Click one of the download buttons
+    grid.element.find('[data-hg-action="download"]').eq(1).trigger('click');
+    isTrue(HGrid.Actions.download.callback.calledOnce, 'triggers the "download" callback');
+    isTrue(optionSpy.calledOnce);
+  });
+
+  test('custom actions', function() {
+    var spy = this.spy();
+    HGrid.Actions.testaction = {
+      on: 'click',
+      callback: spy
+    };
+    var buttonCol = {
+      text: 'My buttons',
+      itemView: function() {
+        return HGrid.Format.button({
+          text: 'Test',
+          action: 'testaction'
+        });
+      }
+    };
+    var grid = getMockGrid({
+      columns: [buttonCol]
+    });
+    grid.element.find('[data-hg-action="testaction"]').eq(1).trigger('click');
+    isTrue(spy.calledOnce, 'action callback was triggered');
+  });
 
 })(jQuery);

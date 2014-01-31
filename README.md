@@ -213,6 +213,8 @@ var grid = new HGrid('#myGrid', {
 - `onDragleave: function(event, item)`
 - `onDrop: function(event, item)`
 - `onSort: function(event, column, args)`: Called whenever a column header is clicked to sort the grid.
+- `onExpand: function(event, item)`
+- `onCollapse: function(event, item)`
 
 ### Upload-related Callbacks 
 

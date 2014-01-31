@@ -290,6 +290,28 @@
     containsText('.slick-cell', 'mydoc.txt', 'shows folder contents in DOM');
   });
 
+  test('onExpand', function() {
+    var spy = this.spy();
+    var grid = getMockGrid({
+      onExpand: spy
+    });
+    var item = grid.getData()[0];
+    grid.expandItem(item);
+    ok(spy.calledOnce);
+    equal(spy.args[0][1], item, 'second arg is item');
+  });
+
+  test('onCollapse', function() {
+    var spy = this.spy();
+    var grid = getMockGrid({
+      onCollapse: spy
+    });
+    var item = grid.getData()[0];
+    grid.collapseItem(item);
+    ok(spy.calledOnce);
+    equal(spy.args[0][1], item, 'second arg is item');
+  });
+
   test('Toggle collapse', function() {
     var dat = {
       data: [{

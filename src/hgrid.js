@@ -357,6 +357,8 @@ if (typeof jQuery === 'undefined') {
       // Open up a filepicker for the folder
       this.uploadToFolder(item);
     },
+    onExpand: function(event, item) {},
+    onCollapse: function(event, item) {},
     /**
      * Callback executed after an item is added.
      * @property [onItemAdded]
@@ -879,6 +881,7 @@ if (typeof jQuery === 'undefined') {
   /**
    * Helper for retrieving JSON data usin AJAX.
    * @method  getFromServer
+   * @return {jQuery xhr} The xhr object returned by jQuery.ajax.
    */
   HGrid.prototype.getFromServer = function(url, options) {
     var self = this;
@@ -1055,7 +1058,7 @@ if (typeof jQuery === 'undefined') {
       var item = this.getDataView().getItem(args.row);
       // Expand/collapse item
       if (this.canToggle(evt.target)) {
-        this.toggleCollapse(item);
+        this.toggleCollapse(item, evt);
       }
       this.options.onClick.call(this, evt, item);
       return this;
@@ -1446,7 +1449,8 @@ if (typeof jQuery === 'undefined') {
    * @method  expandItem
    * @param  {Object} item
    */
-  HGrid.prototype.expandItem = function(item) {
+  HGrid.prototype.expandItem = function(item, evt) {
+    item = typeof item === 'object' ? item : this.getByID(item.id);
     item._node.expand();
     var dataview = this.getDataView();
     var ignoreBefore = dataview.getRowById(item.id);
@@ -1456,6 +1460,7 @@ if (typeof jQuery === 'undefined') {
       ignoreDiffsBefore: ignoreBefore
     });
     this.getDataView().updateItem(item.id, item);
+    this.options.onExpand.call(this, evt, item);
     return this;
   };
 
@@ -1464,7 +1469,7 @@ if (typeof jQuery === 'undefined') {
    * @method  collapseItem
    * @param  {Object} item
    */
-  HGrid.prototype.collapseItem = function(item) {
+  HGrid.prototype.collapseItem = function(item, evt) {
     item._node.collapse();
     var dataview = this.getDataView();
     var ignoreBefore = dataview.getRowById(item.id);
@@ -1474,6 +1479,7 @@ if (typeof jQuery === 'undefined') {
       ignoreDiffsBefore: ignoreBefore
     });
     dataview.updateItem(item.id, item);
+    this.options.onCollapse.call(this, evt, item);
     return this;
   };
 
@@ -1586,12 +1592,12 @@ if (typeof jQuery === 'undefined') {
    * @method  toggleCollapse
    * @param  {item} item A folder item
    */
-  HGrid.prototype.toggleCollapse = function(item) {
+  HGrid.prototype.toggleCollapse = function(item, event) {
     if (item) {
       if (this.isCollapsed(item)) {
-        this.expandItem(item);
+        this.expandItem(item, event);
       } else {
-        this.collapseItem(item);
+        this.collapseItem(item, event);
       }
     }
     return this;

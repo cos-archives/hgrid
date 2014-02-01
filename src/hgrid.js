@@ -72,7 +72,7 @@ if (typeof jQuery === 'undefined') {
    * @return {String}      The rendered HTML
    */
   function asItem(item, html) {
-    var openTag = '<div class="hg-item-content" data-id="' + item.id + '">';
+    var openTag = '<div class="' + HGrid.Html.itemClass + '" data-id="' + item.id + '">';
     var closingTag = '</div>';
     return [openTag, html, closingTag].join('');
   }
@@ -165,11 +165,12 @@ if (typeof jQuery === 'undefined') {
     expandElem: '<span class="hg-toggle hg-expand"></span>',
     collapseElem: '<span class="hg-toggle hg-collapse"></span>',
     // Icons
-    folderIcon: ' <i class="hg-folder"></i>',
+    folderIcon: '<i class="hg-folder"></i>',
     fileIcon: '<i class="hg-file"></i>',
     // Placeholder for error messages. Upload error messages will be interpolated here
     errorElem: '&nbsp;<span class="error" data-upload-errormessage></span>',
-    buttonClass: 'hg-btn'
+    buttonClass: 'hg-btn',
+    itemClass: 'hg-item-content'
   };
 
   // Formatting helpers public interface

@@ -465,7 +465,10 @@ if (typeof jQuery === 'undefined') {
      * Additional initialization. Useful for adding listeners.
      * @property {Function} init
      */
-    init: function() {}
+    init: function() {},
+
+    searchInput: null,
+    searchFilter: function () {return true;}
   };
 
   ///////////////////////////////////
@@ -1292,6 +1295,15 @@ if (typeof jQuery === 'undefined') {
       }, userCallback);
     }
     this.attachActionListeners();
+
+    var $searchInput = $(self.options.searchInput);
+
+    if ($searchInput.length) {
+      $searchInput.keyup(function (e) {
+        self._searchText = this.value;
+        self.getDataView().refresh();
+      });
+    }
   };
 
   /**
@@ -1340,8 +1352,18 @@ if (typeof jQuery === 'undefined') {
    * @private
    * @returns {Boolean} Whether to display the item or not.
    */
-  function collapseFilter(item) {
-    return !item._hidden;
+  function collapseFilter(item, args) {
+    var visible;
+
+    if (args.grid._searchText) {
+      item.depth = 0;
+      visible =  args.searchFn.call(args.grid, item);
+    } else {
+      item.depth = item._node.depth;
+      visible = !item._hidden;
+    }
+
+    return visible;
   }
   // Expose collapse filter for testing purposes
   HGrid._collapseFilter = collapseFilter;
@@ -1357,6 +1379,7 @@ if (typeof jQuery === 'undefined') {
     var self = this;
     var dataView = this.getDataView();
     dataView.beginUpdate();
+    dataView.setFilterArgs({ grid: self, searchFn: self.options.searchFilter });
     dataView.setFilter(collapseFilter);
     dataView.endUpdate();
     dataView.onRowCountChanged.subscribe(function(event, args) {

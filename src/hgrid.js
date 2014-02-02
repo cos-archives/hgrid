@@ -16,469 +16,7 @@ if (typeof jQuery === 'undefined') {
   var ROOT_ID = 'root';
   var ITEM = 'item';
   var FOLDER = 'folder';
-
-  /**
-   * Custom Error for HGrid-related errors.
-   *
-   * @class  HGridError
-   * @constructor
-   */
-  function HGridError(message) {
-    this.name = 'HGridError';
-    this.message = message || '';
-  }
-  HGridError.prototype = new Error();
-
   function noop() {}
-
-  ////////////////
-  // Formatting //
-  ////////////////
-
-  /**
-   * Sanitize a value to be displayed as HTML.
-   */
-  function sanitized(value) {
-    return value.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
-  }
-
-  /**
-   * Render a spacer element given an indent value in pixels.
-   */
-  function makeIndentElem(indent) {
-    return '<span class="hg-indent" style="width:' + indent + 'px"></span>';
-  }
-
-  /**
-   * Adds a span element that indents an item element, given an item.
-   * `item` must have a depth property.
-   * @param {Object} item
-   * @param {String} html The inner HTML
-   * @return {String} The rendered HTML
-   */
-  function withIndent(item, html, indentWidth) {
-    indentWidth = indentWidth || DEFAULT_INDENT;
-    var indent = item.depth * indentWidth;
-    // indenting span
-    var spacer = makeIndentElem(indent);
-    return spacer + html;
-  }
-
-  /**
-   * Surrounds HTML with a span with class='hg-item-content' and 'data-id' attribute
-   * equal to the item's id
-   * @param  {Object} item The item object
-   * @param  {string} html The inner HTML
-   * @return {String}      The rendered HTML
-   */
-  function asItem(item, html) {
-    var openTag = '<div class="' + HGrid.Html.itemClass + '" data-id="' + item.id + '">';
-    var closingTag = '</div>';
-    return [openTag, html, closingTag].join('');
-  }
-
-  /**
-   * Render the html for a button, given an item and buttonDef. buttonDef is an
-   * object of the form {text: "My button", cssClass: "btn btn-primary",
-   *                     onClick: function(evt, item) {alert(item.name); }}
-   * @class  renderButton
-   * @private
-   */
-  function renderButton(buttonDef) {
-    var cssClass;
-    // For now, buttons are required to have the hg-btn class so that a click
-    // event listener can be attacked to them later
-    if (buttonDef.cssClass) {
-      cssClass = HGrid.Html.buttonClass + ' ' + buttonDef.cssClass;
-    } else {
-      cssClass = HGrid.Html.buttonClass;
-    }
-    var action = buttonDef.action || 'noop';
-    var openTag = '<button data-hg-action="' + action + '" class="' + cssClass + '">';
-    var closingTag = '</button>';
-    var html = [openTag, buttonDef.text, closingTag].join('');
-    return html;
-  }
-
-  function renderButtons(buttonDefs) {
-    var renderedButtons = buttonDefs.map(function(btn) {
-      var html = renderButton(btn);
-      return html;
-    }).join('');
-    return renderedButtons;
-  }
-
-  /**
-   * Default rendering function that renders a file item to HTML.
-   * @class defaultItemView
-   * @param  {Object} item The item data object.
-   * @return {String}      HTML for the item.
-   */
-  function defaultItemView(row, args) {
-    args = args || {};
-    var innerContent = [HGrid.Html.fileIcon, sanitized(row.name), HGrid.Html.errorElem].join('');
-    return asItem(row, withIndent(row, innerContent, args.indent));
-  }
-
-  /**
-   * Default rendering function that renders a folder row to HTML.
-   * @class defaultFolderView
-   * @param  {Object} row The folder data object.
-   * @return {String}      HTML for the folder.
-   */
-  function defaultFolderView(row, args) {
-    args = args || {};
-    var name = sanitized(row.name);
-    // The + / - button for expanding/collapsing a folder
-    var expander;
-    if (row._node.children.length > 0 && row.depth > 0) {
-      expander = row._collapsed ? HGrid.Html.expandElem : HGrid.Html.collapseElem;
-    } else { // Folder is empty
-      expander = '<span></span>';
-    }
-    // Concatenate the expander, folder icon, and the folder name
-    var innerContent = [expander, HGrid.Html.folderIcon, name, HGrid.Html.errorElem].join(' ');
-    return asItem(row, withIndent(row, innerContent, args.indent));
-  }
-
-  /**
-   * Microtemplating function. Adapted from Riot.js (MIT License).
-   */
-  var tpl_fn_cache = {};
-  var tpl = function(template, data) {
-    /*jshint quotmark:false */
-    if (!template) {
-      return '';
-    }
-    tpl_fn_cache[template] = tpl_fn_cache[template] || new Function("_",
-      "return '" + template
-      .replace(/\n/g, "\\n")
-      .replace(/\r/g, "\\r")
-      .replace(/'/g, "\\'")
-      .replace(/\{\{\s*(\w+)\s*\}\}/g, "'+(_.$1?(_.$1+'').replace(/&/g,'&amp;').replace(/\"/g,'&quot;').replace(/</g,'&lt;').replace(/>/g,'&gt;'):(_.$1===0?0:''))+'") + "'"
-    );
-    return tpl_fn_cache[template](data);
-  };
-
-  HGrid.Html = {
-    // Expand/collapse button
-    expandElem: '<span class="hg-toggle hg-expand"></span>',
-    collapseElem: '<span class="hg-toggle hg-collapse"></span>',
-    // Icons
-    folderIcon: '<i class="hg-folder"></i>',
-    fileIcon: '<i class="hg-file"></i>',
-    // Placeholder for error messages. Upload error messages will be interpolated here
-    errorElem: '&nbsp;<span class="error" data-upload-errormessage></span>',
-    buttonClass: 'hg-btn',
-    itemClass: 'hg-item-content'
-  };
-
-  // Formatting helpers public interface
-  HGrid.Fmt = HGrid.Format = {
-    withIndent: withIndent,
-    asItem: asItem,
-    makeIndentElem: makeIndentElem,
-    sanitized: sanitized,
-    button: renderButton,
-    buttons: renderButtons,
-    tpl: tpl
-  };
-
-  // Predefined actions
-  HGrid.Actions = {
-    download: {
-      on: 'click',
-      callback: function(evt, item) {
-        this.options.onClickDownload.call(this, evt, item);
-      }
-    },
-    delete: {
-      on: 'click',
-      callback: function(evt, item) {
-        this.options.onClickDelete.call(this, evt, item);
-      }
-    },
-    upload: {
-      on: 'click',
-      callback: function(evt, item) {
-        this.options.onClickUpload.call(this, evt, item);
-      }
-    },
-    noop: {
-      on: 'click',
-      callback: noop
-    }
-  };
-
-  // Predefined column schemas
-  HGrid.Col = HGrid.Columns = {
-    defaultFolderView: defaultFolderView,
-    defaultItemView: defaultItemView,
-
-    // Name field schema
-    Name: {
-      id: 'name',
-      name: 'Name',
-      sortkey: 'name',
-      cssClass: 'hg-cell',
-      folderView: defaultFolderView,
-      itemView: defaultItemView,
-      sortable: true
-    },
-
-    // Actions buttons schema
-    ActionButtons: {
-      id: 'actions',
-      name: 'Actions',
-      cssClass: 'hg-cell',
-      width: 50,
-      sortable: false,
-      folderView: function() {
-        var buttonDefs = [];
-        if (this.options.uploads) {
-          buttonDefs.push({
-            text: 'Upload',
-            action: 'upload'
-          });
-        }
-        if (buttonDefs) {
-          return renderButtons(buttonDefs);
-        }
-        return '';
-      },
-      itemView: function() {
-        var buttonDefs = [{
-          text: 'Download',
-          action: 'download'
-        }, {
-          text: 'Delete',
-          action: 'delete'
-        }];
-        return renderButtons(buttonDefs);
-      }
-    }
-  };
-
-  /**
-   * Default options object
-   * @class  defaults
-   */
-  var defaults = {
-    /**
-     * The data for the grid.
-     * @property data
-     */
-    data: null,
-    ajaxOptions: {},
-    /**
-     * Enable uploads (requires DropZone)
-     * @property [uploads]
-     * @type {Boolean}
-     */
-    uploads: false,
-    /**
-     * Array of column schemas
-     * @property [columns]
-     */
-    columns: [HGrid.Columns.Name],
-    /**
-     * @property  [width] Width of the grid
-     */
-    width: 600,
-    /**
-     * Height of the grid div in px or 'auto' (to disable vertical scrolling).*
-     * @property [height]
-     */
-    height: 300,
-    /**
-     * CSS class applied for a highlighted row.
-     * @property [highlightClass]
-     * @type {String}
-     */
-    highlightClass: 'hg-row-highlight',
-    /**
-     * Width to indent items (in px)*
-     * @property indent
-     */
-    indent: DEFAULT_INDENT,
-    /**
-     * Additional options passed to Slick.Grid constructor
-     * See: https://github.com/mleibman/SlickGrid/wiki/Grid-Options
-     * @property [slickgridOptions]
-     */
-    slickgridOptions: {},
-    /**
-     * URL to send upload requests to. Can be either a string of a function
-     * that receives a data item.
-     * Example:
-     *  uploadUrl: function(item) {return '/upload/' + item.id; }
-     * @property [uploadUrl]
-     */
-    uploadUrl: null,
-    /**
-     * Array of accepted file types. Can be file extensions or mimetypes.
-     * Example: `['.py', 'application/pdf', 'image/*']
-     * @property [acceptedFiles]
-     * @type {Array}
-     */
-    acceptedFiles: null,
-    /**
-     * Max filesize in Mb.
-     * @property [maxFilesize]
-     */
-    maxFilesize: 256,
-    /**
-     * HTTP method to use for uploading.
-     * Can be either a string or a function that receives the item
-     * to upload to and returns the method name.
-     */
-    uploadMethod: 'POST',
-    /**
-     * Additional options passed to DropZone constructor
-     * See: http://www.dropzonejs.com/
-     * @property [dropzoneOptions]
-     * @type {Object}
-     */
-    dropzoneOptions: {},
-    /**
-     * Callback function executed after an item is clicked.
-     * By default, expand or collapse the item.
-     * @property [onClick]
-     */
-    /*jshint unused: false */
-    onClick: function(event, item) {},
-    onClickDownload: function(event, item, options) {
-      this.downloadItem(item, options);
-    },
-    onClickDelete: function(event, item, options) {
-      this.removeItem(item.id);
-      this.deleteFile(item, options);
-    },
-    onClickUpload: function(event, item, options) {
-      // Open up a filepicker for the folder
-      this.uploadToFolder(item);
-    },
-    onExpand: function(event, item) {},
-    onCollapse: function(event, item) {},
-    /**
-     * Callback executed after an item is added.
-     * @property [onItemAdded]
-     */
-    onItemAdded: function(item) {},
-    // Dragging related callbacks
-    onDragover: function(evt, item) {},
-    onDragenter: function(evt, item) {},
-    onDrop: function(event, item) {},
-    /**
-     *  Called when a column is sorted.
-     *  @param {Object} event
-     *  @param {Object} column The column definition for the sorted column.
-     *  @param {Object} args SlickGrid sorting args.
-     */
-    onSort: function(event, column, args) {},
-    /**
-     * Called whenever a file is added for uploaded
-     * @param  {Object} file The file object. Has gridElement and gridItem bound to it.
-     * @param  {Object} item The added item
-     */
-    uploadAdded: function(file, item) {},
-    /**
-     * Called whenever a file gets processed.
-     * @property {Function} [uploadProcessing]
-     */
-    /*jshint unused: false */
-    uploadProcessing: function(file, item) {
-      // TODO: display Cancel upload button text
-    },
-    /**
-     * Called whenever an upload error occurs
-     * @property [uploadError]
-     * @param  {Object} file    The HTML file object
-     * @param {String} message Error message
-     * @param {Object} item The placeholder item that was added to the grid for the file.
-     */
-    /*jshint unused: false */
-    uploadError: function(file, message, item) {
-      // The row element for the added file is stored on the file object
-      var $rowElem = $(file.gridElement);
-      var msg;
-      if (typeof message !== 'string' && message.error) {
-        msg = message.error;
-      } else {
-        msg = message;
-      }
-      // Show error message in any element within the row
-      // that contains 'data-upload-errormessage'
-      $rowElem.find('[data-upload-errormessage]').each(function(i) {
-        this.textContent = msg;
-      });
-      return this;
-    },
-    /**
-     * Called whenever upload progress gets updated.
-     * @property [uploadProgress]
-     * @param  {Object} file      the file object
-     * @param  {Number} progress  Percentage (0-100)
-     * @param  {Number} bytesSent
-     * @param  {The data item element} item
-     */
-    /*jshint unused: false */
-    uploadProgress: function(file, progress, bytesSent, item) {
-      // Use the row as a progress bar
-      var $row = $(file.gridElement);
-      $row.width(progress + '%');
-    },
-    /**
-     * Called whenever an upload is finished successfully
-     * @property [uploadSuccess]
-     */
-    /*jshint unused: false */
-    uploadSuccess: function(file, item) {},
-    /**
-     * Called when an upload completes (whether it is successful or not)
-     * @property [uploadComplete]
-     */
-    uploadComplete: function(file, item) {},
-    /**
-     * Called before a file gets uploaded. If `done` is called with a string argument,
-     * An error is thrown with the message. If `done` is called with no arguments,
-     * the file is accepted.
-     * @property [uploadAccept]
-     * @param  {Object} file   The file object
-     * @param  {Object} folder The folder item being uploaded to
-     * @param  {Function} done Called to either accept or reject a file.
-     */
-    uploadAccept: function(file, folder, done) {
-      return done();
-    },
-    /**
-     * Returns the url where to download and item
-     * @param  {Object} row The row object
-     * @return {String} The download url
-     */
-    downloadUrl: function(item) {},
-    deleteUrl: function(item) {},
-    deleteMethod: function(item) {},
-
-    listeners: [],
-    /**
-     * Additional initialization. Useful for adding listeners.
-     * @property {Function} init
-     */
-    init: function() {},
-
-    searchInput: null,
-    /**
-     * Search filter that returns true if an item should be displayed in the grid.
-     * By default, items will be searched by name (case insensitive).
-     * @param  {Object} item A data item
-     * @param {String} searchText The current text value in the search input box.
-     * @return {Boolean}      Whether or not to display an item.
-     */
-    searchFilter: function (item, searchText) {
-      return item.name.toLowerCase().indexOf(searchText) !== -1;
-    }
-  };
 
   ///////////
   // Queue //
@@ -507,8 +45,6 @@ if (typeof jQuery === 'undefined') {
   Queue.prototype.isEmpty = function() {
     return this.queue.length === 0;
   };
-
-  HGrid.Queue = Queue;
 
   ///////////////////////////////////
   // Tree and Leaf Representations //
@@ -638,7 +174,7 @@ if (typeof jQuery === 'undefined') {
    */
   Tree.prototype.sort = function(key, asc) {
     this.children.sort(function(child1, child2) {
-      var res, val1 = child1.data[key],
+      var val1 = child1.data[key],
         val2 = child2.data[key];
       var sign = asc ? 1 : -1;
       var ret = (val1 === val2 ? 0 : (val1 > val2 ? 1 : -1)) * sign;
@@ -923,21 +459,484 @@ if (typeof jQuery === 'undefined') {
     return this;
   };
 
-  Leaf.prototype.sort = function(key) {};
+  Leaf.prototype.sort = noop;
 
+  ////////////////
+  // Formatting //
+  ////////////////
+
+  /**
+   * Sanitize a value to be displayed as HTML.
+   */
+  function sanitized(value) {
+    return value.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+  }
+
+  /**
+   * Render a spacer element given an indent value in pixels.
+   */
+  function makeIndentElem(indent) {
+    return '<span class="hg-indent" style="width:' + indent + 'px"></span>';
+  }
+
+  /**
+   * Adds a span element that indents an item element, given an item.
+   * `item` must have a depth property.
+   * @param {Object} item
+   * @param {String} html The inner HTML
+   * @return {String} The rendered HTML
+   */
+  function withIndent(item, html, indentWidth) {
+    indentWidth = indentWidth || DEFAULT_INDENT;
+    var indent = item.depth * indentWidth;
+    // indenting span
+    var spacer = makeIndentElem(indent);
+    return spacer + html;
+  }
+
+  /**
+   * Surrounds HTML with a span with class='hg-item-content' and 'data-id' attribute
+   * equal to the item's id
+   * @param  {Object} item The item object
+   * @param  {string} html The inner HTML
+   * @return {String}      The rendered HTML
+   */
+  function asItem(item, html) {
+    var openTag = '<div class="' + HGrid.Html.itemClass + '" data-id="' + item.id + '">';
+    var closingTag = '</div>';
+    return [openTag, html, closingTag].join('');
+  }
+
+  /**
+   * Render the html for a button, given an item and buttonDef. buttonDef is an
+   * object of the form {text: "My button", cssClass: "btn btn-primary",
+   *                     onClick: function(evt, item) {alert(item.name); }}
+   * @class  renderButton
+   * @private
+   */
+  function renderButton(buttonDef) {
+    var cssClass;
+    // For now, buttons are required to have the hg-btn class so that a click
+    // event listener can be attacked to them later
+    if (buttonDef.cssClass) {
+      cssClass = HGrid.Html.buttonClass + ' ' + buttonDef.cssClass;
+    } else {
+      cssClass = HGrid.Html.buttonClass;
+    }
+    var action = buttonDef.action || 'noop';
+    var openTag = '<button data-hg-action="' + action + '" class="' + cssClass + '">';
+    var closingTag = '</button>';
+    var html = [openTag, buttonDef.text, closingTag].join('');
+    return html;
+  }
+
+  function renderButtons(buttonDefs) {
+    var renderedButtons = buttonDefs.map(function(btn) {
+      var html = renderButton(btn);
+      return html;
+    }).join('');
+    return renderedButtons;
+  }
+
+  /**
+   * Default rendering function that renders a file item to HTML.
+   * @class defaultItemView
+   * @param  {Object} item The item data object.
+   * @return {String}      HTML for the item.
+   */
+  function defaultItemView(row, args) {
+    args = args || {};
+    var innerContent = [HGrid.Html.fileIcon, sanitized(row.name), HGrid.Html.errorElem].join('');
+    return asItem(row, withIndent(row, innerContent, args.indent));
+  }
+
+  /**
+   * Default rendering function that renders a folder row to HTML.
+   * @class defaultFolderView
+   * @param  {Object} row The folder data object.
+   * @return {String}      HTML for the folder.
+   */
+  function defaultFolderView(row, args) {
+    args = args || {};
+    var name = sanitized(row.name);
+    // The + / - button for expanding/collapsing a folder
+    var expander;
+    if (row._node.children.length > 0 && row.depth > 0) {
+      expander = row._collapsed ? HGrid.Html.expandElem : HGrid.Html.collapseElem;
+    } else { // Folder is empty
+      expander = '<span></span>';
+    }
+    // Concatenate the expander, folder icon, and the folder name
+    var innerContent = [expander, HGrid.Html.folderIcon, name, HGrid.Html.errorElem].join(' ');
+    return asItem(row, withIndent(row, innerContent, args.indent));
+  }
+
+  /**
+   * Microtemplating function. Adapted from Riot.js (MIT License).
+   */
+  var tpl_fn_cache = {};
+  var tpl = function(template, data) {
+    /*jshint quotmark:false */
+    if (!template) {
+      return '';
+    }
+    tpl_fn_cache[template] = tpl_fn_cache[template] || new Function("_",
+      "return '" + template
+      .replace(/\n/g, "\\n")
+      .replace(/\r/g, "\\r")
+      .replace(/'/g, "\\'")
+      .replace(/\{\{\s*(\w+)\s*\}\}/g, "'+(_.$1?(_.$1+'').replace(/&/g,'&amp;').replace(/\"/g,'&quot;').replace(/</g,'&lt;').replace(/>/g,'&gt;'):(_.$1===0?0:''))+'") + "'"
+    );
+    return tpl_fn_cache[template](data);
+  };
+
+  HGrid.Html = {
+    // Expand/collapse button
+    expandElem: '<span class="hg-toggle hg-expand"></span>',
+    collapseElem: '<span class="hg-toggle hg-collapse"></span>',
+    // Icons
+    folderIcon: '<i class="hg-folder"></i>',
+    fileIcon: '<i class="hg-file"></i>',
+    // Placeholder for error messages. Upload error messages will be interpolated here
+    errorElem: '&nbsp;<span class="error" data-upload-errormessage></span>',
+    buttonClass: 'hg-btn',
+    itemClass: 'hg-item-content'
+  };
+
+  // Formatting helpers public interface
+  HGrid.Fmt = HGrid.Format = {
+    withIndent: withIndent,
+    asItem: asItem,
+    makeIndentElem: makeIndentElem,
+    sanitized: sanitized,
+    button: renderButton,
+    buttons: renderButtons,
+    tpl: tpl
+  };
+
+  // Predefined actions
+  HGrid.Actions = {
+    download: {
+      on: 'click',
+      callback: function(evt, item) {
+        this.options.onClickDownload.call(this, evt, item);
+      }
+    },
+    delete: {
+      on: 'click',
+      callback: function(evt, item) {
+        this.options.onClickDelete.call(this, evt, item);
+      }
+    },
+    upload: {
+      on: 'click',
+      callback: function(evt, item) {
+        this.options.onClickUpload.call(this, evt, item);
+      }
+    },
+    noop: {
+      on: 'click',
+      callback: noop
+    }
+  };
+
+  // Predefined column schemas
+  HGrid.Col = HGrid.Columns = {
+    defaultFolderView: defaultFolderView,
+    defaultItemView: defaultItemView,
+
+    // Name field schema
+    Name: {
+      id: 'name',
+      name: 'Name',
+      sortkey: 'name',
+      cssClass: 'hg-cell',
+      folderView: defaultFolderView,
+      itemView: defaultItemView,
+      sortable: true
+    },
+
+    // Actions buttons schema
+    ActionButtons: {
+      id: 'actions',
+      name: 'Actions',
+      cssClass: 'hg-cell',
+      width: 50,
+      sortable: false,
+      folderView: function() {
+        var buttonDefs = [];
+        if (this.options.uploads) {
+          buttonDefs.push({
+            text: 'Upload',
+            action: 'upload'
+          });
+        }
+        if (buttonDefs) {
+          return renderButtons(buttonDefs);
+        }
+        return '';
+      },
+      itemView: function() {
+        var buttonDefs = [{
+          text: 'Download',
+          action: 'download'
+        }, {
+          text: 'Delete',
+          action: 'delete'
+        }];
+        return renderButtons(buttonDefs);
+      }
+    }
+  };
 
   ///////////
   // HGrid //
   ///////////
 
+  /**
+   * Default options object
+   * @class  defaults
+   */
+  var defaults = {
+    /**
+     * The data for the grid.
+     * @property data
+     */
+    data: null,
+    ajaxOptions: {},
+    /**
+     * Enable uploads (requires DropZone)
+     * @property [uploads]
+     * @type {Boolean}
+     */
+    uploads: false,
+    /**
+     * Array of column schemas
+     * @property [columns]
+     */
+    columns: [HGrid.Columns.Name],
+    /**
+     * @property  [width] Width of the grid
+     */
+    width: 600,
+    /**
+     * Height of the grid div in px or 'auto' (to disable vertical scrolling).*
+     * @property [height]
+     */
+    height: 300,
+    /**
+     * CSS class applied for a highlighted row.
+     * @property [highlightClass]
+     * @type {String}
+     */
+    highlightClass: 'hg-row-highlight',
+    /**
+     * Width to indent items (in px)*
+     * @property indent
+     */
+    indent: DEFAULT_INDENT,
+    /**
+     * Additional options passed to Slick.Grid constructor
+     * See: https://github.com/mleibman/SlickGrid/wiki/Grid-Options
+     * @property [slickgridOptions]
+     */
+    slickgridOptions: {},
+    /**
+     * URL to send upload requests to. Can be either a string of a function
+     * that receives a data item.
+     * Example:
+     *  uploadUrl: function(item) {return '/upload/' + item.id; }
+     * @property [uploadUrl]
+     */
+    uploadUrl: null,
+    /**
+     * Array of accepted file types. Can be file extensions or mimetypes.
+     * Example: `['.py', 'application/pdf', 'image/*']
+     * @property [acceptedFiles]
+     * @type {Array}
+     */
+    acceptedFiles: null,
+    /**
+     * Max filesize in Mb.
+     * @property [maxFilesize]
+     */
+    maxFilesize: 256,
+    /**
+     * HTTP method to use for uploading.
+     * Can be either a string or a function that receives the item
+     * to upload to and returns the method name.
+     */
+    uploadMethod: 'POST',
+    /**
+     * Additional options passed to DropZone constructor
+     * See: http://www.dropzonejs.com/
+     * @property [dropzoneOptions]
+     * @type {Object}
+     */
+    dropzoneOptions: {},
+    /**
+     * Callback function executed after an item is clicked.
+     * By default, expand or collapse the item.
+     * @property [onClick]
+     */
+    /*jshint unused: false */
+    onClick: function(event, item) {},
+    onClickDownload: function(event, item, options) {
+      this.downloadItem(item, options);
+    },
+    onClickDelete: function(event, item, options) {
+      this.removeItem(item.id);
+      this.deleteFile(item, options);
+    },
+    onClickUpload: function(event, item, options) {
+      // Open up a filepicker for the folder
+      this.uploadToFolder(item);
+    },
+    onExpand: function(event, item) {},
+    onCollapse: function(event, item) {},
+    /**
+     * Callback executed after an item is added.
+     * @property [onItemAdded]
+     */
+    onItemAdded: function(item) {},
+    // Dragging related callbacks
+    onDragover: function(evt, item) {},
+    onDragenter: function(evt, item) {},
+    onDrop: function(event, item) {},
+    /**
+     *  Called when a column is sorted.
+     *  @param {Object} event
+     *  @param {Object} column The column definition for the sorted column.
+     *  @param {Object} args SlickGrid sorting args.
+     */
+    onSort: function(event, column, args) {},
+    /**
+     * Called whenever a file is added for uploaded
+     * @param  {Object} file The file object. Has gridElement and gridItem bound to it.
+     * @param  {Object} item The added item
+     */
+    uploadAdded: function(file, item) {},
+    /**
+     * Called whenever a file gets processed.
+     * @property {Function} [uploadProcessing]
+     */
+    /*jshint unused: false */
+    uploadProcessing: function(file, item) {
+      // TODO: display Cancel upload button text
+    },
+    /**
+     * Called whenever an upload error occurs
+     * @property [uploadError]
+     * @param  {Object} file    The HTML file object
+     * @param {String} message Error message
+     * @param {Object} item The placeholder item that was added to the grid for the file.
+     */
+    /*jshint unused: false */
+    uploadError: function(file, message, item) {
+      // The row element for the added file is stored on the file object
+      var $rowElem = $(file.gridElement);
+      var msg;
+      if (typeof message !== 'string' && message.error) {
+        msg = message.error;
+      } else {
+        msg = message;
+      }
+      // Show error message in any element within the row
+      // that contains 'data-upload-errormessage'
+      $rowElem.find('[data-upload-errormessage]').each(function(i) {
+        this.textContent = msg;
+      });
+      return this;
+    },
+    /**
+     * Called whenever upload progress gets updated.
+     * @property [uploadProgress]
+     * @param  {Object} file      the file object
+     * @param  {Number} progress  Percentage (0-100)
+     * @param  {Number} bytesSent
+     * @param  {The data item element} item
+     */
+    /*jshint unused: false */
+    uploadProgress: function(file, progress, bytesSent, item) {
+      // Use the row as a progress bar
+      var $row = $(file.gridElement);
+      $row.width(progress + '%');
+    },
+    /**
+     * Called whenever an upload is finished successfully
+     * @property [uploadSuccess]
+     */
+    /*jshint unused: false */
+    uploadSuccess: function(file, item) {},
+    /**
+     * Called when an upload completes (whether it is successful or not)
+     * @property [uploadComplete]
+     */
+    uploadComplete: function(file, item) {},
+    /**
+     * Called before a file gets uploaded. If `done` is called with a string argument,
+     * An error is thrown with the message. If `done` is called with no arguments,
+     * the file is accepted.
+     * @property [uploadAccept]
+     * @param  {Object} file   The file object
+     * @param  {Object} folder The folder item being uploaded to
+     * @param  {Function} done Called to either accept or reject a file.
+     */
+    uploadAccept: function(file, folder, done) {
+      return done();
+    },
+    /**
+     * Returns the url where to download and item
+     * @param  {Object} row The row object
+     * @return {String} The download url
+     */
+    downloadUrl: function(item) {},
+    deleteUrl: function(item) {},
+    deleteMethod: function(item) {},
+
+    listeners: [],
+    /**
+     * Additional initialization. Useful for adding listeners.
+     * @property {Function} init
+     */
+    init: function() {},
+
+    searchInput: null,
+    /**
+     * Search filter that returns true if an item should be displayed in the grid.
+     * By default, items will be searched by name (case insensitive).
+     * @param  {Object} item A data item
+     * @param {String} searchText The current text value in the search input box.
+     * @return {Boolean}      Whether or not to display an item.
+     */
+    searchFilter: function (item, searchText) {
+      return item.name.toLowerCase().indexOf(searchText) !== -1;
+    }
+  };
+
   HGrid._defaults = defaults;
-  // Expose Tree and Leaf via the HGrid namespace
+  // Expose data structures via the HGrid namespace
   HGrid.Tree = Tree;
   HGrid.Leaf = Leaf;
+  HGrid.Queue = Queue;
 
+  // Constants
   HGrid.ROOT_ID = ROOT_ID;
   HGrid.FOLDER = FOLDER;
   HGrid.ITEM = ITEM;
+
+  /**
+   * Custom Error for HGrid-related errors.
+   *
+   * @class  HGridError
+   * @constructor
+   */
+  function HGridError(message) {
+    this.name = 'HGridError';
+    this.message = message || '';
+  }
+  HGridError.prototype = new Error();
+
   /**
    * Construct an HGrid.
    *

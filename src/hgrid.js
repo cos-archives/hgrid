@@ -484,7 +484,7 @@ if (typeof jQuery === 'undefined') {
   // Queue //
   ///////////
 
-  // An efficient, lightweight queue implementation, adapted from Queue.js
+  // An efficient, lightweight queue implementation, adapted from Queue.js by Steven Morley
   function Queue() {
     this.queue = [];
     this.offset = 0;
@@ -547,18 +547,13 @@ if (typeof jQuery === 'undefined') {
       });
     } else {
       this.data = data || {};
-      if (data.id) {
-        this.id = data.id;
-      } else {
-        this.id = getUID();
-      }
+      this.id = data.id ? data.id : getUID();
       // Depth and dataView will be set by parent after being added as a subtree
       this.depth = null;
       this.dataView = null;
     }
     this.children = [];
     this.parentID = null;
-    return this;
   }
   /**
    * Construct a new Tree from either an object or an array of data.
@@ -587,6 +582,10 @@ if (typeof jQuery === 'undefined') {
       tree = new Tree(data);
       tree.depth = parent.depth + 1;
     }
+    // Assumes nodes have a `kind` property. If `kind` is "item", create a leaf,
+    // else create a Tree.
+    // TODO: This logic might not be necessary. Could just create a tree node for
+    // every item.
     for (var i = 0, len = children.length; i < len; i++) {
       var child = children[i];
       if (child.kind === ITEM) {
@@ -769,7 +768,7 @@ if (typeof jQuery === 'undefined') {
       node.collapse(true);
     }
     if (!this.isRoot() && refresh) {
-      this.dataView.updateItem(item.id, item);
+      this.dataView.updateItem(item.id, item); // need to update the item index
     }
     return this;
   };
@@ -851,16 +850,11 @@ if (typeof jQuery === 'undefined') {
    */
   function Leaf(data) {
     this.data = data;
-    if (data.id) {
-      this.id = data.id;
-    } else {
-      this.id = getUID(); // Set id then increment counter
-    }
+    this.id  = data.id ? data.id : getUID();
     this.parentID = null; // Set by parent
     this.depth = null;
     this.children = [];
     this.dataView = null; // Set by parent
-    return this;
   }
   /**
    * Construct a new Leaf from an object.

@@ -628,7 +628,7 @@
   });
 
   test('Creating trees with metadata', function() {
-    var t1 = HGrid.Tree({
+    var t1 = new HGrid.Tree({
       name: 'foo.py',
       kind: HGrid.FOLDER,
       language: 'python'

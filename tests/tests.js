@@ -520,7 +520,7 @@
     isTrue(t4.isHidden(), 'another depth 3 node is hidden');
   });
 
-  test('Tree.expandAtDepth()', function() {
+  test('Tree.expandAt()', function() {
     var root = new HGrid.Tree();
     var t1 = new HGrid.Tree({name: 'D1 Node', kind: 'folder'});
     var t2 = new HGrid.Tree({name: 'D2 Node', kind: 'folder'});
@@ -530,11 +530,10 @@
     t1.add(t2, true);
     t2.add(t3, true);
     t2.add(t4, true);
-    root.updateDataView();
-    root.collapse();
-    root.expandAtDepth(2);
+    root.collapseAt(1, true);
+    root.expandAt(2, true);
     isFalse(t2.isCollapsed(), 'depth 2 node is not collapsed');
-    isTrue(t1.isCollapsed(), 'depth 1 node is collapsed');
+    isFalse(t1.isCollapsed(), 'depth 1 node is collapsed');
     isFalse(t3.isHidden(), 'depth 3 node is not hidden');
     isFalse(t4.isHidden(), 'another depth 3 node is not hidden');
   });

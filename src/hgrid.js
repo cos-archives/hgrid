@@ -356,6 +356,21 @@ if (typeof jQuery === 'undefined') {
     return this;
   };
 
+  Tree.prototype.expandAt = function(depth, refresh) {
+    if (depth === 0) {
+      return this.expand(false, refresh);
+    }
+    this.bfTraverse(function(node) {
+      if (!node.isRoot() && node.depth < depth) {
+        node.expand(false, true);  // Make sure item is updated
+      }
+    }, depth);
+    if (refresh) {
+      this.dataView.refresh();
+    }
+    return this;
+  };
+
   Tree.prototype.isHidden = function() {
     return this.getItem()._hidden;
   };
@@ -478,6 +493,10 @@ if (typeof jQuery === 'undefined') {
   };
 
   Leaf.prototype.sort = noop;
+
+  Leaf.prototype.isRoot = function() {
+    return this.depth === 0;
+  };
 
   ////////////////
   // Formatting //

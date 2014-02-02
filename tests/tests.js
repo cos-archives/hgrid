@@ -351,13 +351,13 @@
     var parent = grid.getData()[0];
     parent._collapsed = false;
     var child = grid.getData()[1];
-    isTrue(HGrid._collapseFilter(child, {
+    isTrue(HGrid._hgFilter(child, {
       thisObj: grid,
       rootID: 'root'
     }), 'returns true if parent is not collpased');
     parent._node.collapse();
     child = grid.getData()[1];
-    isFalse(HGrid._collapseFilter(child, {
+    isFalse(HGrid._hgFilter(child, {
       thisObj: grid,
       rootID: 'root'
     }), 'returns false if parent is collapsed');

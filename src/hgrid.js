@@ -1351,13 +1351,15 @@ if (typeof jQuery === 'undefined') {
   };
 
   /**
-   * Filter used by SlickGrid for collapsing/expanding folder.
+   * Filter used by SlickGrid for searching and expanding/collapsing items.
+   * Receives an item and returns true if the item should be displayed in the
+   * grid.
    *
-   * @class  collapseFilter
+   * @class  hgFilter
    * @private
    * @returns {Boolean} Whether to display the item or not.
    */
-  function collapseFilter(item, args) {
+  function hgFilter(item, args) {
     var visible;
 
     if (args.grid && args.grid._searchText) {
@@ -1371,7 +1373,7 @@ if (typeof jQuery === 'undefined') {
     return visible;
   }
   // Expose collapse filter for testing purposes
-  HGrid._collapseFilter = collapseFilter;
+  HGrid._hgFilter = hgFilter;
 
   /**
    * Sets up the DataView with the filter function. Must be executed after
@@ -1385,7 +1387,7 @@ if (typeof jQuery === 'undefined') {
     var dataView = this.getDataView();
     dataView.beginUpdate();
     dataView.setFilterArgs({ grid: self, searchFn: self.options.searchFilter });
-    dataView.setFilter(collapseFilter);
+    dataView.setFilter(hgFilter);
     dataView.endUpdate();
     dataView.onRowCountChanged.subscribe(function(event, args) {
       self.grid.updateRowCount();

@@ -468,7 +468,17 @@ if (typeof jQuery === 'undefined') {
     init: function() {},
 
     searchInput: null,
-    searchFilter: function () {return true;}
+    /**
+     * Search filter that returns true if an item should be displayed in the grid.
+     * Use this.searchInput to access the jQuery element for the input box.
+     * By default, items will be searched by name (case insensitive)
+     * @param  {Object} item A data item
+     * @return {Boolean}      Whether or not to display an item.
+     */
+    searchFilter: function (item) {
+      var searchText = this.searchInput.val().toLowerCase();
+      return item.name.toLowerCase().indexOf(searchText) !== -1;
+    }
   };
 
   ///////////////////////////////////

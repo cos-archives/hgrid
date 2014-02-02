@@ -42,16 +42,9 @@ var myData = {
     }]
 };
 
-var onSearch = function (item) {
-    var searchText = $('#txtSearch').val().toLowerCase();
-    return item.name.toLowerCase().indexOf(searchText) !== -1;
-}
-
-var plainName = {id: 'searchResults', text: 'Name', folderView: '{{name}}', itemView: '{{name}}'}
-
 var myGrid = new HGrid('#myGrid', {data: myData,
     columns: [HGrid.Col.Name],
-    width: 500, height: 200, searchInput: '#txtSearch', searchFilter: onSearch});
+    width: 500, height: 200, searchInput: '#txtSearch'});
 </script>
 </body>
 </html>

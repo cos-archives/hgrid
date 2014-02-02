@@ -869,6 +869,16 @@ if (typeof jQuery === 'undefined') {
     self.options = $.extend({}, defaults, options);
     self.grid = null; // Set upon calling _initSlickGrid()
     self.dropzone = null; // Set upon calling _initDropzone()
+    if (self.options.searchInput) {
+      var $searchInput = $(self.options.searchInput);
+      if ($searchInput.length) {
+        self.searchInput = $searchInput;
+      } else {
+        throw new HGridError('Invalid selector for searchInput.');
+      }
+    } else {
+      self.searchInput = null;
+    }
     if (typeof self.options.data === 'string') { // data is a URL, get the data asynchronously
       self.getFromServer(self.options.data, {
         success: function(data) {
@@ -1296,18 +1306,13 @@ if (typeof jQuery === 'undefined') {
     }
     this.attachActionListeners();
 
-    if (self.options.searchInput) {
-      var $searchInput = $(self.options.searchInput);
-      if ($searchInput.length) {
-        $searchInput.keyup(function (e) {
-          self._searchText = this.value;
-          self.getDataView().refresh();
-          self.grid.invalidate();
-          self.grid.render();
-        });
-      } else {
-        throw new HGridError('Invalid selector for searchInput.');
-      }
+    if (self.searchInput) {
+      self.searchInput.keyup(function (e) {
+        self._searchText = this.value;
+        self.getDataView().refresh();
+        self.grid.invalidate();
+        self.grid.render();
+      });
     }
   };
 

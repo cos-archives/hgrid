@@ -504,6 +504,9 @@ if (typeof jQuery === 'undefined') {
     }
     return item;
   };
+  Qu.prototype.isEmpty = function() {
+    return this.queue.length === 0;
+  };
 
   HGrid.Qu = Qu;
 
@@ -543,7 +546,7 @@ if (typeof jQuery === 'undefined') {
         inlineFilters: true
       });
     } else {
-      this.data = data;
+      this.data = data || {};
       if (data.id) {
         this.id = data.id;
       } else {
@@ -603,10 +606,6 @@ if (typeof jQuery === 'undefined') {
   Tree._getCurrentID = function() {
     return idCounter;
   };
-
-  Tree.collapseAtDepth = function() {
-
-  }
 
   /**
    * Add a component to this node
@@ -748,7 +747,7 @@ if (typeof jQuery === 'undefined') {
    * @method  collapse
    * @param {Boolean} hideSelf Whether to hide this node as well
    */
-  Tree.prototype.collapse = function(hideSelf) {
+  Tree.prototype.collapse = function(hideSelf, refresh) {
     var item = this.getItem();
     // A node can be collapsed but not hidden. For example, if you click
     // on a folder, it should collapse and hide all of its contents, but the folder
@@ -763,22 +762,40 @@ if (typeof jQuery === 'undefined') {
     for (var i = 0, node; node = this.children[i]; i++) {
       node.collapse(true);
     }
+    if (refresh) {
+      this.dataView.updateItem(item.id, item);
+    }
     return this;
   };
 
-  // Tree.prototype.collapseAt = function(depth) {
-  //   var frontier = new Qu();
-  //   var next = this;
-  //   while (next) {
-  //     if (next.children.length) {
-  //       // enqueue all children
-  //       for (var i, child; child=next.children[i]; i++) {
-  //         frontier.enq(child);
-  //       }
-  //       next = frontier.deq();
-  //     }
-  //   }
-  // };
+  /**
+   * Collapse all nodes at a certain depth
+   * @method  collapseAt
+   * @param  {Number} depth   The depth to collapse at
+   * @param  {Boolean} refresh Whether to refresh the DataView.
+   */
+  Tree.prototype.collapseAt = function(depth, refresh) {
+    if (depth === 0) {
+      throw new HGridError('Depth param must be greater than 0');
+    }
+    var frontier = new Qu();
+    var next = this;
+    while (next && next.depth <= depth) {
+      if (next.depth === depth) {
+        next.collapse();
+      }
+      if (next.children.length) {
+        // enqueue all children
+        for (var i = 0, child; child = next.children[i]; i++){
+          frontier.enq(child);
+        }
+      }
+      next = frontier.deq();
+    }
+    if (refresh) {
+      this.dataView.refresh();
+    }
+  };
 
   Tree.prototype.isHidden = function() {
     return this.getItem()._hidden;
@@ -788,7 +805,7 @@ if (typeof jQuery === 'undefined') {
    * Expand this and all children nodes by setting the item's _collapsed attribute
    * @method  expand
    */
-  Tree.prototype.expand = function(notFirst) {
+  Tree.prototype.expand = function(notFirst, refresh) {
     var item = this.getItem();
     if (!notFirst) {
       item._collapsed = false;
@@ -799,6 +816,9 @@ if (typeof jQuery === 'undefined') {
       if (!item._collapsed) { // Maintain subtree's collapsed state
         node.expand(true);
       }
+    }
+    if (refresh) {
+      this.dataView.updateItem(item.id, item);
     }
     return this;
   };
@@ -1576,6 +1596,10 @@ if (typeof jQuery === 'undefined') {
     dataview.updateItem(item.id, item);
     this.options.onCollapse.call(this, evt, item);
     return this;
+  };
+
+  HGrid.prototype.updateItem = function(item) {
+    return this.getDataView().updateItem(item.id, item);
   };
 
   HGrid.prototype.isCollapsed = function(item) {

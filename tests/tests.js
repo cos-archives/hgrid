@@ -1247,7 +1247,7 @@
   module('Queue', {});
 
   test('basic queue operations', function() {
-    var q = new HGrid.Qu();
+    var q = new HGrid.Queue();
     q.enq(4);
     q.enq(2);
     equal(q.deq(), 4);

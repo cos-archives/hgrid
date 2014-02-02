@@ -485,14 +485,14 @@ if (typeof jQuery === 'undefined') {
   ///////////
 
   // An efficient, lightweight queue implementation, adapted from Queue.js
-  function Qu() {
+  function Queue() {
     this.queue = [];
     this.offset = 0;
   }
-  Qu.prototype.enq = function(item) {
+  Queue.prototype.enq = function(item) {
     this.queue.push(item);
   };
-  Qu.prototype.deq = function() {
+  Queue.prototype.deq = function() {
     if (this.queue.length === 0) {
       return undefined;
     }
@@ -504,11 +504,11 @@ if (typeof jQuery === 'undefined') {
     }
     return item;
   };
-  Qu.prototype.isEmpty = function() {
+  Queue.prototype.isEmpty = function() {
     return this.queue.length === 0;
   };
 
-  HGrid.Qu = Qu;
+  HGrid.Queue = Queue;
 
   ///////////////////////////////////
   // Tree and Leaf Representations //
@@ -781,7 +781,7 @@ if (typeof jQuery === 'undefined') {
     if (depth === 0) {
       throw new HGridError('Depth param must be greater than 0');
     }
-    var frontier = new Qu();
+    var frontier = new Queue();
     var next = this;
     while (next && next.depth <= depth) {
       if (next.depth === depth) {

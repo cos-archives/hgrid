@@ -470,13 +470,12 @@ if (typeof jQuery === 'undefined') {
     searchInput: null,
     /**
      * Search filter that returns true if an item should be displayed in the grid.
-     * Use this.searchInput to access the jQuery element for the input box.
-     * By default, items will be searched by name (case insensitive)
+     * By default, items will be searched by name (case insensitive).
      * @param  {Object} item A data item
+     * @param {String} searchText The current text value in the search input box.
      * @return {Boolean}      Whether or not to display an item.
      */
-    searchFilter: function (item) {
-      var searchText = this.searchInput.val().toLowerCase();
+    searchFilter: function (item, searchText) {
       return item.name.toLowerCase().indexOf(searchText) !== -1;
     }
   };
@@ -1378,11 +1377,12 @@ if (typeof jQuery === 'undefined') {
     var visible;
 
     if (args.grid && args.grid._searchText) {
-      item.depth = 0;
-      visible =  args.searchFn.call(args.grid, item);
+      item.depth = 0;  // Show search results without indent
+      // Use search filter function
+      visible =  args.searchFilter.call(args.grid, item, args.grid._searchText);
     } else {
-      item.depth = item._node.depth;
-      visible = !item._hidden;
+      item.depth = item._node.depth;  // Restore indent
+      visible = !item._hidden;  // Hide collapsed elements
     }
 
     return visible;
@@ -1401,7 +1401,7 @@ if (typeof jQuery === 'undefined') {
     var self = this;
     var dataView = this.getDataView();
     dataView.beginUpdate();
-    dataView.setFilterArgs({ grid: self, searchFn: self.options.searchFilter });
+    dataView.setFilterArgs({ grid: self, searchFilter: self.options.searchFilter });
     dataView.setFilter(hgFilter);
     dataView.endUpdate();
     dataView.onRowCountChanged.subscribe(function(event, args) {

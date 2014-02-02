@@ -785,7 +785,7 @@ if (typeof jQuery === 'undefined') {
     var next = this;
     while (next && next.depth <= depth) {
       if (next.depth === depth) {
-        next.collapse();
+        next.collapse(false, true); // Make sure item is updated
       }
       if (next.children.length) {
         // enqueue all children

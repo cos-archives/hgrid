@@ -651,6 +651,7 @@ if (typeof jQuery === 'undefined') {
     for (var i = 0, child; child = this.children[i]; i++) {
       child.sort(key, asc);
     }
+    return this;
   };
 
   // TODO: test me
@@ -659,6 +660,7 @@ if (typeof jQuery === 'undefined') {
     for (var i = 0, child; child = this.children[i]; i++) {
       child.sortCmp(key);
     }
+    return this;
   };
 
   /**
@@ -687,6 +689,7 @@ if (typeof jQuery === 'undefined') {
       idx = computeAddIdx(data, this.dataView);
       this.dataView.insertItem(idx, data);
     }
+    return this;
   };
 
   Tree.prototype.ensureDataView = function(dataView) {
@@ -828,7 +831,7 @@ if (typeof jQuery === 'undefined') {
    * @return {Boolean} Whether the node is collapsed.
    */
   Tree.prototype.isCollapsed = function() {
-    return this.getItem()._collapsed;
+    return Boolean(this.getItem()._collapsed);
   };
 
   /**
@@ -1603,7 +1606,7 @@ if (typeof jQuery === 'undefined') {
   };
 
   HGrid.prototype.isCollapsed = function(item) {
-    return item._collapsed;
+    return Boolean(item._collapsed);
   };
 
   HGrid.prototype.canToggle = function(elem) {

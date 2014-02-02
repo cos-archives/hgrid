@@ -751,21 +751,24 @@ if (typeof jQuery === 'undefined') {
    * @param {Boolean} hideSelf Whether to hide this node as well
    */
   Tree.prototype.collapse = function(hideSelf, refresh) {
-    var item = this.getItem();
-    // A node can be collapsed but not hidden. For example, if you click
-    // on a folder, it should collapse and hide all of its contents, but the folder
-    // should still be visible.
-    if (hideSelf) {
-      item._hidden = true;
-    } else {
-      item._collapsed = true;
-      item._hidden = false;
+    var item;
+    if (!this.isRoot()){
+      item = this.getItem();
+      // A node can be collapsed but not hidden. For example, if you click
+      // on a folder, it should collapse and hide all of its contents, but the folder
+      // should still be visible.
+      if (hideSelf) {
+        item._hidden = true;
+      } else {
+        item._collapsed = true;
+        item._hidden = false;
+      }
     }
     // Collapse and hide all children
     for (var i = 0, node; node = this.children[i]; i++) {
       node.collapse(true);
     }
-    if (refresh) {
+    if (!this.isRoot() && refresh) {
       this.dataView.updateItem(item.id, item);
     }
     return this;
@@ -779,7 +782,7 @@ if (typeof jQuery === 'undefined') {
    */
   Tree.prototype.collapseAt = function(depth, refresh) {
     if (depth === 0) {
-      throw new HGridError('Depth param must be greater than 0');
+      return this.collapse(false, refresh);
     }
     var frontier = new Queue();
     var next = this;
@@ -809,21 +812,28 @@ if (typeof jQuery === 'undefined') {
    * @method  expand
    */
   Tree.prototype.expand = function(notFirst, refresh) {
-    var item = this.getItem();
-    if (!notFirst) {
-      item._collapsed = false;
+    var item;
+    if (!this.isRoot()){
+      item = this.getItem();
+      if (!notFirst) {
+        item._collapsed = false;
+      }
+      item._hidden = false;
     }
-    item._hidden = false;
     // Expand all children
     for (var i = 0, node; node = this.children[i]; i++) {
       if (!item._collapsed) { // Maintain subtree's collapsed state
         node.expand(true);
       }
     }
-    if (refresh) {
+    if (!this.isRoot() && refresh) {
       this.dataView.updateItem(item.id, item);
     }
     return this;
+  };
+
+  Tree.prototype.isRoot = function() {
+    return this.depth === 0;
   };
 
   /**

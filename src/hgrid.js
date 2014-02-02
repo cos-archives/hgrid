@@ -131,7 +131,7 @@ if (typeof jQuery === 'undefined') {
     var name = sanitized(row.name);
     // The + / - button for expanding/collapsing a folder
     var expander;
-    if (row._node.children.length > 0) {
+    if (row._node.children.length > 0 && row.depth > 0) {
       expander = row._collapsed ? HGrid.Html.expandElem : HGrid.Html.collapseElem;
     } else { // Folder is empty
       expander = '<span></span>';
@@ -1302,6 +1302,8 @@ if (typeof jQuery === 'undefined') {
       $searchInput.keyup(function (e) {
         self._searchText = this.value;
         self.getDataView().refresh();
+        self.grid.invalidate();
+        self.grid.render();
       });
     }
   };
@@ -1355,7 +1357,7 @@ if (typeof jQuery === 'undefined') {
   function collapseFilter(item, args) {
     var visible;
 
-    if (args.grid._searchText) {
+    if (args.grid && args.grid._searchText) {
       item.depth = 0;
       visible =  args.searchFn.call(args.grid, item);
     } else {

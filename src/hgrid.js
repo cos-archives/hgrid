@@ -310,6 +310,32 @@ if (typeof jQuery === 'undefined') {
   };
 
   /**
+   * Performs breadth-first traversal of the tree, executing a function once
+   * per node.
+   * @method  bfTraverse
+   * @param  {Function} fun      Function to execute for each node
+   * @param  {Number} maxDepth Max depth to traverse to, or null.
+   */
+  Tree.prototype.bfTraverse = function(fun, maxDepth) {
+    var frontier = new Queue();
+    var next = this;
+    while (next) {
+      if (maxDepth && next.depth > maxDepth) {
+        break;
+      }
+      fun.call(this, next);
+      if (next.children.length) {
+        // enqueue all children
+        for (var i = 0, child; child = next.children[i]; i++){
+          frontier.enq(child);
+        }
+      }
+      next = frontier.deq();
+    }
+    return this;
+  };
+
+  /**
    * Collapse all nodes at a certain depth
    * @method  collapseAt
    * @param  {Number} depth   The depth to collapse at
@@ -319,23 +345,15 @@ if (typeof jQuery === 'undefined') {
     if (depth === 0) {
       return this.collapse(false, refresh);
     }
-    var frontier = new Queue();
-    var next = this;
-    while (next && next.depth <= depth) {
-      if (next.depth === depth) {
-        next.collapse(false, true); // Make sure item is updated
+    this.bfTraverse(function(node) {
+      if (node.depth === depth) {
+        node.collapse(false, true);  // Make sure item is updated
       }
-      if (next.children.length) {
-        // enqueue all children
-        for (var i = 0, child; child = next.children[i]; i++){
-          frontier.enq(child);
-        }
-      }
-      next = frontier.deq();
-    }
+    }, depth);
     if (refresh) {
       this.dataView.refresh();
     }
+    return this;
   };
 
   Tree.prototype.isHidden = function() {

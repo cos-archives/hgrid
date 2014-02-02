@@ -1296,15 +1296,18 @@ if (typeof jQuery === 'undefined') {
     }
     this.attachActionListeners();
 
-    var $searchInput = $(self.options.searchInput);
-
-    if ($searchInput.length) {
-      $searchInput.keyup(function (e) {
-        self._searchText = this.value;
-        self.getDataView().refresh();
-        self.grid.invalidate();
-        self.grid.render();
-      });
+    if (self.options.searchInput) {
+      var $searchInput = $(self.options.searchInput);
+      if ($searchInput.length) {
+        $searchInput.keyup(function (e) {
+          self._searchText = this.value;
+          self.getDataView().refresh();
+          self.grid.invalidate();
+          self.grid.render();
+        });
+      } else {
+        throw new HGridError('Invalid selector for searchInput.');
+      }
     }
   };
 

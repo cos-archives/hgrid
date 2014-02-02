@@ -480,6 +480,33 @@ if (typeof jQuery === 'undefined') {
     }
   };
 
+  ///////////
+  // Queue //
+  ///////////
+
+  // An efficient, lightweight queue implementation, adapted from Queue.js
+  function Qu() {
+    this.queue = [];
+    this.offset = 0;
+  }
+  Qu.prototype.enq = function(item) {
+    this.queue.push(item);
+  };
+  Qu.prototype.deq = function() {
+    if (this.queue.length === 0) {
+      return undefined;
+    }
+    // store item at front of queue
+    var item = this.queue[this.offset];
+    if (++ this.offset * 2 >= this.queue.length) {
+      this.queue = this.queue.slice(this.offset);
+      this.offset = 0;
+    }
+    return item;
+  };
+
+  HGrid.Qu = Qu;
+
   ///////////////////////////////////
   // Tree and Leaf Representations //
   ///////////////////////////////////
@@ -576,6 +603,10 @@ if (typeof jQuery === 'undefined') {
   Tree._getCurrentID = function() {
     return idCounter;
   };
+
+  Tree.collapseAtDepth = function() {
+
+  }
 
   /**
    * Add a component to this node
@@ -733,6 +764,24 @@ if (typeof jQuery === 'undefined') {
       node.collapse(true);
     }
     return this;
+  };
+
+  // Tree.prototype.collapseAt = function(depth) {
+  //   var frontier = new Qu();
+  //   var next = this;
+  //   while (next) {
+  //     if (next.children.length) {
+  //       // enqueue all children
+  //       for (var i, child; child=next.children[i]; i++) {
+  //         frontier.enq(child);
+  //       }
+  //       next = frontier.deq();
+  //     }
+  //   }
+  // };
+
+  Tree.prototype.isHidden = function() {
+    return this.getItem()._hidden;
   };
 
   /**

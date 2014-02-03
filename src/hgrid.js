@@ -80,7 +80,8 @@ if (typeof jQuery === 'undefined') {
    * @param {parent} [parent] Parent item.
    *
    */
-  Tree.fromObject = function(data, parent) {
+  Tree.fromObject = function(data, parent, args) {
+    args = args || {};
     var tree, children, leaf, subtree;
     // If data is an array, create a new root
     if (Array.isArray(data)) {
@@ -91,6 +92,11 @@ if (typeof jQuery === 'undefined') {
       tree = new Tree(data);
       tree.depth = parent.depth + 1;
       tree.dataView = parent.dataView;
+      if (args.collapse) {
+        // TODO: Hardcoded. Change this when _collapsed and _hidden states
+        // are saved on Tree and Leaf objects, and not just on the dataview items
+        tree.data._collapsed = true;
+      }
     }
     // Assumes nodes have a `kind` property. If `kind` is "item", create a leaf,
     // else create a Tree.
@@ -99,10 +105,10 @@ if (typeof jQuery === 'undefined') {
     for (var i = 0, len = children.length; i < len; i++) {
       var child = children[i];
       if (child.kind === ITEM) {
-        leaf = Leaf.fromObject(child, tree);
+        leaf = Leaf.fromObject(child, tree, args);
         tree.add(leaf);
       } else {
-        subtree = Tree.fromObject(child, tree);
+        subtree = Tree.fromObject(child, tree, args);
         tree.add(subtree);
       }
     }
@@ -406,12 +412,18 @@ if (typeof jQuery === 'undefined') {
    * @static
    * @return {Leaf} The constructed Leaf.
    */
-  Leaf.fromObject = function(obj, parent) {
+  Leaf.fromObject = function(obj, parent, args) {
+    args = args || {};
     var leaf = new Leaf(obj);
     if (parent) {
       leaf.depth = parent.depth + 1;
       leaf.parentID = parent.id;
       leaf.dataView = parent.dataView;
+    }
+    if (args.collapse) {
+      // TODO: Hardcoded. Change this when _collapsed and _hidden states
+      // are saved on Tree and Leaf objects, and not just on the dataview items
+      leaf.data._collapsed = true;
     }
     return leaf;
   };
@@ -1056,7 +1068,7 @@ if (typeof jQuery === 'undefined') {
         done && done.call(self, json);
       },
       error: function(xhr, textStatus, error) {
-        done && done.call(self, null, error);
+        done && done.call(self, null, error, textStatus);
       }
     }, self.options.ajaxOptions);
     return $.ajax(ajaxOpts);
@@ -1093,6 +1105,7 @@ if (typeof jQuery === 'undefined') {
     }
     // Attach the listeners last, after this.grid and this.dropzone are set
     this._initListeners();
+    // Collapse all top-level folders if lazy-loading
     if (this.isLazy()) {
       this.collapseAll();
     }
@@ -1679,6 +1692,20 @@ if (typeof jQuery === 'undefined') {
     return Boolean(this.options.fetchUrl);  // Assume lazy loading is enabled if fetchUrl is defined
   };
 
+  HGrid.prototype._lazyLoad = function(item) {
+    var self = this;
+    var url = self.options.fetchUrl(item);
+    if (url !== null) {
+      self.getFromServer(url, function(newData, error) {
+        if (!error) {
+          self.addData(newData, item.id);
+        } else {
+          throw new HGridError('Could not fetch data from url: "' + url + '". Error: ' + error);
+        }
+      });
+    }
+  };
+
   /**
    * Expand an item. Updates the dataview.
    * @method  expandItem
@@ -1687,11 +1714,10 @@ if (typeof jQuery === 'undefined') {
   HGrid.prototype.expandItem = function(item, evt) {
     var self = this;
     item = typeof item === 'object' ? item : self.getByID(item.id);
-    // if (self.isLazy()) {
-    //   self.getFromServer(self.options.fetchUrl(item) {
-    //     success: function()
-    //   })
-    // }
+    var node = self.getNodeByID(item.id);
+    if (self.isLazy() && !node._loaded) {
+      this._lazyLoad(item);
+    }
     item._node.expand();
     var dataview = self.getDataView();
     var hints = self.getRefreshHints(item).expand;
@@ -1847,6 +1873,7 @@ if (typeof jQuery === 'undefined') {
    * @param {Number} parentID ID of the parent node to add the data to
    */
   HGrid.prototype.addData = function(data, parentID) {
+    var self = this;
     var tree = this.getNodeByID(parentID);
     var toAdd;
     if (Array.isArray(data)) {
@@ -1857,12 +1884,15 @@ if (typeof jQuery === 'undefined') {
     for (var i = 0, datum; datum = toAdd[i]; i++) {
       var node;
       if (datum.kind === HGrid.FOLDER) {
-        node = Tree.fromObject(datum, tree);
+        var args = {collapse: self.isLazy()};
+        node = Tree.fromObject(datum, tree, args);
       } else {
         node = Leaf.fromObject(datum, tree);
       }
       tree.add(node, true); // ensure dataview is updated
+      tree._loaded = true; // Add flag to make sure data are only loaded once
     }
+    return this;
   };
 
   $.fn.hgrid = function(options) {

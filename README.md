@@ -49,6 +49,9 @@ To create a new grid:
 
 ```javascript
 var myGrid = new HGrid('#myGrid', {data: files, width: 500, height: 200});
+
+// Or, with jQuery
+$('#myGrid').hgrid({data: files, width: 500, height: 200});
 ```
 
 ## Loading Data From A Server
@@ -69,6 +72,20 @@ var grid = new HGrid('#myGrid' {
 });
 ```
 
+The `ajaxOptions` will be used for every request sent to the server.
+
+### Lazy-loading 
+
+You can lazily fetch folder contents from a server by specifying the `fetchUrl` option.
+
+```javascript
+var grid = new HGrid('#myGrid', {
+  data: '/grid/data/',  // Where to get the initial data
+  fetchUrl: function(folder) {
+    return '/grid/data/' + folder.name;
+  }
+});
+```
 
 
 ## Rows and Columns 

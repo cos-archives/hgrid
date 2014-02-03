@@ -61,6 +61,17 @@
     return grid;
   }
 
+  function createServer(endpoints) {
+    var server = sinon.fakeServer.create();
+    for (var url in endpoints) {
+      server.respondWith('GET', url, [200, {'Content-Type': 'application/json'},
+        JSON.stringify(endpoints[url])
+        ]);
+    }
+    return server;
+  }
+
+
   ////////////////////
   // Custom asserts //
   ////////////////////
@@ -1217,12 +1228,13 @@
   var server;
   module('Async loading', {
     setup: function() {
-      server = sinon.fakeServer.create();
-      server.respondWith('GET', '/hgrid/data', [200, {
-          'Content-Type': 'application/json'
-        },
-        JSON.stringify(testData)
-      ]);
+      var endpoints = {
+        '/hgrid/data': testData
+      };
+      server = createServer(endpoints);
+    },
+    teardown: function() {
+      server.restore();
     }
   });
   // Sanity check
@@ -1252,15 +1264,17 @@
   });
 
   asyncTest('getFromServer', function() {
-    expect(1);
-    var grid = new HGrid('#myGrid');
-    grid.getFromServer('/hgrid/data', {
-      success: function(data) {
-        deepEqual(data, testData, 'return data is correct');
-      },
-      complete: function() {
-        start();
+    expect(2);
+    var grid = getMockGrid({
+      ajaxOptions: {
+        complete: function() {
+          start();
+        }
       }
+    });
+    grid.getFromServer('/hgrid/data', function(data) {
+        isTrue(this instanceof HGrid);
+        deepEqual(data, testData, 'return data is correct');
     });
     server.respond();
   });
@@ -1313,5 +1327,87 @@
     var valid = getMockItem({hasPerm: true});
     deepEqual(grid.validateTarget(valid), valid, 'item is returned if validated');
   });
+
+  module('Adding data', {});
+
+  test('addData', function() {
+    var grid = getMockGrid({
+      data: [{name: 'Computer', kind: 'folder', id: 0, children: []}]
+    });
+    var toAdd = {
+      data: [{name: 'Docs', kind: 'folder',
+              children: [{name: 'mydoc.txt', kind: 'folder'}
+              ]}]
+    };
+    grid.addData(toAdd, 0);
+    var addedNode = grid.tree.children[0].children[0];
+    equal(addedNode.data.name, 'Docs');
+    equal(addedNode.children[0].data.name, 'mydoc.txt');
+    containsText('.slick-cell', 'Docs', 'folder added to DOM');
+    containsText('.slick-cell', 'mydoc.txt', 'fileadded to DOM');
+  });
+
+  // FIXME: This test fails every other time it is run in the browser. Not sure why.
+  // var lazyserver;
+  // module('Lazy loading', {
+  //   setup: function() {
+  //     // include explicit Ids to so items can be retrieved easily
+  //     var endpoints = {
+  //       '/grid/': [{name: 'Codes', id: 0, slug: 'codes', kind: 'folder', children: []},
+  //                   {name: 'Music', id: 1, slug: 'music', kind: 'folder', children: []}],
+  //       '/grid/codes': [{name: 'foo.py', id: 2, kind: 'item'}, {name: 'bar.js', id: 3, kind: 'item'}],
+  //       '/grid/music': [{name: 'psycho-killer.mp3', id: 4, kind: 'item'}, {name: 'Stones', id: 5, slug: 'stones', kind: 'folder'}]
+  //     };
+  //     lazyserver = createServer(endpoints);
+  //   },
+  //   teardown: function() {
+  //     lazyserver.restore();
+  //   }
+  // });
+
+  // test('fetching folder contents on expand calls get items from server once', function() {
+  //   var grid = new HGrid('#myGrid', {
+  //     data: '/grid/',  // Initial data
+  //     fetchUrl: function(item) {
+  //       if (item.slug) {
+  //         return '/grid/' + item.slug;
+  //       }
+  //       return null;
+  //     },
+  //     // init: function() {
+  //     //   start();
+  //     // }
+  //   });
+  //   lazyserver.respond();  // Respond to initial request for data
+  //   notContainsText('.slick-cell', 'foo.py', 'contents not yet in DOM');  // Sanity check
+  //   this.spy(grid, 'getFromServer');
+  //   var folder = grid.getData()[0];
+  //   grid.expandItem(folder.id);
+  //   lazyserver.respond();  // Respond to request for expanded item's contents
+  //   ok(grid.getFromServer.calledOnce);
+  //   containsText('.slick-cell', 'foo.py', 'contents are shown in DOM');
+  //   grid.collapseItem(folder.id);
+  //   notContainsText('.slick-cell', 'foo.py');  // Sanity check
+  //   // Expand item again
+  //   grid.expandItem(folder.id);
+  //   equal(grid.getFromServer.callCount, 1, 'getFromServer was only called once');
+  //   containsText('.slick-cell', 'foo.py');
+  //   grid.destroy();
+  // });
+
+  test('isLazy', function() {
+    var grid = getMockGrid( {
+      fetchUrl: function() {
+        return '/grid';
+      }
+    });
+    isTrue(grid.isLazy());
+  });
+
+  test('not lazy', function() {
+    var grid = getMockGrid({fetchUrl: null});
+    isFalse(grid.isLazy());
+  });
+
 
 })(jQuery);

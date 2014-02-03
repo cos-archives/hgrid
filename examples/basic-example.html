@@ -36,11 +36,16 @@ var myData = {
           kind: 'item',
           children: []
         }]
-      }]
-    }]
+      },
+      {name: 'config.ini', kind: 'item'}]
+    },
+    {name: 'baz.txt', kind: 'item'},
+    {name: 'Your Computer', kind: 'folder', children: [
+      {name: 'quux', kind: 'item'}
+    ]}]
 };
 
-var grid = new HGrid('#myGrid', {data: myData, width: 500, height: 200});
+var grid = new HGrid('#myGrid', {data: myData, width: 500});
 
 </script>
 </body>

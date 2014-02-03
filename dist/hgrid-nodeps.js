@@ -45,6 +45,7 @@ if (typeof jQuery === 'undefined') {
    */
   function Tree(data) {
     if (data === undefined) { // No args passed, it's a root
+      this.data = {};
       this.id = ROOT_ID;
       /**
        * @attribute  depth
@@ -55,7 +56,7 @@ if (typeof jQuery === 'undefined') {
         inlineFilters: true
       });
     } else {
-      this.data = data || {};
+      this.data = data;
       this.id = data.id ? data.id : getUID();
       // Depth and dataView will be set by parent after being added as a subtree
       this.depth = null;
@@ -80,7 +81,8 @@ if (typeof jQuery === 'undefined') {
    * @param {parent} [parent] Parent item.
    *
    */
-  Tree.fromObject = function(data, parent) {
+  Tree.fromObject = function(data, parent, args) {
+    args = args || {};
     var tree, children, leaf, subtree;
     // If data is an array, create a new root
     if (Array.isArray(data)) {
@@ -90,6 +92,12 @@ if (typeof jQuery === 'undefined') {
       children = data.children || [];
       tree = new Tree(data);
       tree.depth = parent.depth + 1;
+      tree.dataView = parent.dataView;
+      if (args.collapse) {
+        // TODO: Hardcoded. Change this when _collapsed and _hidden states
+        // are saved on Tree and Leaf objects, and not just on the dataview items
+        tree.data._collapsed = true;
+      }
     }
     // Assumes nodes have a `kind` property. If `kind` is "item", create a leaf,
     // else create a Tree.
@@ -98,10 +106,10 @@ if (typeof jQuery === 'undefined') {
     for (var i = 0, len = children.length; i < len; i++) {
       var child = children[i];
       if (child.kind === ITEM) {
-        leaf = Leaf.fromObject(child);
+        leaf = Leaf.fromObject(child, tree, args);
         tree.add(leaf);
       } else {
-        subtree = Tree.fromObject(child, tree);
+        subtree = Tree.fromObject(child, tree, args);
         tree.add(subtree);
       }
     }
@@ -319,7 +327,7 @@ if (typeof jQuery === 'undefined') {
       return this.collapse(false, refresh);
     }
     this.bfTraverse(function(node) {
-      if (node.depth === depth) {
+      if (node.depth === depth && node instanceof Tree) {  // only collapse trees on the way
         node.collapse(false, true);  // Make sure item is updated
       }
     }, depth);
@@ -405,8 +413,19 @@ if (typeof jQuery === 'undefined') {
    * @static
    * @return {Leaf} The constructed Leaf.
    */
-  Leaf.fromObject = function(obj) {
+  Leaf.fromObject = function(obj, parent, args) {
+    args = args || {};
     var leaf = new Leaf(obj);
+    if (parent) {
+      leaf.depth = parent.depth + 1;
+      leaf.parentID = parent.id;
+      leaf.dataView = parent.dataView;
+    }
+    if (args.collapse) {
+      // TODO: Hardcoded. Change this when _collapsed and _hidden states
+      // are saved on Tree and Leaf objects, and not just on the dataview items
+      leaf.data._collapsed = true;
+    }
     return leaf;
   };
 
@@ -422,7 +441,8 @@ if (typeof jQuery === 'undefined') {
    * Collapse this leaf by setting its item's _collapsed property.
    * @method  collapse
    */
-  Leaf.prototype.collapse = function() {
+   /*jshint unused: false */
+  Leaf.prototype.collapse = function(hideSelf, refresh) {
     var item = this.getItem();
     item._collapsed = item._hidden = true;
     return this;
@@ -595,7 +615,7 @@ if (typeof jQuery === 'undefined') {
     var name = sanitized(row.name);
     // The + / - button for expanding/collapsing a folder
     var expander;
-    if (row._node.children.length > 0 && row.depth > 0) {
+    if (row._node.children.length > 0 && row.depth > 0 || args.lazyLoad) {
       expander = row._collapsed ? HGrid.Html.expandElem : HGrid.Html.collapseElem;
     } else { // Folder is empty
       expander = '<span></span>';
@@ -739,7 +759,19 @@ if (typeof jQuery === 'undefined') {
      * @property data
      */
     data: null,
+    /**
+     * Options passed to jQuery.ajax on every request for additional data.
+     * @property [ajaxOptions]
+     * @type {Object}
+     */
     ajaxOptions: {},
+    /**
+     * Returns the URL where to fetch the contents for a given folder. Enables
+     * lazy-loading of data.
+     * @param {Object} folder The folder data item.
+     * @property {Function} [fetchUrl]
+     */
+    fetchUrl: null,
     /**
      * Enable uploads (requires DropZone)
      * @property [uploads]
@@ -838,6 +870,7 @@ if (typeof jQuery === 'undefined') {
     // Dragging related callbacks
     onDragover: function(evt, item) {},
     onDragenter: function(evt, item) {},
+    onDragleave: function(evt, item) {},
     onDrop: function(event, item) {},
     /**
      *  Called when a column is sorted.
@@ -858,7 +891,7 @@ if (typeof jQuery === 'undefined') {
      */
     /*jshint unused: false */
     uploadProcessing: function(file, item) {
-      // TODO: display Cancel upload button text
+      // TODO: display Cancel upload button text?
     },
     /**
      * Called whenever an upload error occurs
@@ -947,7 +980,18 @@ if (typeof jQuery === 'undefined') {
      */
     searchFilter: function (item, searchText) {
       return item.name.toLowerCase().indexOf(searchText) !== -1;
-    }
+    },
+    /**
+     * Function that determines whether a folder can be uploaded to.
+     */
+    canUpload: function(folder) {
+      return true;
+    },
+    /**
+     * Called when a user tries to upload to a folder they don't have permission
+     * to upload to. This is called before adding a file to the upload queue.
+     */
+    uploadDenied: function(folder) {}
   };
 
   HGrid._defaults = defaults;
@@ -1000,12 +1044,11 @@ if (typeof jQuery === 'undefined') {
       self.searchInput = null;
     }
     if (typeof self.options.data === 'string') { // data is a URL, get the data asynchronously
-      self.getFromServer(self.options.data, {
-        success: function(data) {
+      self.getFromServer(self.options.data, function(data, error) {
           self._initData(data);
           self.init();
         }
-      });
+      );
     } else { // data is an object
       self._initData(self.options.data);
       self.init();
@@ -1013,18 +1056,34 @@ if (typeof jQuery === 'undefined') {
   }
 
   /**
+   * Collapse all folders
+   * @return {[type]} [description]
+   */
+  HGrid.prototype.collapseAll = function() {
+    this.tree.collapseAt(1, true);
+  };
+
+  /**
    * Helper for retrieving JSON data usin AJAX.
    * @method  getFromServer
+   * @param {String} url
+   * @param {Function} done Callback that receives the JSON data and an
+   *                        error if there is one.
    * @return {jQuery xhr} The xhr object returned by jQuery.ajax.
    */
-  HGrid.prototype.getFromServer = function(url, options) {
+  HGrid.prototype.getFromServer = function(url, done) {
     var self = this;
-    options = options || {};
     var ajaxOpts = $.extend({}, {
       url: url,
       contentType: 'application/json',
-      dataType: 'json'
-    }, self.options.ajaxOptions, options);
+      dataType: 'json',
+      success: function(json) {
+        done && done.call(self, json);
+      },
+      error: function(xhr, textStatus, error) {
+        done && done.call(self, null, error, textStatus);
+      }
+    }, self.options.ajaxOptions);
     return $.ajax(ajaxOpts);
   };
 
@@ -1059,6 +1118,10 @@ if (typeof jQuery === 'undefined') {
     }
     // Attach the listeners last, after this.grid and this.dropzone are set
     this._initListeners();
+    // Collapse all top-level folders if lazy-loading
+    if (this.isLazy()) {
+      this.collapseAll();
+    }
     this.options.init.call(this);
     return this;
   };
@@ -1088,7 +1151,8 @@ if (typeof jQuery === 'undefined') {
         colDef: colDef,
         row: row,
         cell: cell,
-        indent: args.indent
+        indent: args.indent,
+        lazyLoad: self.isLazy()
       };
       if (item.kind === FOLDER) {
         view = folderView;
@@ -1294,12 +1358,30 @@ if (typeof jQuery === 'undefined') {
       if (this.options.uploadAccept) {
         // Override dropzone accept callback. Just calls options.uploadAccept with the right params
         this.dropzone.options.accept = function(file, done) {
-          var ret = self.options.uploadAccept.call(self, file, item, done);
-          return ret;
+          return self.options.uploadAccept.call(self, file, item, done);
         };
       }
     }
   };
+
+  HGrid.prototype.canUpload = function(item) {
+    return Boolean(item && this.options.canUpload(item));
+  };
+
+  HGrid.prototype.denyUpload = function(targetItem) {
+    // Need to throw an error to prevent dropzone's sequence of callbacks from firing
+    this.options.uploadDenied.call(this, targetItem);
+    throw new HGridError('Upload permission denied.');
+  };
+
+  HGrid.prototype.validateTarget = function(targetItem) {
+    if (!this.canUpload(targetItem)) {
+      return this.denyUpload(targetItem);
+    } else {
+      return targetItem;
+    }
+  };
+
   /**
    * DropZone events that the grid subscribes to.
    * For each function, `this` refers to the HGrid object.
@@ -1313,6 +1395,7 @@ if (typeof jQuery === 'undefined') {
   HGrid.prototype.dropzoneEvents = {
     drop: function(evt) {
       this.removeHighlight();
+      this.validateTarget(this.currentTarget);
       // update the dropzone options, eg. dropzone.options.url
       this.setUploadTarget(this.currentTarget);
       this.options.onDrop.call(this, evt, this.currentTarget);
@@ -1337,8 +1420,8 @@ if (typeof jQuery === 'undefined') {
     dragover: function(evt) {
       var currentTarget = this.currentTarget;
       var item = this.getItemFromEvent(evt);
-      if (currentTarget) {
-        if (currentTarget.allowUploads || typeof currentTarget.allowUploads === 'undefined') {
+      if(this.canUpload(currentTarget)) {
+        if (currentTarget) {
           this.addHighlight(currentTarget);
         }
       }
@@ -1352,18 +1435,22 @@ if (typeof jQuery === 'undefined') {
     // (the added item object) to the file object
     addedfile: function(file) {
       var currentTarget = this.currentTarget;
-      // Add a new row
-      var addedItem = this.addItem({
-        name: file.name,
-        kind: HGrid.ITEM,
-        parentID: currentTarget.id
-      });
-      var rowElem = this.getRowElement(addedItem.id),
-        $rowElem = $(rowElem);
-      // Save the item data and HTML element on the file object
-      file.gridItem = addedItem;
-      file.gridElement = rowElem;
-      $rowElem.addClass('hg-upload-started');
+      this.validateTarget(currentTarget);
+      var addedItem;
+      if (this.canUpload(currentTarget)){
+        // Add a new row
+        addedItem = this.addItem({
+          name: file.name,
+          kind: HGrid.ITEM,
+          parentID: currentTarget.id
+        });
+        var rowElem = this.getRowElement(addedItem.id),
+          $rowElem = $(rowElem);
+        // Save the item data and HTML element on the file object
+        file.gridItem = addedItem;
+        file.gridElement = rowElem;
+        $rowElem.addClass('hg-upload-started');
+      }
       this.options.uploadAdded.call(this, file, file.gridItem);
       return addedItem;
     },
@@ -1601,24 +1688,58 @@ if (typeof jQuery === 'undefined') {
     return this.grid.getData();
   };
 
+  HGrid.prototype.getRefreshHints = function (item) {
+    var ignoreBefore = this.getDataView().getRowById(item.id);
+    var hints = {
+      expand: {
+        isFilterNarrowing: false, isFilterExpanding: true, ignoreDiffsBefore: ignoreBefore
+      },
+      collapse: {
+        isFilterNarrowing: true, isFilterExpanding: false, ignoreDiffsBefore: ignoreBefore
+      }
+    };
+    return hints;
+  };
+
+  HGrid.prototype.isLazy = function() {
+    return Boolean(this.options.fetchUrl);  // Assume lazy loading is enabled if fetchUrl is defined
+  };
+
+  HGrid.prototype._lazyLoad = function(item) {
+    var self = this;
+    var url = self.options.fetchUrl(item);
+    if (url !== null) {
+      return self.getFromServer(url, function(newData, error) {
+        if (!error) {
+          self.addData(newData, item.id);
+          item._node._loaded = true; // Add flag to make sure data are only fetched once.
+        } else {
+          throw new HGridError('Could not fetch data from url: "' + url + '". Error: ' + error);
+        }
+      });
+    }
+    return false;
+  };
+
   /**
    * Expand an item. Updates the dataview.
    * @method  expandItem
    * @param  {Object} item
    */
   HGrid.prototype.expandItem = function(item, evt) {
-    item = typeof item === 'object' ? item : this.getByID(item.id);
+    var self = this;
+    item = typeof item === 'object' ? item : self.getByID(item);
+    var node = self.getNodeByID(item.id);
     item._node.expand();
-    var dataview = this.getDataView();
-    var ignoreBefore = dataview.getRowById(item.id);
-    dataview.setRefreshHints({
-      isFilterNarrowing: false,
-      isFilterExpanding: true,
-      ignoreDiffsBefore: ignoreBefore
-    });
-    this.getDataView().updateItem(item.id, item);
-    this.options.onExpand.call(this, evt, item);
-    return this;
+    if (self.isLazy() && !node._loaded) {
+      this._lazyLoad(item);
+    }
+    var dataview = self.getDataView();
+    var hints = self.getRefreshHints(item).expand;
+    dataview.setRefreshHints(hints);
+    self.getDataView().updateItem(item.id, item);
+    self.options.onExpand.call(self, evt, item);
+    return self;
   };
 
   /**
@@ -1627,14 +1748,11 @@ if (typeof jQuery === 'undefined') {
    * @param  {Object} item
    */
   HGrid.prototype.collapseItem = function(item, evt) {
+    item = typeof item === 'object' ? item : this.getByID(item);
     item._node.collapse();
     var dataview = this.getDataView();
-    var ignoreBefore = dataview.getRowById(item.id);
-    dataview.setRefreshHints({
-      isFilterNarrowing: true,
-      isFilterExpanding: false,
-      ignoreDiffsBefore: ignoreBefore
-    });
+    var hints = this.getRefreshHints(item).collapse;
+    dataview.setRefreshHints(hints);
     dataview.updateItem(item.id, item);
     this.options.onCollapse.call(this, evt, item);
     return this;
@@ -1762,6 +1880,44 @@ if (typeof jQuery === 'undefined') {
       }
     }
     return this;
+  };
+
+  /**
+   * Add more hierarchical data. The `data` param takes the same form as the
+   * input data.
+   * @param  data    Hierarchical data to add
+   * @param {Number} parentID ID of the parent node to add the data to
+   */
+  HGrid.prototype.addData = function(data, parentID) {
+    var self = this;
+    var tree = this.getNodeByID(parentID);
+    var toAdd;
+    if (Array.isArray(data)) {
+      toAdd = data;
+    } else { // Data is an object with a `data` property
+      toAdd = data.data;
+    }
+    for (var i = 0, datum; datum = toAdd[i]; i++) {
+      var node;
+      if (datum.kind === HGrid.FOLDER) {
+        var args = {collapse: self.isLazy()};
+        node = Tree.fromObject(datum, tree, args);
+      } else {
+        node = Leaf.fromObject(datum, tree);
+      }
+      tree.add(node, true); // ensure dataview is updated
+    }
+    return this;
+  };
+
+  $.fn.hgrid = function(options) {
+    this.each(function() {
+      if (!this.id) { // Must have ID because SlickGrid requires a selector
+        throw new HGridError('Element must have an ID if initializing HGrid with jQuery');
+      }
+      var selector = '#' + this.id;
+      return new HGrid(selector, options);
+    });
   };
 
 })(jQuery, window, document);

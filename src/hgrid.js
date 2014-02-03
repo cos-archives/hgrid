@@ -838,6 +838,7 @@ if (typeof jQuery === 'undefined') {
     // Dragging related callbacks
     onDragover: function(evt, item) {},
     onDragenter: function(evt, item) {},
+    onDragleave: function(evt, item) {},
     onDrop: function(event, item) {},
     /**
      *  Called when a column is sorted.
@@ -947,6 +948,12 @@ if (typeof jQuery === 'undefined') {
      */
     searchFilter: function (item, searchText) {
       return item.name.toLowerCase().indexOf(searchText) !== -1;
+    },
+    /**
+     * Function that determines whether a folder can be uploaded to.
+     */
+    canUpload: function(folder) {
+      return true;
     }
   };
 
@@ -1294,12 +1301,16 @@ if (typeof jQuery === 'undefined') {
       if (this.options.uploadAccept) {
         // Override dropzone accept callback. Just calls options.uploadAccept with the right params
         this.dropzone.options.accept = function(file, done) {
-          var ret = self.options.uploadAccept.call(self, file, item, done);
-          return ret;
+          return self.options.uploadAccept.call(self, file, item, done);
         };
       }
     }
   };
+
+  HGrid.prototype.canUpload = function(item) {
+    return item && this.options.canUpload(item);
+  };
+
   /**
    * DropZone events that the grid subscribes to.
    * For each function, `this` refers to the HGrid object.
@@ -1312,6 +1323,7 @@ if (typeof jQuery === 'undefined') {
    */
   HGrid.prototype.dropzoneEvents = {
     drop: function(evt) {
+      console.log('dropped');
       this.removeHighlight();
       // update the dropzone options, eg. dropzone.options.url
       this.setUploadTarget(this.currentTarget);
@@ -1337,10 +1349,13 @@ if (typeof jQuery === 'undefined') {
     dragover: function(evt) {
       var currentTarget = this.currentTarget;
       var item = this.getItemFromEvent(evt);
-      if (currentTarget) {
-        if (currentTarget.allowUploads || typeof currentTarget.allowUploads === 'undefined') {
+
+      if(this.canUpload(currentTarget)) {
+        if (currentTarget) {
           this.addHighlight(currentTarget);
         }
+      } else{
+        return false;
       }
       this.options.onDragover.call(this, evt, item);
     },
@@ -1352,18 +1367,21 @@ if (typeof jQuery === 'undefined') {
     // (the added item object) to the file object
     addedfile: function(file) {
       var currentTarget = this.currentTarget;
-      // Add a new row
-      var addedItem = this.addItem({
-        name: file.name,
-        kind: HGrid.ITEM,
-        parentID: currentTarget.id
-      });
-      var rowElem = this.getRowElement(addedItem.id),
-        $rowElem = $(rowElem);
-      // Save the item data and HTML element on the file object
-      file.gridItem = addedItem;
-      file.gridElement = rowElem;
-      $rowElem.addClass('hg-upload-started');
+      var addedItem;
+      if (this.canUpload(currentTarget)){
+        // Add a new row
+        addedItem = this.addItem({
+          name: file.name,
+          kind: HGrid.ITEM,
+          parentID: currentTarget.id
+        });
+        var rowElem = this.getRowElement(addedItem.id),
+          $rowElem = $(rowElem);
+        // Save the item data and HTML element on the file object
+        file.gridItem = addedItem;
+        file.gridElement = rowElem;
+        $rowElem.addClass('hg-upload-started');
+      }
       this.options.uploadAdded.call(this, file, file.gridItem);
       return addedItem;
     },

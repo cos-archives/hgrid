@@ -18,37 +18,10 @@ if (typeof jQuery === 'undefined') {
   var FOLDER = 'folder';
   function noop() {}
 
-  ///////////
-  // Queue //
-  ///////////
 
-  // An efficient, lightweight queue implementation, adapted from Queue.js by Steven Morley
-  function Queue() {
-    this.queue = [];
-    this.offset = 0;
-  }
-  Queue.prototype.enq = function(item) {
-    this.queue.push(item);
-  };
-  Queue.prototype.deq = function() {
-    if (this.queue.length === 0) {
-      return undefined;
-    }
-    // store item at front of queue
-    var item = this.queue[this.offset];
-    if (++ this.offset * 2 >= this.queue.length) {
-      this.queue = this.queue.slice(this.offset);
-      this.offset = 0;
-    }
-    return item;
-  };
-  Queue.prototype.isEmpty = function() {
-    return this.queue.length === 0;
-  };
-
-  ///////////////////////////////////
-  // Tree and Leaf Representations //
-  ///////////////////////////////////
+  /////////////////////
+  // Data Structures //
+  /////////////////////
 
   var idCounter = 0; // Ensure unique IDs among trees and leaves
   function getUID() {
@@ -498,6 +471,30 @@ if (typeof jQuery === 'undefined') {
     return this.depth === 0;
   };
 
+  // An efficient, lightweight queue implementation, adapted from Queue.js by Steven Morley
+  function Queue() {
+    this.queue = [];
+    this.offset = 0;
+  }
+  Queue.prototype.enq = function(item) {
+    this.queue.push(item);
+  };
+  Queue.prototype.deq = function() {
+    if (this.queue.length === 0) {
+      return undefined;
+    }
+    // store item at front of queue
+    var item = this.queue[this.offset];
+    if (++ this.offset * 2 >= this.queue.length) {
+      this.queue = this.queue.slice(this.offset);
+      this.offset = 0;
+    }
+    return item;
+  };
+  Queue.prototype.isEmpty = function() {
+    return this.queue.length === 0;
+  };
+
   ////////////////
   // Formatting //
   ////////////////
@@ -636,9 +633,15 @@ if (typeof jQuery === 'undefined') {
     fileIcon: '<i class="hg-file"></i>',
     // Placeholder for error messages. Upload error messages will be interpolated here
     errorElem: '&nbsp;<span class="error" data-upload-errormessage></span>',
+    // CSS Classes
     buttonClass: 'hg-btn',
-    itemClass: 'hg-item-content'
+    itemClass: 'hg-item-content',
+    toggleClass: 'hg-toggle'
   };
+
+  ///////////
+  // HGrid //
+  ///////////
 
   // Formatting helpers public interface
   HGrid.Fmt = HGrid.Format = {
@@ -725,10 +728,6 @@ if (typeof jQuery === 'undefined') {
       }
     }
   };
-
-  ///////////
-  // HGrid //
-  ///////////
 
   /**
    * Default options object
@@ -937,7 +936,7 @@ if (typeof jQuery === 'undefined') {
      * @property {Function} init
      */
     init: function() {},
-
+    // CSS Selector for search input box
     searchInput: null,
     /**
      * Search filter that returns true if an item should be displayed in the grid.
@@ -1650,7 +1649,7 @@ if (typeof jQuery === 'undefined') {
   };
 
   HGrid.prototype.canToggle = function(elem) {
-    return $(elem).hasClass('hg-toggle');
+    return $(elem).hasClass(HGrid.Html.toggleClass);
   };
 
   /**

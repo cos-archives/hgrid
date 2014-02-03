@@ -320,7 +320,7 @@ if (typeof jQuery === 'undefined') {
       return this.collapse(false, refresh);
     }
     this.bfTraverse(function(node) {
-      if (node.depth === depth) {
+      if (node.depth === depth && node instanceof Tree) {  // only collapse trees on the way
         node.collapse(false, true);  // Make sure item is updated
       }
     }, depth);
@@ -428,7 +428,8 @@ if (typeof jQuery === 'undefined') {
    * Collapse this leaf by setting its item's _collapsed property.
    * @method  collapse
    */
-  Leaf.prototype.collapse = function() {
+   /*jshint unused: false */
+  Leaf.prototype.collapse = function(hideSelf, refresh) {
     var item = this.getItem();
     item._collapsed = item._hidden = true;
     return this;
@@ -1030,6 +1031,14 @@ if (typeof jQuery === 'undefined') {
   }
 
   /**
+   * Collapse all folders
+   * @return {[type]} [description]
+   */
+  HGrid.prototype.collapseAll = function() {
+    this.tree.collapseAt(1, true);
+  };
+
+  /**
    * Helper for retrieving JSON data usin AJAX.
    * @method  getFromServer
    * @param {String} url
@@ -1084,6 +1093,9 @@ if (typeof jQuery === 'undefined') {
     }
     // Attach the listeners last, after this.grid and this.dropzone are set
     this._initListeners();
+    if (this.isLazy()) {
+      this.collapseAll();
+    }
     this.options.init.call(this);
     return this;
   };

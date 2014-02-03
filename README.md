@@ -72,6 +72,20 @@ var grid = new HGrid('#myGrid' {
 });
 ```
 
+The `ajaxOptions` will be used for every request sent to the server.
+
+### Lazy-loading 
+
+You can lazily fetch folder contents from a server by specifying the `fetchUrl` option.
+
+```javascript
+var grid = new HGrid('#myGrid', {
+  data: '/grid/data/',  // Where to get the initial data
+  fetchUrl: function(folder) {
+    return '/grid/data/' + folder.name;
+  }
+});
+```
 
 
 ## Rows and Columns 

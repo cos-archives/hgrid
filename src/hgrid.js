@@ -45,6 +45,7 @@ if (typeof jQuery === 'undefined') {
    */
   function Tree(data) {
     if (data === undefined) { // No args passed, it's a root
+      this.data = {};
       this.id = ROOT_ID;
       /**
        * @attribute  depth
@@ -55,7 +56,7 @@ if (typeof jQuery === 'undefined') {
         inlineFilters: true
       });
     } else {
-      this.data = data || {};
+      this.data = data;
       this.id = data.id ? data.id : getUID();
       // Depth and dataView will be set by parent after being added as a subtree
       this.depth = null;
@@ -758,7 +759,19 @@ if (typeof jQuery === 'undefined') {
      * @property data
      */
     data: null,
+    /**
+     * Options passed to jQuery.ajax on every request for additional data.
+     * @property [ajaxOptions]
+     * @type {Object}
+     */
     ajaxOptions: {},
+    /**
+     * Returns the URL where to fetch the contents for a given folder. Enables
+     * lazy-loading of data.
+     * @param {Object} folder The folder data item.
+     * @property {Function} [fetchUrl]
+     */
+    fetchUrl: null,
     /**
      * Enable uploads (requires DropZone)
      * @property [uploads]
@@ -878,7 +891,7 @@ if (typeof jQuery === 'undefined') {
      */
     /*jshint unused: false */
     uploadProcessing: function(file, item) {
-      // TODO: display Cancel upload button text
+      // TODO: display Cancel upload button text?
     },
     /**
      * Called whenever an upload error occurs
@@ -1699,6 +1712,7 @@ if (typeof jQuery === 'undefined') {
       return self.getFromServer(url, function(newData, error) {
         if (!error) {
           self.addData(newData, item.id);
+          item._node._loaded = true; // Add flag to make sure data are only fetched once.
         } else {
           throw new HGridError('Could not fetch data from url: "' + url + '". Error: ' + error);
         }
@@ -1716,10 +1730,10 @@ if (typeof jQuery === 'undefined') {
     var self = this;
     item = typeof item === 'object' ? item : self.getByID(item);
     var node = self.getNodeByID(item.id);
+    item._node.expand();
     if (self.isLazy() && !node._loaded) {
       this._lazyLoad(item);
     }
-    item._node.expand();
     var dataview = self.getDataView();
     var hints = self.getRefreshHints(item).expand;
     dataview.setRefreshHints(hints);
@@ -1734,6 +1748,7 @@ if (typeof jQuery === 'undefined') {
    * @param  {Object} item
    */
   HGrid.prototype.collapseItem = function(item, evt) {
+    item = typeof item === 'object' ? item : this.getByID(item);
     item._node.collapse();
     var dataview = this.getDataView();
     var hints = this.getRefreshHints(item).collapse;
@@ -1891,7 +1906,6 @@ if (typeof jQuery === 'undefined') {
         node = Leaf.fromObject(datum, tree);
       }
       tree.add(node, true); // ensure dataview is updated
-      tree._loaded = true; // Add flag to make sure data are only loaded once
     }
     return this;
   };

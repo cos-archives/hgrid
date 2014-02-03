@@ -14,19 +14,19 @@
 <script src="../dist/hgrid.js"></script>
 
 <script>
-var grid = new HGrid('#myGrid', {
+$('#myGrid').hgrid({
   data: '/grid/',
-  ajaxOptions: {
-    error: function(xhr, textStatus, error) {
-        alert('Server took a dump. Told you so.');
-    }
-  },
   fetchUrl: function(item) {
     if (item.slug) {
       return '/grid/' + item.slug;
     }
     return null;
   }
+  ajaxOptions: {
+    error: function(xhr, textStatus, error) {
+        alert('Server took a dump. Told you so.');
+    }
+  },
 });
 </script>
 </body>

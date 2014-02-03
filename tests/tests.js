@@ -1252,7 +1252,7 @@
   });
 
   asyncTest('getFromServer', function() {
-    expect(2);
+    expect(3);
     var grid = new HGrid('#myGrid');
     grid.getFromServer('/hgrid/data', {
       success: function(data) {
@@ -1261,6 +1261,7 @@
       },
       complete: function() {
         start();
+        isTrue(this instanceof HGrid);
       }
     });
     server.respond();
@@ -1313,6 +1314,25 @@
     }, HGridError);
     var valid = getMockItem({hasPerm: true});
     deepEqual(grid.validateTarget(valid), valid, 'item is returned if validated');
+  });
+
+  module('Adding data', {});
+
+  test('addData', function() {
+    var grid = getMockGrid({
+      data: [{name: 'Computer', kind: 'folder', id: 0, children: []}]
+    });
+    var toAdd = {
+      data: [{name: 'Docs', kind: 'folder',
+              children: [{name: 'mydoc.txt', kind: 'folder'}
+              ]}]
+    };
+    grid.addData(toAdd, 0);
+    var addedNode = grid.tree.children[0].children[0];
+    equal(addedNode.data.name, 'Docs');
+    equal(addedNode.children[0].data.name, 'mydoc.txt');
+    containsText('.slick-cell', 'Docs', 'folder added to DOM');
+    containsText('.slick-cell', 'mydoc.txt', 'fileadded to DOM');
   });
 
 })(jQuery);

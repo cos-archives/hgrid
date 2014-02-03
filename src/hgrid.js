@@ -90,6 +90,7 @@ if (typeof jQuery === 'undefined') {
       children = data.children || [];
       tree = new Tree(data);
       tree.depth = parent.depth + 1;
+      tree.dataView = parent.dataView;
     }
     // Assumes nodes have a `kind` property. If `kind` is "item", create a leaf,
     // else create a Tree.
@@ -98,7 +99,7 @@ if (typeof jQuery === 'undefined') {
     for (var i = 0, len = children.length; i < len; i++) {
       var child = children[i];
       if (child.kind === ITEM) {
-        leaf = Leaf.fromObject(child);
+        leaf = Leaf.fromObject(child, tree);
         tree.add(leaf);
       } else {
         subtree = Tree.fromObject(child, tree);
@@ -405,8 +406,13 @@ if (typeof jQuery === 'undefined') {
    * @static
    * @return {Leaf} The constructed Leaf.
    */
-  Leaf.fromObject = function(obj) {
+  Leaf.fromObject = function(obj, parent) {
     var leaf = new Leaf(obj);
+    if (parent) {
+      leaf.depth = parent.depth + 1;
+      leaf.parentID = parent.id;
+      leaf.dataView = parent.dataView;
+    }
     return leaf;
   };
 
@@ -1804,6 +1810,25 @@ if (typeof jQuery === 'undefined') {
       }
     }
     return this;
+  };
+
+  HGrid.prototype.addData = function(data, parentID) {
+    var tree = this.getNodeByID(parentID);
+    var toAdd;
+    if (Array.isArray(data)) {
+      toAdd = data;
+    } else { // Data is an object with a `data` property
+      toAdd = data.data;
+    }
+    for (var i = 0, datum; datum = toAdd[i]; i++) {
+      var node;
+      if (datum.kind === HGrid.FOLDER) {
+        node = Tree.fromObject(datum, tree);
+      } else {
+        node = Leaf.fromObject(datum, tree);
+      }
+      tree.add(node, true); // ensure data view is updated
+    }
   };
 
 })(jQuery, window, document);

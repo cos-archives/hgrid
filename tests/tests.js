@@ -2,7 +2,7 @@
   'use strict';
 
 
-  // Fixtures and vactories
+  // Fixtures and factories
   var counter = 0;
 
   function getMockFile() {
@@ -967,6 +967,7 @@
   });
 
   test('default addedfile', function() {
+    this.spy(myGrid, 'validateTarget');
     var oldLength = myGrid.getData().length;
     var addedItem = myGrid.dropzoneEvents.addedfile.call(myGrid, file);
     equal(myGrid.getData().length, oldLength + 1, 'a row was added');
@@ -974,21 +975,24 @@
     isTrue($rowElem.hasClass('hg-upload-started'),
       'hg-upload-started class was added to the row element');
     containsText('.slick-row', file.name, 'file name is in DOM');
+    isTrue(myGrid.validateTarget.calledWith(myGrid.currentTarget));
   });
 
   test('drop', function() {
-    var spy = this.spy();
+    var dropSpy = this.spy();
     var grid = getMockGrid({
-      onDrop: spy,
+      onDrop: dropSpy,
       uploads: true
     });
     this.spy(grid, 'setUploadTarget');
+    this.spy(grid, 'validateTarget');
     var folder = grid.getData()[0];
     grid.currentTarget = folder;
     grid.dropzone.emit('drop');
-    isTrue(spy.calledOnce, 'options.onDrop is called');
-    equal(spy.args[0][1], grid.currentTarget, 'second arg is currentTarget');
+    isTrue(dropSpy.calledOnce, 'options.onDrop is called');
+    equal(dropSpy.args[0][1], grid.currentTarget, 'second arg is currentTarget');
     isTrue(grid.setUploadTarget.calledWith(folder), 'upload target is set');
+    isTrue(grid.validateTarget.calledWith(grid.currentTarget), 'target was validated');
   });
 
 
@@ -1270,6 +1274,44 @@
     equal(q.deq(), 4);
     equal(q.deq(), 2);
     equal(q.deq(), undefined);
+  });
+
+  module('Permissions', {});
+
+  test('canUpload', function() {
+    var grid = getMockGrid({
+      uploads: true,
+      canUpload: function(item) { return item.hasPermission; }
+    });
+    isFalse(grid.canUpload(undefined));
+    isFalse(grid.canUpload(null));
+    isFalse(grid.canUpload(getMockItem({hasPermission: false})));
+    isTrue(grid.canUpload(getMockItem({hasPermission: true})));
+  });
+
+  test('denyUpload', function() {
+    var spy = this.spy();
+    var grid = getMockGrid({
+      uploads: true,
+      uploadDenied: spy
+    });
+    throws(function() {
+      grid.denyUpload(getMockItem());
+    }, HGridError);
+    sinon.assert.calledOnce(spy);
+  });
+
+  test('validateTarget', function() {
+    var item = getMockItem({hasPerm: false});
+    var grid = getMockGrid({
+      uploads: true,
+      canUpload: function(item) {return item.hasPerm; }
+    });
+    throws(function() {
+      grid.validateTarget(item);
+    }, HGridError);
+    var valid = getMockItem({hasPerm: true});
+    deepEqual(grid.validateTarget(valid), valid, 'item is returned if validated');
   });
 
 })(jQuery);

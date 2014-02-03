@@ -1313,7 +1313,7 @@ if (typeof jQuery === 'undefined') {
   };
 
   HGrid.prototype.canUpload = function(item) {
-    return item && this.options.canUpload(item);
+    return Boolean(item && this.options.canUpload(item));
   };
 
   HGrid.prototype.denyUpload = function(targetItem) {

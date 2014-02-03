@@ -61,6 +61,17 @@
     return grid;
   }
 
+  function createServer(endpoints) {
+    var server = sinon.fakeServer.create();
+    for (var url in endpoints) {
+      server.respondWith('GET', url, [200, {'Content-Type': 'application/json'},
+        JSON.stringify(endpoints[url])
+        ]);
+    }
+    return server;
+  }
+
+
   ////////////////////
   // Custom asserts //
   ////////////////////
@@ -1217,12 +1228,10 @@
   var server;
   module('Async loading', {
     setup: function() {
-      server = sinon.fakeServer.create();
-      server.respondWith('GET', '/hgrid/data', [200, {
-          'Content-Type': 'application/json'
-        },
-        JSON.stringify(testData)
-      ]);
+      var endpoints = {
+        '/hgrid/data': testData
+      };
+      server = createServer(endpoints);
     }
   });
   // Sanity check

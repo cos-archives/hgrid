@@ -49,6 +49,9 @@ To create a new grid:
 
 ```javascript
 var myGrid = new HGrid('#myGrid', {data: files, width: 500, height: 200});
+
+// Or, with jQuery
+$('#myGrid').hgrid({data: files, width: 500, height: 200});
 ```
 
 ## Loading Data From A Server

@@ -601,8 +601,9 @@ if (typeof jQuery === 'undefined') {
     var name = sanitized(row.name);
     // The + / - button for expanding/collapsing a folder
     var expander;
-    if (row._node.children.length > 0 && row.depth > 0) {
-      expander = row._collapsed ? HGrid.Html.expandElem : HGrid.Html.collapseElem;
+    if (row._node.children.length > 0 && row.depth > 0 || args.lazyLoad) {
+      var isLoaded = args.lazyLoad && row._loaded;
+      expander = row._collapsed || !isLoaded  ? HGrid.Html.expandElem : HGrid.Html.collapseElem;
     } else { // Folder is empty
       expander = '<span></span>';
     }
@@ -1113,7 +1114,8 @@ if (typeof jQuery === 'undefined') {
         colDef: colDef,
         row: row,
         cell: cell,
-        indent: args.indent
+        indent: args.indent,
+        lazyLoad: self.isLazy()
       };
       if (item.kind === FOLDER) {
         view = folderView;
@@ -1649,6 +1651,27 @@ if (typeof jQuery === 'undefined') {
     return this.grid.getData();
   };
 
+  HGrid.prototype.getRefreshHints = function (item) {
+    var ignoreBefore = this.getDataView().getRowById(item.id);
+    var hints = {
+      expand: {
+        isFilterNarrowing: false,
+        isFilterExpanding: true,
+        ignoreDiffsBefore: ignoreBefore
+      },
+      collapse: {
+        isFilterNarrowing: true,
+        isFilterExpanding: false,
+        ignoreDiffsBefore: ignoreBefore
+      }
+    };
+    return hints;
+  };
+
+  HGrid.prototype.isLazy = function() {
+    return Boolean(this.options.fetchUrl);  // Assume lazy loading is enabled if fetchUrl is defined
+  };
+
   /**
    * Expand an item. Updates the dataview.
    * @method  expandItem
@@ -1658,12 +1681,8 @@ if (typeof jQuery === 'undefined') {
     item = typeof item === 'object' ? item : this.getByID(item.id);
     item._node.expand();
     var dataview = this.getDataView();
-    var ignoreBefore = dataview.getRowById(item.id);
-    dataview.setRefreshHints({
-      isFilterNarrowing: false,
-      isFilterExpanding: true,
-      ignoreDiffsBefore: ignoreBefore
-    });
+    var hints = this.getRefreshHints(item).expand;
+    dataview.setRefreshHints(hints);
     this.getDataView().updateItem(item.id, item);
     this.options.onExpand.call(this, evt, item);
     return this;
@@ -1677,12 +1696,8 @@ if (typeof jQuery === 'undefined') {
   HGrid.prototype.collapseItem = function(item, evt) {
     item._node.collapse();
     var dataview = this.getDataView();
-    var ignoreBefore = dataview.getRowById(item.id);
-    dataview.setRefreshHints({
-      isFilterNarrowing: true,
-      isFilterExpanding: false,
-      ignoreDiffsBefore: ignoreBefore
-    });
+    var hints = this.getRefreshHints(item).collapse;
+    dataview.setRefreshHints(hints);
     dataview.updateItem(item.id, item);
     this.options.onCollapse.call(this, evt, item);
     return this;

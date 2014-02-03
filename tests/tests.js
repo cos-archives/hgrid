@@ -1252,10 +1252,11 @@
   });
 
   asyncTest('getFromServer', function() {
-    expect(1);
+    expect(2);
     var grid = new HGrid('#myGrid');
     grid.getFromServer('/hgrid/data', {
       success: function(data) {
+        isTrue(this instanceof HGrid);
         deepEqual(data, testData, 'return data is correct');
       },
       complete: function() {

@@ -1037,6 +1037,13 @@ if (typeof jQuery === 'undefined') {
       contentType: 'application/json',
       dataType: 'json'
     }, self.options.ajaxOptions, options);
+    // Bind self to each callback
+    var callbacks = ['success', 'complete', 'error'];
+    callbacks.forEach(function(callback) {
+      if (ajaxOpts[callback]) {
+        ajaxOpts[callback] = ajaxOpts[callback].bind(self);
+      }
+    });
     return $.ajax(ajaxOpts);
   };
 

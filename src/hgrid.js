@@ -1696,7 +1696,7 @@ if (typeof jQuery === 'undefined') {
     var self = this;
     var url = self.options.fetchUrl(item);
     if (url !== null) {
-      self.getFromServer(url, function(newData, error) {
+      return self.getFromServer(url, function(newData, error) {
         if (!error) {
           self.addData(newData, item.id);
         } else {
@@ -1704,6 +1704,7 @@ if (typeof jQuery === 'undefined') {
         }
       });
     }
+    return false;
   };
 
   /**
@@ -1713,7 +1714,7 @@ if (typeof jQuery === 'undefined') {
    */
   HGrid.prototype.expandItem = function(item, evt) {
     var self = this;
-    item = typeof item === 'object' ? item : self.getByID(item.id);
+    item = typeof item === 'object' ? item : self.getByID(item);
     var node = self.getNodeByID(item.id);
     if (self.isLazy() && !node._loaded) {
       this._lazyLoad(item);

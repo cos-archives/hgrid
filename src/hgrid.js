@@ -602,8 +602,7 @@ if (typeof jQuery === 'undefined') {
     // The + / - button for expanding/collapsing a folder
     var expander;
     if (row._node.children.length > 0 && row.depth > 0 || args.lazyLoad) {
-      var isLoaded = args.lazyLoad && row._loaded;
-      expander = row._collapsed || !isLoaded  ? HGrid.Html.expandElem : HGrid.Html.collapseElem;
+      expander = row._collapsed ? HGrid.Html.expandElem : HGrid.Html.collapseElem;
     } else { // Folder is empty
       expander = '<span></span>';
     }
@@ -1019,12 +1018,11 @@ if (typeof jQuery === 'undefined') {
       self.searchInput = null;
     }
     if (typeof self.options.data === 'string') { // data is a URL, get the data asynchronously
-      self.getFromServer(self.options.data, {
-        success: function(data) {
+      self.getFromServer(self.options.data, function(data, error) {
           self._initData(data);
           self.init();
         }
-      });
+      );
     } else { // data is an object
       self._initData(self.options.data);
       self.init();
@@ -1034,23 +1032,24 @@ if (typeof jQuery === 'undefined') {
   /**
    * Helper for retrieving JSON data usin AJAX.
    * @method  getFromServer
+   * @param {String} url
+   * @param {Function} done Callback that receives the JSON data and an
+   *                        error if there is one.
    * @return {jQuery xhr} The xhr object returned by jQuery.ajax.
    */
-  HGrid.prototype.getFromServer = function(url, options) {
+  HGrid.prototype.getFromServer = function(url, done) {
     var self = this;
-    options = options || {};
     var ajaxOpts = $.extend({}, {
       url: url,
       contentType: 'application/json',
-      dataType: 'json'
-    }, self.options.ajaxOptions, options);
-    // Bind self to each callback
-    var callbacks = ['success', 'complete', 'error'];
-    callbacks.forEach(function(callback) {
-      if (ajaxOpts[callback]) {
-        ajaxOpts[callback] = ajaxOpts[callback].bind(self);
+      dataType: 'json',
+      success: function(json) {
+        done && done.call(self, json);
+      },
+      error: function(xhr, textStatus, error) {
+        done && done.call(self, null, error);
       }
-    });
+    }, self.options.ajaxOptions);
     return $.ajax(ajaxOpts);
   };
 
@@ -1655,14 +1654,10 @@ if (typeof jQuery === 'undefined') {
     var ignoreBefore = this.getDataView().getRowById(item.id);
     var hints = {
       expand: {
-        isFilterNarrowing: false,
-        isFilterExpanding: true,
-        ignoreDiffsBefore: ignoreBefore
+        isFilterNarrowing: false, isFilterExpanding: true, ignoreDiffsBefore: ignoreBefore
       },
       collapse: {
-        isFilterNarrowing: true,
-        isFilterExpanding: false,
-        ignoreDiffsBefore: ignoreBefore
+        isFilterNarrowing: true, isFilterExpanding: false, ignoreDiffsBefore: ignoreBefore
       }
     };
     return hints;
@@ -1678,14 +1673,20 @@ if (typeof jQuery === 'undefined') {
    * @param  {Object} item
    */
   HGrid.prototype.expandItem = function(item, evt) {
-    item = typeof item === 'object' ? item : this.getByID(item.id);
+    var self = this;
+    item = typeof item === 'object' ? item : self.getByID(item.id);
+    // if (self.isLazy()) {
+    //   self.getFromServer(self.options.fetchUrl(item) {
+    //     success: function()
+    //   })
+    // }
     item._node.expand();
-    var dataview = this.getDataView();
-    var hints = this.getRefreshHints(item).expand;
+    var dataview = self.getDataView();
+    var hints = self.getRefreshHints(item).expand;
     dataview.setRefreshHints(hints);
-    this.getDataView().updateItem(item.id, item);
-    this.options.onExpand.call(this, evt, item);
-    return this;
+    self.getDataView().updateItem(item.id, item);
+    self.options.onExpand.call(self, evt, item);
+    return self;
   };
 
   /**

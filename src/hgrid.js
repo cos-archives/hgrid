@@ -1812,6 +1812,12 @@ if (typeof jQuery === 'undefined') {
     return this;
   };
 
+  /**
+   * Add more hierarchical data. The `data` param takes the same form as the
+   * input data.
+   * @param  data    Hierarchical data to add
+   * @param {Number} parentID ID of the parent node to add the data to
+   */
   HGrid.prototype.addData = function(data, parentID) {
     var tree = this.getNodeByID(parentID);
     var toAdd;
@@ -1827,8 +1833,18 @@ if (typeof jQuery === 'undefined') {
       } else {
         node = Leaf.fromObject(datum, tree);
       }
-      tree.add(node, true); // ensure data view is updated
+      tree.add(node, true); // ensure dataview is updated
     }
+  };
+
+  $.fn.hgrid = function(options) {
+    this.each(function() {
+      if (!this.id) { // Must have ID because SlickGrid requires a selector
+        throw new HGridError('Element must have an ID if initializing HGrid with jQuery');
+      }
+      var selector = '#' + this.id;
+      return new HGrid(selector, options);
+    });
   };
 
 })(jQuery, window, document);

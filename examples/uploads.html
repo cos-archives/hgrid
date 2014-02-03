@@ -18,12 +18,9 @@
 <script>
 // Initial data
 var folderData = {
-  data: [{name: 'Uploads', kind: 'folder',  canUpload: true}, // Note: canUpload is NOT a special
-                                                              // property used by HGrid. It is just metadata that the
-                                                              // programmer can use, e.g., in the uploadAccept function
-                                                              // below
-        {name: 'Forbidden', kind: 'folder', canUpload: false},
-        {name: 'PUT stuff', kind: 'folder', canUpload: true}]
+  data: [{name: 'Uploads', kind: 'folder', permissions: ['upload']},
+        {name: 'Forbidden', kind: 'folder', permissions: ['upload']},
+        {name: 'PUT stuff', kind: 'folder', permissions: ['upload']}]
 };
 
 // Overriding the download action
@@ -40,14 +37,6 @@ var grid = new HGrid('#myGrid', {
             HGrid.Columns.ActionButtons],  // Default buttons
   uploads: true,
   maxFilesize: 20, // Mb
-  uploadAccept: function(file, row, done) {
-    if (!row.canUpload) {
-      // If done callback is called with an argument, an error is thrown
-      done('Verboten!');
-    }
-    // Accept the file
-    done();
-  },
   uploadError: function(file, message, item) {
     alert(message);
     this.removeItem(item.id);
@@ -58,7 +47,13 @@ var grid = new HGrid('#myGrid', {
     }
     return 'POST';
   },
-  uploadUrl: 'http://www.torrentplease.com/dropzone.php'
+  uploadUrl: 'http://www.torrentplease.com/dropzone.php',
+  canUpload: function(item) {
+    return 'upload' in item.permissions;
+  },
+  uploadDenied: function(item) {
+    alert('Cannot upload to folder: ' + item.name);
+  }
 });
 </script>
 </body>

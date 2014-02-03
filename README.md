@@ -234,6 +234,11 @@ var grid = new HGrid('#myGrid', {
   }
   ```
 
+### Permissions-related Callbacks
+
+- `canUpload: function(folder)`: Returns a boolean whether to allow uploads to a folder.
+- `uploadDenied: function(folder)`: Called when user tries to upload to a folder they don't have permission to, as determined by `canUpload`. NOTE: This gets called *before* a file gets added to the upload queue, whereas `uploadAccept` is called *after* a file is added to the queue.
+
 ### Adding other listeners
 
 The `init` option is useful for attaching additional listeners to the grid.

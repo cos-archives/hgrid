@@ -954,7 +954,12 @@ if (typeof jQuery === 'undefined') {
      */
     canUpload: function(folder) {
       return true;
-    }
+    },
+    /**
+     * Called when a user tries to upload to a folder they don't have permission
+     * to upload to. This is called before adding a file to the upload queue.
+     */
+    uploadDenied: function(folder) {}
   };
 
   HGrid._defaults = defaults;
@@ -1311,6 +1316,20 @@ if (typeof jQuery === 'undefined') {
     return item && this.options.canUpload(item);
   };
 
+  HGrid.prototype.denyUpload = function(targetItem) {
+    // Need to throw an error to prevent dropzone's sequence of callbacks from firing
+    this.options.uploadDenied.call(this, targetItem);
+    throw new HGridError('Upload permission denied.');
+  };
+
+  HGrid.prototype.validateTarget = function(targetItem) {
+    if (!this.canUpload(targetItem)) {
+      return this.denyUpload(targetItem);
+    } else {
+      return targetItem;
+    }
+  };
+
   /**
    * DropZone events that the grid subscribes to.
    * For each function, `this` refers to the HGrid object.
@@ -1323,8 +1342,8 @@ if (typeof jQuery === 'undefined') {
    */
   HGrid.prototype.dropzoneEvents = {
     drop: function(evt) {
-      console.log('dropped');
       this.removeHighlight();
+      this.validateTarget(this.currentTarget);
       // update the dropzone options, eg. dropzone.options.url
       this.setUploadTarget(this.currentTarget);
       this.options.onDrop.call(this, evt, this.currentTarget);
@@ -1349,13 +1368,10 @@ if (typeof jQuery === 'undefined') {
     dragover: function(evt) {
       var currentTarget = this.currentTarget;
       var item = this.getItemFromEvent(evt);
-
       if(this.canUpload(currentTarget)) {
         if (currentTarget) {
           this.addHighlight(currentTarget);
         }
-      } else{
-        return false;
       }
       this.options.onDragover.call(this, evt, item);
     },
@@ -1367,6 +1383,7 @@ if (typeof jQuery === 'undefined') {
     // (the added item object) to the file object
     addedfile: function(file) {
       var currentTarget = this.currentTarget;
+      this.validateTarget(currentTarget);
       var addedItem;
       if (this.canUpload(currentTarget)){
         // Add a new row

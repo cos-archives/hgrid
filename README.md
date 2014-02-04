@@ -142,7 +142,7 @@ var myCustomNameColumn = {
 };
 
 var filesizeColumn = {text: 'Filesize',
-  // receives `row` containing all the item information
+  // Using a function that receives `row` containing all the item information
   itemView: function(row) {return row.filesize.toString(); },
   folderView: function(row) {return '';} // Folders don't have a file size
   sortable: true, sortkey: 'size'
@@ -154,27 +154,13 @@ var grid = new HGrid('#myGrid', {
 }); 
 ```
 
-#### Formatting helpers
+#### Schema options 
 
-The `HGrid.Fmt` namespace includes a number of functions for rendering a row's HTML.
+- `indent`: Either a boolean or number of pixels to indent each row. Number of indents will be calculated based on an item's depth.
+- `showExpander: function(row, args)`: Boolean or function that returns a boolean whether to show the expander button or not.
+- `isName`: Boolean indicating whether the column is the name column.
 
-For example, `HGrid.Fmt.withIndent` adds a span element with a width based on an item's `depth` property.
-
-```javascript
-var item = {id: 123, name: 'My Documents', kind: 'folder', depth: 3};
-
-var nameColumn = {text: 'Name',
-  folderView: function(row) {
-    var html = HGrid.Fmt.tpl('<em>{{ name }}</em?>', row);
-    var itemWithIndent = HGrid.Fmt.withIndent(row, html);
-    // => '<span class="hg-indent" style="width:45"></span><em>My Documents</em>'
-    return itemWithIndent;
-  },
-  itemView: ...
-};
-```
-
-Available helpers
+#### Helper functions
 
 - `HGrid.Fmt.withIndent(row, html, [indentWidth])`: Adds an indenting span based on the a row's `depth` property.
 - `HGrid.Fmt.asItem(row, html)`: Surrounds `html` with `<div class="hg-item" data-id=123>`

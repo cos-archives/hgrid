@@ -1146,30 +1146,22 @@ if (typeof jQuery === 'undefined') {
   // HGrid column schmea => SlickGrid Formatter
   HGrid.prototype.makeFormatter = function(schema) {
     var self = this,
-      view;
+      view, html;
     var folderView = schema.folderView;
     var itemView = schema.itemView;
+    var showExpander = schema.showExpander;
+    var indentWidth = typeof schema.indent === 'number' ? schema.indent : DEFAULT_INDENT;
     var formatter = function(row, cell, value, colDef, item) {
       var rendererArgs = {
-        colDef: colDef,
-        row: row,
-        cell: cell,
-        indent: schema.indent,
-        lazyLoad: self.isLazy()
+        colDef: colDef, row: row, cell: cell, indent: schema.indent, lazyLoad: self.isLazy()
       };
-      if (item.kind === FOLDER) {
-        view = folderView;
-      } else {
-        view = itemView;
-      }
-      var html;
+      view = item.kind === FOLDER ? folderView : itemView;
       if (typeof view === 'function') {
         html = view.call(self, item, rendererArgs); // Returns the rendered HTML
       } else {
         // Use template
         html = HGrid.Format.tpl(view, item);
       }
-      var showExpander = schema.showExpander;
       if (showExpander) {
         var expander;
         if (typeof showExpander === 'function' && showExpander(item, rendererArgs)) {
@@ -1180,7 +1172,7 @@ if (typeof jQuery === 'undefined') {
         html = [expander, html].join('');
       }
       if (schema.indent) {
-        html = withIndent(item, html, schema.indent);
+        html = withIndent(item, html, indentWidth);
       }
       if (schema.isName) {
         html = asName(item, html);

@@ -1455,5 +1455,22 @@
     isFalse(grid.isLazy());
   });
 
+  module('deleting files', {});
+
+  test('deleteFile sends ajax request', function() {
+    var server = sinon.fakeServer.create();
+    server.respondWith('DELETE', '/deleteitem', [200, {'Content-Type': 'application/json'},
+        JSON.stringify({'success': true})
+    ]);
+    var grid = getMockGrid({
+      deleteUrl: '/deleteitem'
+    });
+    var item = grid.getData()[1];
+    this.spy($, 'ajax');
+    grid.deleteFile(item);
+    server.respond();
+    ok($.ajax.calledOnce);
+  });
+
 
 })(jQuery);

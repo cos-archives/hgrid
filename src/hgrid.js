@@ -845,7 +845,6 @@ this.HGrid = (function($, window, document, undefined) {
       this.downloadItem(item, options);
     },
     onClickDelete: function(event, item, options) {
-      this.removeItem(item.id);
       this.deleteFile(item, options);
     },
     onClickUpload: function(event, item, options) {
@@ -1332,24 +1331,23 @@ this.HGrid = (function($, window, document, undefined) {
   /**
    * Send a delete request to an item's download URL.
    */
-  // TODO: untested
   HGrid.prototype.deleteFile = function(item, ajaxOptions) {
+    var self = this;
     var url, method;
     // TODO: repetition here
-    if (typeof this.options.deleteUrl === 'function') {
-      url = this.options.deleteUrl(item);
-    } else {
-      url = this.options.deleteUrl;
-    }
-    if (typeof this.options.deleteMethod === 'function') {
-      method = this.options.deleteMethod(item);
-    } else {
-      method = this.options.deleteMethod;
-    }
+    url = typeof this.options.deleteUrl === 'function' ?
+          this.options.deleteUrl(item) : this.options.deleteUrl;
+    method  = typeof this.options.deleteMethod === 'function' ?
+              this.options.deleteMethod(item) : this.options.deleteMethod;
     var options = $.extend({}, {
       url: url,
-      type: method
-    }, this.options.ajaxOptions, ajaxOptions);
+      type: method,
+      success: function(data) {
+        // Update parent
+        self.updateItem(self.getByID(item.parentID));
+        self.removeItem(item.id);
+      }
+    }, self.options.ajaxOptions, ajaxOptions);
     var promise = null;
     if (url) {
       promise = $.ajax(options);

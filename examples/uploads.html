@@ -47,6 +47,9 @@ var grid = new HGrid('#myGrid', {
     }
     return 'POST';
   },
+  onClickDelete: function(evt, item) {
+    this.removeItem(item.id);
+  },
   uploadUrl: 'http://www.torrentplease.com/dropzone.php',
   canUpload: function(item) {
     return item.permissions.indexOf('upload') > -1;

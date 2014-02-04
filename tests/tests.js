@@ -1088,18 +1088,19 @@
     $row.addClass('hg-upload-processing');
     myGrid.dropzoneEvents.success.call(myGrid, file);
     isTrue($row.hasClass('hg-upload-success'), 'row has hg-upload-success class');
-    isFalse($row.hasClass('hg-upload-processing'), 'hg-upload-processing class was removed');
   });
 
   test('uploadComplete callback', function() {
-    expect(2); // Make sure callback executes
+    expect(3); // Make sure callback executes
     var file = getMockFile();
     var grid = new HGrid('#myGrid', {
       data: testData,
       // Just check that the params are ok
       uploadComplete: function(file, item) {
+        var $row = $(file.gridElement);
         ok(typeof(file) === 'object');
         ok(typeof(item) === 'object');
+        isFalse($row.hasClass('hg-upload-processing'), 'hg-upload-processing class was removed');
       }
     });
     var folder = grid.getData()[0];

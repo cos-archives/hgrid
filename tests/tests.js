@@ -1065,7 +1065,7 @@
     grid.dropzoneEvents.error.call(grid, file, message);
     isTrue($row.hasClass('hg-upload-error'), 'row element has hg-upload-error class');
     isFalse($row.hasClass('hg-upload-processing'), 'hg-upload-processing class was removed');
-    containsText('.slick-cell', message.error, 'Cell contains error message');
+    // containsText('.slick-cell', message.error, 'Cell contains error message');
   });
 
   test('default processing callback', function() {
@@ -1139,31 +1139,6 @@
     equal(acceptSpy.args[0][0], file, 'first argument was the file object');
   });
 
-  module('Predefined columns (HGrid.Columns)', {});
-
-  test('defaultItemView', function() {
-    var item = getMockItem();
-    var html = HGrid.Columns.defaultItemView(item);
-    ok(typeof html === 'string', 'renderer returns a string');
-    var $elem = $(html);
-    isTrue($elem.hasClass('hg-item-content'), 'has hg-item-content class');
-    equal($elem.data('id'), item.id, 'has correct data-id attribute');
-    isTrue($elem.find('span.hg-indent').length > 0, 'has indent element');
-    isTrue($elem.find('i.hg-file').length > 0, 'has icon with hg-file class');
-  });
-
-  test('defaultFolderView', function() {
-    var item = getMockItem({
-      kind: HGrid.FOLDER
-    });
-    var html = HGrid.Columns.defaultFolderView(item);
-    ok(typeof html === 'string', 'renderer returns a string');
-    var $elem = $(html);
-    isTrue($elem.hasClass('hg-item-content'), 'has hg-item-content class');
-    equal($elem.data('id'), item.id, 'has correct data-id attribute');
-    isTrue($elem.find('span.hg-indent').length > 0, 'has indent element');
-    isTrue($elem.find('i.hg-folder').length > 0, 'has icon with hg-folder class');
-  });
 
   module('Formatting helpers (HGrid.Format)', {});
 
@@ -1193,10 +1168,10 @@
     equal($elem.css('width'), 15 * depth + 'px', 'width is correct');
   });
 
-  test('asItem', function() {
+  test('asName', function() {
     var item = getMockItem();
     var html = '<p>test</p>';
-    var itemHtml = HGrid.Format.asItem(item, html);
+    var itemHtml = HGrid.Format.asName(item, html);
     var $elem = $(itemHtml);
     equal($elem.data('id'), item.id, 'has data-id');
     isTrue($elem.hasClass('hg-item-content'), 'has hg-item-content class');

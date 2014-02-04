@@ -575,7 +575,7 @@ if (typeof jQuery === 'undefined') {
    * @param  {string} html The inner HTML
    * @return {String}      The rendered HTML
    */
-  function asItem(item, html) {
+  function asName(item, html) {
     var openTag = '<div class="' + HGrid.Html.itemClass + '" data-id="' + item.id + '">';
     var closingTag = '</div>';
     return [openTag, html, closingTag].join('');
@@ -610,39 +610,6 @@ if (typeof jQuery === 'undefined') {
       return html;
     }).join('');
     return renderedButtons;
-  }
-
-  /**
-   * Default rendering function that renders a file item to HTML.
-   * @class defaultItemView
-   * @param  {Object} item The item data object.
-   * @return {String}      HTML for the item.
-   */
-  function defaultItemView(row, args) {
-    args = args || {};
-    var innerContent = [HGrid.Html.fileIcon, sanitized(row.name), HGrid.Html.errorElem].join('');
-    return asItem(row, withIndent(row, innerContent, args.indent));
-  }
-
-  /**
-   * Default rendering function that renders a folder row to HTML.
-   * @class defaultFolderView
-   * @param  {Object} row The folder data object.
-   * @return {String}      HTML for the folder.
-   */
-  function defaultFolderView(row, args) {
-    args = args || {};
-    var name = sanitized(row.name);
-    // The + / - button for expanding/collapsing a folder
-    var expander;
-    if (row._node.children.length > 0 && row.depth > 0 || args.lazyLoad) {
-      expander = row._collapsed ? HGrid.Html.expandElem : HGrid.Html.collapseElem;
-    } else { // Folder is empty
-      expander = '<span></span>';
-    }
-    // Concatenate the expander, folder icon, and the folder name
-    var innerContent = [expander, HGrid.Html.folderIcon, name, HGrid.Html.errorElem].join(' ');
-    return asItem(row, withIndent(row, innerContent, args.indent));
   }
 
   /**
@@ -686,7 +653,7 @@ if (typeof jQuery === 'undefined') {
   // Formatting helpers public interface
   HGrid.Fmt = HGrid.Format = {
     withIndent: withIndent,
-    asItem: asItem,
+    asName: asName,
     makeIndentElem: makeIndentElem,
     sanitized: sanitized,
     button: renderButton,
@@ -722,18 +689,21 @@ if (typeof jQuery === 'undefined') {
 
   // Predefined column schemas
   HGrid.Col = HGrid.Columns = {
-    defaultFolderView: defaultFolderView,
-    defaultItemView: defaultItemView,
-
     // Name field schema
     Name: {
       id: 'name',
       name: 'Name',
       sortkey: 'name',
       cssClass: 'hg-cell',
-      folderView: defaultFolderView,
-      itemView: defaultItemView,
-      sortable: true
+      folderView: HGrid.Html.folderIcon + ' {{name}}',
+      itemView: HGrid.Html.fileIcon + ' {{name}}',
+      sortable: true,
+      indent: DEFAULT_INDENT,
+      isName: true,
+      showExpander: function(item, args) {
+        return item.kind === HGrid.FOLDER &&
+                item._node.children.length && item.depth || args.lazyLoad;
+      }
     },
 
     // Actions buttons schema
@@ -1173,16 +1143,18 @@ if (typeof jQuery === 'undefined') {
   };
 
   // TODO: test me
-  // HGrid folderView and itemView (in column def) => SlickGrid Formatter
-  HGrid.prototype.makeFormatter = function(folderView, itemView, args) {
+  // HGrid column schmea => SlickGrid Formatter
+  HGrid.prototype.makeFormatter = function(schema) {
     var self = this,
       view;
+    var folderView = schema.folderView;
+    var itemView = schema.itemView;
     var formatter = function(row, cell, value, colDef, item) {
       var rendererArgs = {
         colDef: colDef,
         row: row,
         cell: cell,
-        indent: args.indent,
+        indent: schema.indent,
         lazyLoad: self.isLazy()
       };
       if (item.kind === FOLDER) {
@@ -1190,11 +1162,30 @@ if (typeof jQuery === 'undefined') {
       } else {
         view = itemView;
       }
+      var html;
       if (typeof view === 'function') {
-        return view.call(self, item, rendererArgs); // Returns the rendered HTML
+        html = view.call(self, item, rendererArgs); // Returns the rendered HTML
+      } else {
+        // Use template
+        html = HGrid.Format.tpl(view, item);
       }
-      // Use template
-      return HGrid.Format.tpl(view, item);
+      var showExpander = schema.showExpander;
+      if (showExpander) {
+        var expander;
+        if (typeof showExpander === 'function' && showExpander(item, rendererArgs)) {
+          expander = item._collapsed ? HGrid.Html.expandElem : HGrid.Html.collapseElem;
+        } else {
+          expander = '<span></span>';
+        }
+        html = [expander, html].join('');
+      }
+      if (schema.indent) {
+        html = withIndent(item, html, schema.indent);
+      }
+      if (schema.isName) {
+        html = asName(item, html);
+      }
+      return html;
     };
     return formatter;
   };
@@ -1206,10 +1197,7 @@ if (typeof jQuery === 'undefined') {
       if (!('formatter' in col)) {
         // Create the formatter function from the columns definition's
         // "folderView" and "itemView" properties
-        col.formatter = self.makeFormatter.call(self, col.folderView,
-          col.itemView, {
-            indent: self.options.indent
-          });
+        col.formatter = self.makeFormatter.call(self, col);
       }
       if ('text' in col) { // Use 'text' instead of 'name' for column header text
         col.name = col.text;

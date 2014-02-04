@@ -1049,20 +1049,25 @@ if (typeof jQuery === 'undefined') {
 
   /**
    * Collapse all folders
-   * @return {[type]} [description]
+   * @method  collapseAll
    */
   HGrid.prototype.collapseAll = function() {
     this.tree.collapseAt(1, true);
+    return this;
   };
 
   /**
    * Remove a folder's contents from the grid.
+   * @method  emptyFolder
    * @param  {Object} item The folder item to empty.
+   * @param {Boolean} [removeFolder] Also remove the folder.
    */
-  HGrid.prototype.emptyFolder = function(item) {
+  HGrid.prototype.emptyFolder = function(item, removeFolder) {
     item = typeof item === 'object' ? item : this.getByID(item);
-    item._node.empty();
-    this.getDataView().updateItem(item.id, item);
+    item._node.empty(removeFolder);
+    if (!removeFolder) {
+      this.getDataView().updateItem(item.id, item);
+    }
     return this;
   };
 

@@ -239,7 +239,7 @@ var grid = new HGrid('#myGrid', {
 - `uploadProcessing function(file, item)`: Called when a file in the upload queue begins processing.
 - `uploadError: function(file, message, item)`: Called when a file upload fails. By default, imputes the error message into any HTML element that has the `data-upload-errormessage` attribute.
 - `uploadProgress: function(file, progress, bytesSent, item)`: Called whenever upload progress changes.
-- `uploadSuccess: function(file, item)`
+- `uploadSuccess: function(file, item, data)`: Called when an upload succeeds. `item` is the new grid item and `data` is the data returned from the server.
 - `uploadComplete: function(file, item)`
 - `uploadAccept: function(file, folder, done)`: Validation function that is run before a file gets uploaded. `done` is a function that, if called with a string argument, raises the error message, passes it to `uploadError`, and terminates the upload. If called with no arguments, the upload is allowed. For filetype and filesize checking, use the `acceptedFiles` and `maxFilesize` options.
 

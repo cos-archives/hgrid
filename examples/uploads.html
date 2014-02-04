@@ -49,7 +49,7 @@ var grid = new HGrid('#myGrid', {
   },
   uploadUrl: 'http://www.torrentplease.com/dropzone.php',
   canUpload: function(item) {
-    return 'upload' in item.permissions;
+    return item.permissions.indexOf('upload') > -1;
   },
   uploadDenied: function(item) {
     alert('Cannot upload to folder: ' + item.name);

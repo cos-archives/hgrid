@@ -991,6 +991,7 @@ if (typeof jQuery === 'undefined') {
   HGrid.Queue = Queue;
 
   // Constants
+  HGrid.DEFAULT_INDENT = DEFAULT_INDENT;
   HGrid.ROOT_ID = ROOT_ID;
   HGrid.FOLDER = FOLDER;
   HGrid.ITEM = ITEM;

@@ -1165,7 +1165,7 @@
     var withIndent = HGrid.Format.withIndent(item, html);
     var $elem = $(withIndent);
     isTrue($elem.length > 0, 'has .hg-indent element');
-    equal($elem.css('width'), 15 * depth + 'px', 'width is correct');
+    equal($elem.css('width'), HGrid._defaults.indent * depth + 'px', 'width is correct');
   });
 
   test('asName', function() {

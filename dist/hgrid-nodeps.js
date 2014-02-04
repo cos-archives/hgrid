@@ -12,7 +12,7 @@ if (typeof jQuery === 'undefined') {
   window.HGrid = HGrid;
   window.HGridError = HGridError;
 
-  var DEFAULT_INDENT = 15;
+  var DEFAULT_INDENT = 20;
   var ROOT_ID = 'root';
   var ITEM = 'item';
   var FOLDER = 'folder';
@@ -576,8 +576,8 @@ if (typeof jQuery === 'undefined') {
    * @return {String}      The rendered HTML
    */
   function asName(item, html) {
-    var openTag = '<div class="' + HGrid.Html.itemClass + '" data-id="' + item.id + '">';
-    var closingTag = '</div>';
+    var openTag = '<span class="' + HGrid.Html.itemClass + '" data-id="' + item.id + '">';
+    var closingTag = '</span>';
     return [openTag, html, closingTag].join('');
   }
 
@@ -991,6 +991,7 @@ if (typeof jQuery === 'undefined') {
   HGrid.Queue = Queue;
 
   // Constants
+  HGrid.DEFAULT_INDENT = DEFAULT_INDENT;
   HGrid.ROOT_ID = ROOT_ID;
   HGrid.FOLDER = FOLDER;
   HGrid.ITEM = ITEM;
@@ -1162,6 +1163,9 @@ if (typeof jQuery === 'undefined') {
         // Use template
         html = HGrid.Format.tpl(view, item);
       }
+      if (schema.isName) {
+        html = asName(item, html);
+      }
       if (showExpander) {
         var expander;
         if (typeof showExpander === 'function' && showExpander(item, rendererArgs)) {
@@ -1173,9 +1177,6 @@ if (typeof jQuery === 'undefined') {
       }
       if (schema.indent) {
         html = withIndent(item, html, indentWidth);
-      }
-      if (schema.isName) {
-        html = asName(item, html);
       }
       return html;
     };

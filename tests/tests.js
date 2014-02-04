@@ -143,7 +143,7 @@
       $('.no-id').hgrid({
         data: testData
       });
-    }, HGridError);
+    }, HGrid.Error);
   });
 
   test('Initializing HGrid with data that has metadata', function() {
@@ -278,6 +278,18 @@
       name: 'Testing column'
     });
     containsText('.slick-header', 'Testing column', 'new column was added in the DOM');
+  });
+
+  test('render', function() {
+    this.spy(myGrid.grid, 'render');
+    myGrid.render();
+    isTrue(myGrid.grid.render.calledOnce);
+  });
+
+  test('invalidate', function() {
+    this.spy(myGrid.grid, 'invalidate');
+    myGrid.invalidate();
+    isTrue(myGrid.grid.invalidate.calledOnce);
   });
 
   test('Removing item', function() {
@@ -913,7 +925,7 @@
       triggerSlick(myGrid.grid.onSort, {
         sortCol: {} // no sortkey
       });
-    }, HGridError, 'HGrid error is thrown');
+    }, HGrid.Error, 'HGrid error is thrown');
   });
 
   test('onMouseLeave', function() {
@@ -1345,7 +1357,7 @@
     });
     throws(function() {
       grid.denyUpload(getMockItem());
-    }, HGridError);
+    }, HGrid.Error);
     sinon.assert.calledOnce(spy);
   });
 
@@ -1357,7 +1369,7 @@
     });
     throws(function() {
       grid.validateTarget(item);
-    }, HGridError);
+    }, HGrid.Error);
     var valid = getMockItem({hasPerm: true});
     deepEqual(grid.validateTarget(valid), valid, 'item is returned if validated');
   });

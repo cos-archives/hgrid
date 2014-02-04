@@ -1,16 +1,13 @@
 /**
- * Provides the main HGrid class and HGridError.
+ * Provides the main HGrid class and HGrid.Error.
  * @module HGrid
  */
 ; // jshint ignore: line
 if (typeof jQuery === 'undefined') {
   throw new Error('HGrid requires jQuery to be loaded');
 }
-(function($, window, document, undefined) {
+this.HGrid = (function($, window, document, undefined) {
   'use strict';
-  // Exports
-  window.HGrid = HGrid;
-  window.HGridError = HGridError;
 
   var DEFAULT_INDENT = 20;
   var ROOT_ID = 'root';
@@ -239,7 +236,7 @@ if (typeof jQuery === 'undefined') {
    */
   Tree.prototype.updateDataView = function(onlySetItems) {
     if (!this.dataView) {
-      throw new HGridError('Tree does not have a DataView. updateDataView must be called on a root node.');
+      throw new HGrid.Error('Tree does not have a DataView. updateDataView must be called on a root node.');
     }
     if (!onlySetItems) {
       this.ensureDataView();
@@ -1005,14 +1002,14 @@ if (typeof jQuery === 'undefined') {
   /**
    * Custom Error for HGrid-related errors.
    *
-   * @class  HGridError
+   * @class  HGrid.Error
    * @constructor
    */
-  function HGridError(message) {
-    this.name = 'HGridError';
+  HGrid.Error = function(message) {
+    this.name = 'HGrid.Error';
     this.message = message || '';
-  }
-  HGridError.prototype = new Error();
+  };
+  HGrid.Error.prototype = new Error();
 
   /**
    * Construct an HGrid.
@@ -1035,7 +1032,7 @@ if (typeof jQuery === 'undefined') {
       if ($searchInput.length) {
         self.searchInput = $searchInput;
       } else {
-        throw new HGridError('Invalid selector for searchInput.');
+        throw new HGrid.Error('Invalid selector for searchInput.');
       }
     } else {
       self.searchInput = null;
@@ -1125,7 +1122,7 @@ if (typeof jQuery === 'undefined') {
 
     if (this.options.uploads) {
       if (typeof Dropzone === 'undefined') {
-        throw new HGridError('uploads=true requires DropZone to be loaded');
+        throw new HGrid.Error('uploads=true requires DropZone to be loaded');
       }
       this._initDropzone();
     }
@@ -1295,7 +1292,7 @@ if (typeof jQuery === 'undefined') {
       var col = args.sortCol; // column to sort
       var key = col.field || col.sortkey; // key to sort on
       if (!key) {
-        throw new HGridError('Sortable column does not define a `sortkey` to sort on.');
+        throw new HGrid.Error('Sortable column does not define a `sortkey` to sort on.');
       }
       this.tree.sort(key, args.sortAsc);
       this.tree.updateDataView(true);
@@ -1400,7 +1397,7 @@ if (typeof jQuery === 'undefined') {
   HGrid.prototype.denyUpload = function(targetItem) {
     // Need to throw an error to prevent dropzone's sequence of callbacks from firing
     this.options.uploadDenied.call(this, targetItem);
-    throw new HGridError('Upload permission denied.');
+    throw new HGrid.Error('Upload permission denied.');
   };
 
   HGrid.prototype.validateTarget = function(targetItem) {
@@ -1748,7 +1745,7 @@ if (typeof jQuery === 'undefined') {
           self.addData(newData, item.id);
           item._node._loaded = true; // Add flag to make sure data are only fetched once.
         } else {
-          throw new HGridError('Could not fetch data from url: "' + url + '". Error: ' + error);
+          throw new HGrid.Error('Could not fetch data from url: "' + url + '". Error: ' + error);
         }
       });
     }
@@ -1944,14 +1941,26 @@ if (typeof jQuery === 'undefined') {
     return this;
   };
 
+  HGrid.prototype.render = function() {
+    this.grid.render();
+    return this;
+  };
+
+  HGrid.prototype.invalidate = function () {
+    this.grid.invalidate();
+    return this;
+  };
+
   $.fn.hgrid = function(options) {
     this.each(function() {
       if (!this.id) { // Must have ID because SlickGrid requires a selector
-        throw new HGridError('Element must have an ID if initializing HGrid with jQuery');
+        throw new HGrid.Error('Element must have an ID if initializing HGrid with jQuery');
       }
       var selector = '#' + this.id;
       return new HGrid(selector, options);
     });
   };
+
+  return HGrid;
 
 })(jQuery, window, document);

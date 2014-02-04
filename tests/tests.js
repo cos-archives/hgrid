@@ -1113,7 +1113,7 @@
   });
 
   test('setUploadTarget', function() {
-    expect(3);
+    var headers = {'My-Awesome-Header': 'header value'};
     var grid = new HGrid('#myGrid', {
       data: testData,
       uploads: true,
@@ -1124,12 +1124,16 @@
         deepEqual(this.getData()[0], folder);
         return 'PUT';
       },
+      uploadHeaders: function(folder) {
+        return headers;
+      }
     });
     var folder = grid.getData()[0];
     grid.currentTarget = folder;
     grid.setUploadTarget(folder);
     equal(grid.dropzone.options.url, 'uploads/' + folder.id, 'upload url was set');
     equal(grid.dropzone.options.method, 'PUT', 'upload method was set');
+    deepEqual(grid.dropzone.options.headers, headers, 'headers were set');
   });
 
   test('setUploadTarget sets dropzone accept function', function() {

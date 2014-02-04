@@ -826,6 +826,10 @@ if (typeof jQuery === 'undefined') {
      */
     uploadMethod: 'POST',
     /**
+     * Additional headers to send with upload requests.
+     */
+    uploadHeaders: {},
+    /**
      * Additional options passed to DropZone constructor
      * See: http://www.dropzonejs.com/
      * @property [dropzoneOptions]
@@ -1366,14 +1370,16 @@ if (typeof jQuery === 'undefined') {
     var self = this;
     // if upload url or upload method is a function, call it, passing in the target item,
     // and set dropzone to upload to the result
-    function resolveUrl(url) {
+    function resolveParam(url) {
       return typeof url === 'function' ? url.call(self, item) : url;
     }
     if (self.currentTarget) {
       $.when(
-        resolveUrl(self.options.uploadUrl),
-        resolveUrl(self.options.uploadMethod)
-      ).done(function(uploadUrl, uploadMethod) {
+        resolveParam(self.options.uploadHeaders),
+        resolveParam(self.options.uploadUrl),
+        resolveParam(self.options.uploadMethod)
+      ).done(function(uploadHeaders, uploadUrl, uploadMethod) {
+        self.dropzone.options.headers = uploadHeaders;
         self.dropzone.options.url = uploadUrl;
         self.dropzone.options.method = uploadMethod;
         if (self.options.uploadAccept) {
@@ -1650,17 +1656,15 @@ if (typeof jQuery === 'undefined') {
    * @private
    */
   HGrid.prototype._initDropzone = function() {
-    var uploadUrl, uploadMethod;
-    if (typeof this.options.uploadUrl === 'string') {
-      uploadUrl = this.options.uploadUrl;
-    } else { // uploadUrl is a function, so compute the url lazily;
-      uploadUrl = '/'; // placeholder
+    var uploadUrl, uploadMethod, headers;
+    // If a param is a string, return that, otherwise the param is a function,
+    // so the value will be computed later.
+    function resolveParam(param, fallback){
+      return (typeof param === 'function' || param == null) ? fallback : param;
     }
-    if (typeof this.options.uploadMethod === 'string') {
-      uploadMethod = this.options.uploadMethod;
-    } else { // uploadMethod is a function, so compute the upload url lazily
-      uploadMethod = 'POST'; // placeholder
-    }
+    uploadUrl = resolveParam(this.options.uploadUrl, '/');
+    uploadMethod = resolveParam(this.options.uploadMethod, 'POST');
+    headers = resolveParam(this.options.uploadHeaders, {});
     // Build up the options object, combining the HGrid options, required options,
     // and additional options
     var dropzoneOptions = $.extend({}, {
@@ -1669,7 +1673,8 @@ if (typeof jQuery === 'undefined') {
         acceptedFiles: this.options.acceptedFiles ?
           this.options.acceptedFiles.join(',') : null,
         maxFilesize: this.options.maxFilesize,
-        method: uploadMethod
+        method: uploadMethod,
+        headers: headers
       },
       requiredDropzoneOpts,
       this.options.dropzoneOptions);

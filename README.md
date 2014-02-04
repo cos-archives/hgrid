@@ -195,6 +195,7 @@ var grid = new HGrid('#myGrid', {
   uploadUrl: function(row) {  // row => {id: 3, name: 'My bucket', kind: 'folder'}
     return 'files/' + row.id;
   },
+  uploadHeaders: {'My-Header': 'is awesome'},
   // Returns where to send request for deletion
   deleteUrl: function(row) {
     return 'files/' + row.id + '/remove';

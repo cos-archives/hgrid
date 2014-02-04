@@ -138,7 +138,8 @@ var myCustomNameColumn = {
   folderView: '<div class="folder {{cssClass}}">{{ name }}</div?>' // Using a microtemplate
   itemView: '<div class="file {{cssClass}}">{{ name }}</div?>'
   sortable: true,
-  sortkey: 'name' // property of item object on which to sort on
+  sortkey: 'name', // property of item object on which to sort on
+  indent: true  // Indent based on item depth
 };
 
 var filesizeColumn = {text: 'Filesize',
@@ -154,7 +155,7 @@ var grid = new HGrid('#myGrid', {
 }); 
 ```
 
-#### Schema options 
+#### Additional schema options 
 
 - `indent`: Either a boolean or number of pixels to indent each row. Number of indents will be calculated based on an item's depth.
 - `showExpander: function(row, args)`: Boolean or function that returns a boolean whether to show the expander button or not.

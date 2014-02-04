@@ -368,6 +368,18 @@
     isFalse(grid.isCollapsed(folder));
   });
 
+  test('Emptying folder', function() {
+    var grid = getMockGrid();
+    var folder = grid.getData()[0];
+    var item = folder._node.children[0].getItem();
+    this.spy(folder._node, 'empty');
+    containsText('.slick-cell', item.name, 'sanity check');
+    grid.emptyFolder(folder);
+    isTrue(folder._node.empty.calledOnce);
+    notContainsText('.slick-cell', item.name, 'child was removed from DOM');
+    containsText('.slick-cell', folder.name, 'folder was not removed from DOM');
+  });
+
   test('Collapse filter', function() {
     var myData = {
       data: [{
@@ -747,11 +759,11 @@
     }]);
   });
 
-  test('Tree.destroy', function() {
+  test('Tree.empty', function() {
     var tree = getTree();
     var node = tree.children[0];
     var child = node.children[0];
-    node.destroy();
+    node.empty();
     equal(node.children.length, 0);
     equal(child.children.length, 0);
   });

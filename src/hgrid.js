@@ -141,14 +141,14 @@ if (typeof jQuery === 'undefined') {
     return this;
   };
 
-  Tree.prototype.destroy = function(removeSelf) {
+  Tree.prototype.empty = function(removeSelf) {
     if (removeSelf) {
       // Clear children
       var item = this.getItem();
       this.dataView.deleteItem(item.id);
     }
     for(var i=0, child; child = this.children[i]; i++) {
-      child.destroy(true);
+      child.empty(true);
       child.children = [];
     }
     this.children = [];
@@ -505,7 +505,7 @@ if (typeof jQuery === 'undefined') {
     return this.depth === 0;
   };
 
-  Leaf.prototype.destroy = function() {
+  Leaf.prototype.empty = function() {
     var item = this.getItem();
     this.dataView.deleteItem(item.id);
     return this;
@@ -1081,6 +1081,17 @@ if (typeof jQuery === 'undefined') {
    */
   HGrid.prototype.collapseAll = function() {
     this.tree.collapseAt(1, true);
+  };
+
+  /**
+   * Remove a folder's contents from the grid.
+   * @param  {Object} item The folder item to empty.
+   */
+  HGrid.prototype.emptyFolder = function(item) {
+    item = typeof item === 'object' ? item : this.getByID(item);
+    item._node.empty();
+    this.getDataView().updateItem(item.id, item);
+    return this;
   };
 
   /**

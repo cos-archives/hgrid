@@ -42,7 +42,7 @@ function fileViewButtons(row) {
   // Use the button formatting helper to make a button that can use the
   // custom action
   var buttons = [{text: 'RED', action: 'makered'}, {text: 'BLUE', action: 'makeblue'}];
-  return HGrid.Format.buttons(buttons);
+  return HGrid.Fmt.buttons(buttons);
 }
 
 var grid = new HGrid('#myGrid', {

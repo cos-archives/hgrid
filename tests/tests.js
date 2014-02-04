@@ -1024,6 +1024,8 @@
 
   test('default addedfile', function() {
     this.spy(myGrid, 'validateTarget');
+    this.spy(myGrid.options, 'uploadAdded');
+    myGrid.currentTarget = myGrid.getData()[0];
     var oldLength = myGrid.getData().length;
     var addedItem = myGrid.dropzoneEvents.addedfile.call(myGrid, file);
     equal(myGrid.getData().length, oldLength + 1, 'a row was added');
@@ -1032,6 +1034,9 @@
       'hg-upload-started class was added to the row element');
     containsText('.slick-row', file.name, 'file name is in DOM');
     isTrue(myGrid.validateTarget.calledWith(myGrid.currentTarget));
+    ok(myGrid.options.uploadAdded.calledOnce);
+    equal(myGrid.options.uploadAdded.args[0][1], addedItem, 'second argument is addedItem');
+    equal(myGrid.options.uploadAdded.args[0][2], myGrid.currentTarget, 'third argument is current upload target');
   });
 
   test('drop', function() {
@@ -1069,9 +1074,13 @@
   });
 
   test('default processing callback', function() {
+    this.spy(myGrid.options, 'uploadProcessing');
+    myGrid.currentTarget = myGrid.getData()[0];
     myGrid.dropzoneEvents.processing.call(myGrid, file);
     var $row = $(file.gridElement);
     isTrue($row.hasClass('hg-upload-processing'), 'row has hg-upload-processing class');
+    ok(myGrid.options.uploadProcessing.calledOnce);
+    equal(myGrid.options.uploadProcessing.args[0][2], myGrid.currentTarget, 'third argument is curernt upload target');
   });
 
   test('default success callback', function() {

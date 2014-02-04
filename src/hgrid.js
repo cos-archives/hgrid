@@ -584,7 +584,7 @@ if (typeof jQuery === 'undefined') {
   /**
    * Render the html for a button, given an item and buttonDef. buttonDef is an
    * object of the form {text: "My button", cssClass: "btn btn-primary",
-   *                     onClick: function(evt, item) {alert(item.name); }}
+   *                     action: "download" }}
    * @class  renderButton
    * @private
    */
@@ -873,8 +873,9 @@ if (typeof jQuery === 'undefined') {
      * Called whenever a file is added for uploaded
      * @param  {Object} file The file object. Has gridElement and gridItem bound to it.
      * @param  {Object} item The added item
+     * @param {Object} folder The folder item being uploaded to
      */
-    uploadAdded: function(file, item) {},
+    uploadAdded: function(file, item, folder) {},
     /**
      * Called whenever a file gets processed.
      * @property {Function} [uploadProcessing]
@@ -1341,7 +1342,7 @@ if (typeof jQuery === 'undefined') {
     var options = $.extend({}, {
       url: url,
       type: method
-    }, ajaxOptions);
+    }, this.options.ajaxOptions, ajaxOptions);
     var promise = null;
     if (url) {
       promise = $.ajax(options);
@@ -1467,7 +1468,7 @@ if (typeof jQuery === 'undefined') {
         file.gridElement = rowElem;
         $rowElem.addClass('hg-upload-started');
       }
-      this.options.uploadAdded.call(this, file, file.gridItem);
+      this.options.uploadAdded.call(this, file, file.gridItem, currentTarget);
       return addedItem;
     },
     thumbnail: noop,
@@ -1479,7 +1480,7 @@ if (typeof jQuery === 'undefined') {
     },
     processing: function(file) {
       $(file.gridElement).addClass('hg-upload-processing');
-      this.options.uploadProcessing.call(this, file, file.gridItem);
+      this.options.uploadProcessing.call(this, file, file.gridItem, this.currentTarget);
       return this;
     },
     uploadprogress: function(file, progress, bytesSent) {

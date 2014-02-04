@@ -222,8 +222,8 @@ var grid = new HGrid('#myGrid', {
 
 ### Upload-related Callbacks 
 
-- `uploadAdded: function(file, item)`
-- `uploadProcessing function(file, item)`: Called when a file in the upload queue begins processing.
+- `uploadAdded: function(file, item, folder)`
+- `uploadProcessing function(file, item, folder)`: Called when a file in the upload queue begins processing.
 - `uploadError: function(file, message, item)`: Called when a file upload fails. By default, imputes the error message into any HTML element that has the `data-upload-errormessage` attribute.
 - `uploadProgress: function(file, progress, bytesSent, item)`: Called whenever upload progress changes.
 - `uploadSuccess: function(file, item, data)`: Called when an upload succeeds. `item` is the new grid item and `data` is the data returned from the server.

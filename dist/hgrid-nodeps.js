@@ -1,16 +1,13 @@
 /**
- * Provides the main HGrid class and HGridError.
+ * Provides the main HGrid class and HGrid.Error.
  * @module HGrid
  */
 ; // jshint ignore: line
 if (typeof jQuery === 'undefined') {
   throw new Error('HGrid requires jQuery to be loaded');
 }
-(function($, window, document, undefined) {
+this.HGrid = (function($, window, document, undefined) {
   'use strict';
-  // Exports
-  window.HGrid = HGrid;
-  window.HGridError = HGridError;
 
   var DEFAULT_INDENT = 20;
   var ROOT_ID = 'root';
@@ -239,7 +236,7 @@ if (typeof jQuery === 'undefined') {
    */
   Tree.prototype.updateDataView = function(onlySetItems) {
     if (!this.dataView) {
-      throw new HGridError('Tree does not have a DataView. updateDataView must be called on a root node.');
+      throw new HGrid.Error('Tree does not have a DataView. updateDataView must be called on a root node.');
     }
     if (!onlySetItems) {
       this.ensureDataView();
@@ -584,7 +581,7 @@ if (typeof jQuery === 'undefined') {
   /**
    * Render the html for a button, given an item and buttonDef. buttonDef is an
    * object of the form {text: "My button", cssClass: "btn btn-primary",
-   *                     onClick: function(evt, item) {alert(item.name); }}
+   *                     action: "download" }}
    * @class  renderButton
    * @private
    */
@@ -702,7 +699,8 @@ if (typeof jQuery === 'undefined') {
       isName: true,
       showExpander: function(item, args) {
         return item.kind === HGrid.FOLDER &&
-                (item._node.children.length && item.depth || args.lazyLoad);
+                (item._node.children.length && item.depth || args.lazyLoad) &&
+                !item._processing;
       }
     },
 
@@ -826,6 +824,10 @@ if (typeof jQuery === 'undefined') {
      */
     uploadMethod: 'POST',
     /**
+     * Additional headers to send with upload requests.
+     */
+    uploadHeaders: {},
+    /**
      * Additional options passed to DropZone constructor
      * See: http://www.dropzonejs.com/
      * @property [dropzoneOptions]
@@ -843,7 +845,6 @@ if (typeof jQuery === 'undefined') {
       this.downloadItem(item, options);
     },
     onClickDelete: function(event, item, options) {
-      this.removeItem(item.id);
       this.deleteFile(item, options);
     },
     onClickUpload: function(event, item, options) {
@@ -873,8 +874,9 @@ if (typeof jQuery === 'undefined') {
      * Called whenever a file is added for uploaded
      * @param  {Object} file The file object. Has gridElement and gridItem bound to it.
      * @param  {Object} item The added item
+     * @param {Object} folder The folder item being uploaded to
      */
-    uploadAdded: function(file, item) {},
+    uploadAdded: function(file, item, folder) {},
     /**
      * Called whenever a file gets processed.
      * @property {Function} [uploadProcessing]
@@ -999,14 +1001,14 @@ if (typeof jQuery === 'undefined') {
   /**
    * Custom Error for HGrid-related errors.
    *
-   * @class  HGridError
+   * @class  HGrid.Error
    * @constructor
    */
-  function HGridError(message) {
-    this.name = 'HGridError';
+  HGrid.Error = function(message) {
+    this.name = 'HGrid.Error';
     this.message = message || '';
-  }
-  HGridError.prototype = new Error();
+  };
+  HGrid.Error.prototype = new Error();
 
   /**
    * Construct an HGrid.
@@ -1029,7 +1031,7 @@ if (typeof jQuery === 'undefined') {
       if ($searchInput.length) {
         self.searchInput = $searchInput;
       } else {
-        throw new HGridError('Invalid selector for searchInput.');
+        throw new HGrid.Error('Invalid selector for searchInput.');
       }
     } else {
       self.searchInput = null;
@@ -1048,20 +1050,25 @@ if (typeof jQuery === 'undefined') {
 
   /**
    * Collapse all folders
-   * @return {[type]} [description]
+   * @method  collapseAll
    */
   HGrid.prototype.collapseAll = function() {
     this.tree.collapseAt(1, true);
+    return this;
   };
 
   /**
    * Remove a folder's contents from the grid.
+   * @method  emptyFolder
    * @param  {Object} item The folder item to empty.
+   * @param {Boolean} [removeFolder] Also remove the folder.
    */
-  HGrid.prototype.emptyFolder = function(item) {
+  HGrid.prototype.emptyFolder = function(item, removeFolder) {
     item = typeof item === 'object' ? item : this.getByID(item);
-    item._node.empty();
-    this.getDataView().updateItem(item.id, item);
+    item._node.empty(removeFolder);
+    if (!removeFolder) {
+      this.getDataView().updateItem(item.id, item);
+    }
     return this;
   };
 
@@ -1114,7 +1121,7 @@ if (typeof jQuery === 'undefined') {
 
     if (this.options.uploads) {
       if (typeof Dropzone === 'undefined') {
-        throw new HGridError('uploads=true requires DropZone to be loaded');
+        throw new HGrid.Error('uploads=true requires DropZone to be loaded');
       }
       this._initDropzone();
     }
@@ -1284,7 +1291,7 @@ if (typeof jQuery === 'undefined') {
       var col = args.sortCol; // column to sort
       var key = col.field || col.sortkey; // key to sort on
       if (!key) {
-        throw new HGridError('Sortable column does not define a `sortkey` to sort on.');
+        throw new HGrid.Error('Sortable column does not define a `sortkey` to sort on.');
       }
       this.tree.sort(key, args.sortAsc);
       this.tree.updateDataView(true);
@@ -1324,24 +1331,23 @@ if (typeof jQuery === 'undefined') {
   /**
    * Send a delete request to an item's download URL.
    */
-  // TODO: untested
   HGrid.prototype.deleteFile = function(item, ajaxOptions) {
+    var self = this;
     var url, method;
     // TODO: repetition here
-    if (typeof this.options.deleteUrl === 'function') {
-      url = this.options.deleteUrl(item);
-    } else {
-      url = this.options.deleteUrl;
-    }
-    if (typeof this.options.deleteMethod === 'function') {
-      method = this.options.deleteMethod(item);
-    } else {
-      method = this.options.deleteMethod;
-    }
+    url = typeof this.options.deleteUrl === 'function' ?
+          this.options.deleteUrl(item) : this.options.deleteUrl;
+    method  = typeof this.options.deleteMethod === 'function' ?
+              this.options.deleteMethod(item) : this.options.deleteMethod;
     var options = $.extend({}, {
       url: url,
-      type: method
-    }, ajaxOptions);
+      type: method,
+      success: function(data) {
+        // Update parent
+        self.updateItem(self.getByID(item.parentID));
+        self.removeItem(item.id);
+      }
+    }, self.options.ajaxOptions, ajaxOptions);
     var promise = null;
     if (url) {
       promise = $.ajax(options);
@@ -1360,14 +1366,16 @@ if (typeof jQuery === 'undefined') {
     var self = this;
     // if upload url or upload method is a function, call it, passing in the target item,
     // and set dropzone to upload to the result
-    function resolveUrl(url) {
+    function resolveParam(url) {
       return typeof url === 'function' ? url.call(self, item) : url;
     }
     if (self.currentTarget) {
       $.when(
-        resolveUrl(self.options.uploadUrl),
-        resolveUrl(self.options.uploadMethod)
-      ).done(function(uploadUrl, uploadMethod) {
+        resolveParam(self.options.uploadHeaders),
+        resolveParam(self.options.uploadUrl),
+        resolveParam(self.options.uploadMethod)
+      ).done(function(uploadHeaders, uploadUrl, uploadMethod) {
+        self.dropzone.options.headers = uploadHeaders;
         self.dropzone.options.url = uploadUrl;
         self.dropzone.options.method = uploadMethod;
         if (self.options.uploadAccept) {
@@ -1387,7 +1395,7 @@ if (typeof jQuery === 'undefined') {
   HGrid.prototype.denyUpload = function(targetItem) {
     // Need to throw an error to prevent dropzone's sequence of callbacks from firing
     this.options.uploadDenied.call(this, targetItem);
-    throw new HGridError('Upload permission denied.');
+    throw new HGrid.Error('Upload permission denied.');
   };
 
   HGrid.prototype.validateTarget = function(targetItem) {
@@ -1467,7 +1475,7 @@ if (typeof jQuery === 'undefined') {
         file.gridElement = rowElem;
         $rowElem.addClass('hg-upload-started');
       }
-      this.options.uploadAdded.call(this, file, file.gridItem);
+      this.options.uploadAdded.call(this, file, file.gridItem, currentTarget);
       return addedItem;
     },
     thumbnail: noop,
@@ -1479,18 +1487,22 @@ if (typeof jQuery === 'undefined') {
     },
     processing: function(file) {
       $(file.gridElement).addClass('hg-upload-processing');
-      this.options.uploadProcessing.call(this, file, file.gridItem);
+      this.currentTarget._processing = true;
+      this.updateItem(this.currentTarget);
+      this.options.uploadProcessing.call(this, file, file.gridItem, this.currentTarget);
       return this;
     },
     uploadprogress: function(file, progress, bytesSent) {
       return this.options.uploadProgress.call(this, file, progress, bytesSent, file.gridItem);
     },
     success: function(file, data) {
-      $(file.gridElement).addClass('hg-upload-success')
-        .removeClass('hg-upload-processing');
+      $(file.gridElement).addClass('hg-upload-success');
       return this.options.uploadSuccess.call(this, file, file.gridItem, data);
     },
     complete: function(file) {
+      $(file.gridElement).removeClass('hg-upload-processing');
+      this.currentTarget._processing = false;
+      this.updateItem(this.currentTarget);
       return this.options.uploadComplete.call(this, file, file.gridItem);
     }
   };
@@ -1644,17 +1656,15 @@ if (typeof jQuery === 'undefined') {
    * @private
    */
   HGrid.prototype._initDropzone = function() {
-    var uploadUrl, uploadMethod;
-    if (typeof this.options.uploadUrl === 'string') {
-      uploadUrl = this.options.uploadUrl;
-    } else { // uploadUrl is a function, so compute the url lazily;
-      uploadUrl = '/'; // placeholder
+    var uploadUrl, uploadMethod, headers;
+    // If a param is a string, return that, otherwise the param is a function,
+    // so the value will be computed later.
+    function resolveParam(param, fallback){
+      return (typeof param === 'function' || param == null) ? fallback : param;
     }
-    if (typeof this.options.uploadMethod === 'string') {
-      uploadMethod = this.options.uploadMethod;
-    } else { // uploadMethod is a function, so compute the upload url lazily
-      uploadMethod = 'POST'; // placeholder
-    }
+    uploadUrl = resolveParam(this.options.uploadUrl, '/');
+    uploadMethod = resolveParam(this.options.uploadMethod, 'POST');
+    headers = resolveParam(this.options.uploadHeaders, {});
     // Build up the options object, combining the HGrid options, required options,
     // and additional options
     var dropzoneOptions = $.extend({}, {
@@ -1663,7 +1673,8 @@ if (typeof jQuery === 'undefined') {
         acceptedFiles: this.options.acceptedFiles ?
           this.options.acceptedFiles.join(',') : null,
         maxFilesize: this.options.maxFilesize,
-        method: uploadMethod
+        method: uploadMethod,
+        headers: headers
       },
       requiredDropzoneOpts,
       this.options.dropzoneOptions);
@@ -1732,7 +1743,7 @@ if (typeof jQuery === 'undefined') {
           self.addData(newData, item.id);
           item._node._loaded = true; // Add flag to make sure data are only fetched once.
         } else {
-          throw new HGridError('Could not fetch data from url: "' + url + '". Error: ' + error);
+          throw new HGrid.Error('Could not fetch data from url: "' + url + '". Error: ' + error);
         }
       });
     }
@@ -1928,14 +1939,26 @@ if (typeof jQuery === 'undefined') {
     return this;
   };
 
+  HGrid.prototype.render = function() {
+    this.grid.render();
+    return this;
+  };
+
+  HGrid.prototype.invalidate = function () {
+    this.grid.invalidate();
+    return this;
+  };
+
   $.fn.hgrid = function(options) {
     this.each(function() {
       if (!this.id) { // Must have ID because SlickGrid requires a selector
-        throw new HGridError('Element must have an ID if initializing HGrid with jQuery');
+        throw new HGrid.Error('Element must have an ID if initializing HGrid with jQuery');
       }
       var selector = '#' + this.id;
       return new HGrid(selector, options);
     });
   };
+
+  return HGrid;
 
 })(jQuery, window, document);

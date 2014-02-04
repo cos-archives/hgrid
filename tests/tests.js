@@ -13,6 +13,19 @@
     };
   }
 
+  function getTree() {
+    var root = new HGrid.Tree();
+    var tree = new HGrid.Tree({name: 'Tree', kind: 'folder'});
+    var leaf = new HGrid.Leaf({name: 'Leaf', kind: 'item'});
+    var subtree = new HGrid.Tree({name: 'Subtree', kind: 'folder'});
+    var subsubtree = new HGrid.Tree({name: 'SubSubTree', kind: 'folder'});
+    root.add(tree, true);
+    tree.add(leaf, true);
+    tree.add(subtree, true);
+    subtree.add(subsubtree, true);
+    return root;
+  }
+
   function getMockItem(args) {
     var item = $.extend({}, {
       id: 123,
@@ -113,14 +126,24 @@
     var grid2 = new HGrid('#myGrid', {
       data: testData
     });
-    ok(grid2, 'standard initialization');
+    ok(grid2 instanceof HGrid, 'standard initialization');
+  });
 
-    // throws(function() {
-    //   new HGrid('#myGrid', {
-    //     ajaxSource: '/foo/',
-    //     data: testData
-    //   });
-    // }, HGridError, 'fails if both ajax url and data are passed to constructor');
+  test('jQuery initialization', function() {
+    expect(1);
+    $('#myGrid').hgrid({
+      init: function() {
+        ok(this instanceof HGrid);
+      }
+    });
+  });
+
+  test('jQuery initialization requires ID', function() {
+    throws(function() {
+      $('.no-id').hgrid({
+        data: testData
+      });
+    }, HGridError);
   });
 
   test('Initializing HGrid with data that has metadata', function() {
@@ -724,6 +747,15 @@
     }]);
   });
 
+  test('Tree.destroy', function() {
+    var tree = getTree();
+    var node = tree.children[0];
+    var child = node.children[0];
+    node.destroy();
+    equal(node.children.length, 0);
+    equal(child.children.length, 0);
+  });
+
   test('Constructing leaf from object', function() {
     var file = HGrid.Leaf.fromObject({
       name: 'foo.py',
@@ -775,6 +807,7 @@
     equal(child.depth, 2, 'child depth is 2');
     equal(root.dataView.getItems().length, root.toData().length, 'DataView and Tree have same data length');
   });
+
 
   var tree, data;
   module('Sorting trees', {

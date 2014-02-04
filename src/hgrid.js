@@ -141,6 +141,20 @@ if (typeof jQuery === 'undefined') {
     return this;
   };
 
+  Tree.prototype.destroy = function(removeSelf) {
+    if (removeSelf) {
+      // Clear children
+      var item = this.getItem();
+      this.dataView.deleteItem(item.id);
+    }
+    for(var i=0, child; child = this.children[i]; i++) {
+      child.destroy(true);
+      child.children = [];
+    }
+    this.children = [];
+    return this;
+  };
+
   /**
    * Get the tree's corresponding item object from the dataview.
    * @method  getItem
@@ -489,6 +503,12 @@ if (typeof jQuery === 'undefined') {
 
   Leaf.prototype.isRoot = function() {
     return this.depth === 0;
+  };
+
+  Leaf.prototype.destroy = function() {
+    var item = this.getItem();
+    this.dataView.deleteItem(item.id);
+    return this;
   };
 
   // An efficient, lightweight queue implementation, adapted from Queue.js by Steven Morley
@@ -1508,11 +1528,13 @@ if (typeof jQuery === 'undefined') {
     // Attach extra listeners from options.listeners
     var userCallback = function(evt) {
       var row = self.getItemFromEvent(evt);
-      return evt.data.listenerObj.callback.call(self, evt, row);
+      return evt.data.listenerObj.callback(evt, row, evt.data.grid);
     };
+    // TODO: test me
     for (var i = 0, listener; listener = this.options.listeners[i]; i++) {
       self.element.on(listener.on, listener.selector, {
-        listenerObj: listener
+        listenerObj: listener,
+        grid: self
       }, userCallback);
     }
     this.attachActionListeners();

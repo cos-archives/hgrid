@@ -702,7 +702,8 @@ if (typeof jQuery === 'undefined') {
       isName: true,
       showExpander: function(item, args) {
         return item.kind === HGrid.FOLDER &&
-                (item._node.children.length && item.depth || args.lazyLoad);
+                (item._node.children.length && item.depth || args.lazyLoad) &&
+                !item._processing;
       }
     },
 
@@ -1491,6 +1492,8 @@ if (typeof jQuery === 'undefined') {
     },
     processing: function(file) {
       $(file.gridElement).addClass('hg-upload-processing');
+      this.currentTarget._processing = true;
+      this.updateItem(this.currentTarget);
       this.options.uploadProcessing.call(this, file, file.gridItem, this.currentTarget);
       return this;
     },
@@ -1498,11 +1501,13 @@ if (typeof jQuery === 'undefined') {
       return this.options.uploadProgress.call(this, file, progress, bytesSent, file.gridItem);
     },
     success: function(file, data) {
-      $(file.gridElement).addClass('hg-upload-success')
-        .removeClass('hg-upload-processing');
+      $(file.gridElement).addClass('hg-upload-success');
       return this.options.uploadSuccess.call(this, file, file.gridItem, data);
     },
     complete: function(file) {
+      $(file.gridElement).removeClass('hg-upload-processing');
+      this.currentTarget._processing = false;
+      this.updateItem(this.currentTarget);
       return this.options.uploadComplete.call(this, file, file.gridItem);
     }
   };

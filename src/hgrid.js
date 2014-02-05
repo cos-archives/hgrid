@@ -1398,7 +1398,7 @@ this.HGrid = (function($, window, document, undefined) {
 
   /**
    * Update the dropzone object's options dynamically. Lazily updates the
-   * upload url, method, etc.
+   * upload url, method, maxFilesize, etc.
    * @method  setUploadTarget
    */
   HGrid.prototype.setUploadTarget = function(item) {
@@ -1412,11 +1412,13 @@ this.HGrid = (function($, window, document, undefined) {
       $.when(
         resolveParam(self.options.uploadHeaders),
         resolveParam(self.options.uploadUrl),
-        resolveParam(self.options.uploadMethod)
-      ).done(function(uploadHeaders, uploadUrl, uploadMethod) {
+        resolveParam(self.options.uploadMethod),
+        resolveParam(self.options.maxFilesize)
+      ).done(function(uploadHeaders, uploadUrl, uploadMethod, maxFilesize) {
         self.dropzone.options.headers = uploadHeaders;
         self.dropzone.options.url = uploadUrl;
         self.dropzone.options.method = uploadMethod;
+        self.dropzone.options.maxFilesize = maxFilesize;
         if (self.options.uploadAccept) {
           // Override dropzone accept callback. Just calls options.uploadAccept with the right params
           self.dropzone.options.accept = function(file, done) {

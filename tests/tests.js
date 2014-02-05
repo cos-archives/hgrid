@@ -1170,7 +1170,6 @@
 
   test('renderButton', function() {
     var btnDef = {
-      id: 'testbtn',
       text: 'Test Button',
       cssClass: 'test-btn',
       action: 'myaction'
@@ -1180,6 +1179,15 @@
     isTrue($btn.hasClass('test-btn'), 'has user-defined class');
     equal($btn.text().trim(), btnDef.text.trim(), 'text is correct');
     equal($btn.data('hg-action'), 'myaction', 'has correct action');
+  });
+
+  test('renderButton with alternate tag', function() {
+    var btnDef = {
+      text: 'Test btn',
+      tag: 'a'
+    };
+    var $btn = $(HGrid.Fmt.button(btnDef));
+    isTrue($btn.is('a'), 'is an anchor elem');
   });
 
   test('withIndent', function() {

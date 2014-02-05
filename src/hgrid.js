@@ -587,6 +587,7 @@ this.HGrid = (function($, window, document, undefined) {
    */
   function renderButton(buttonDef) {
     var cssClass;
+    var tag = buttonDef.tag || 'button';
     // For now, buttons are required to have the hg-btn class so that a click
     // event listener can be attacked to them later
     if (buttonDef.cssClass) {
@@ -595,9 +596,9 @@ this.HGrid = (function($, window, document, undefined) {
       cssClass = HGrid.Html.buttonClass;
     }
     var action = buttonDef.action || 'noop';
-    var openTag = '<button data-hg-action="' + action + '" class="' + cssClass + '">';
-    var closingTag = '</button>';
-    var html = [openTag, buttonDef.text, closingTag].join('');
+    var data = {action: action, cssClass: cssClass, tag: tag, text: buttonDef.text};
+    var html = tpl('<{{tag}} data-hg-action="{{action}}" class="{{cssClass}}">{{text}}</{{tag}}>',
+      data);
     return html;
   }
 

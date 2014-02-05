@@ -310,7 +310,7 @@
     var item = myGrid.getData()[0];
     var $elem = $(myGrid.getRowElement(item.id));
     isTrue($elem.hasClass('slick-row'), 'is a SlickGrid row');
-    equal($elem.find('.hg-item-content').attr('data-id'), item.id, 'is the row for the correct item');
+    equal($elem.find('.hg-name').attr('data-id'), item.id, 'is the row for the correct item');
     isTrue($elem.find('.slick-cell.hg-cell').length > 0, 'cell has hg-cell class');
   });
 
@@ -1203,12 +1203,18 @@
   });
 
   test('asName', function() {
-    var item = getMockItem();
+    var item = getMockItem({kind: 'folder'});
     var html = '<p>test</p>';
     var itemHtml = HGrid.Format.asName(item, html);
     var $elem = $(itemHtml);
     equal($elem.data('id'), item.id, 'has data-id');
-    isTrue($elem.hasClass('hg-item-content'), 'has hg-item-content class');
+    isTrue($elem.hasClass('hg-name'), 'has hg-name class');
+    isTrue($elem.hasClass('hg-folder-name'), 'has hg-folde-name class');
+    item = getMockItem({kind: 'item'});
+    html = '<p>test</p>';
+    itemHtml = HGrid.Format.asName(item, html);
+    $elem = $(itemHtml);
+    isTrue($elem.hasClass('hg-item-name'), 'has hg-item-name class');
   });
 
   test('renderButton default action', function() {

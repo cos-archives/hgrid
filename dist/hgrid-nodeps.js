@@ -152,6 +152,34 @@ this.HGrid = (function($, window, document, undefined) {
     return this;
   };
 
+  // Remove an object from an array, searching by an attribute value
+  function removeByProperty(arr, attr, value){
+    var i = arr.length;
+    while(i--){
+      if(arr[i] && arr[i].hasOwnProperty(attr) && (arguments.length > 2 && arr[i][attr] === value )){
+         arr.splice(i,1);
+         return true;
+      }
+    }
+    return false;
+  }
+
+  /**
+   * Remove a child node.
+   * @param  {Object} child The child node to remove or an id.
+   */
+  Tree.prototype.remove = function(child) {
+    var childId = typeof child === 'object' ? child.id : child;
+    var removed = removeByProperty(this.children, 'id', child);
+    if(!removed) {
+      for (var i = 0, node; node = this.children[i]; i++) {
+        removed = node.remove(child);
+      }
+    } else {
+      this.dataView.deleteItem(childId);
+    }
+  };
+
   /**
    * Get the tree's corresponding item object from the dataview.
    * @method  getItem
@@ -469,6 +497,8 @@ this.HGrid = (function($, window, document, undefined) {
     return this;
   };
 
+  Leaf.prototype.remove = noop;
+
   /**
    * Convert the Leaf to SlickGrid data format
    * @method toData
@@ -573,7 +603,8 @@ this.HGrid = (function($, window, document, undefined) {
    * @return {String}      The rendered HTML
    */
   function asName(item, html) {
-    var openTag = '<span class="' + HGrid.Html.itemClass + '" data-id="' + item.id + '">';
+    var cssClass = item.kind === FOLDER ? HGrid.Html.folderNameClass : HGrid.Html.itemNameClass;
+    var openTag = '<span class="' + HGrid.Html.nameClass +  ' ' + cssClass + '" data-id="' + item.id + '">';
     var closingTag = '</span>';
     return [openTag, html, closingTag].join('');
   }
@@ -587,6 +618,7 @@ this.HGrid = (function($, window, document, undefined) {
    */
   function renderButton(buttonDef) {
     var cssClass;
+    var tag = buttonDef.tag || 'button';
     // For now, buttons are required to have the hg-btn class so that a click
     // event listener can be attacked to them later
     if (buttonDef.cssClass) {
@@ -595,9 +627,9 @@ this.HGrid = (function($, window, document, undefined) {
       cssClass = HGrid.Html.buttonClass;
     }
     var action = buttonDef.action || 'noop';
-    var openTag = '<button data-hg-action="' + action + '" class="' + cssClass + '">';
-    var closingTag = '</button>';
-    var html = [openTag, buttonDef.text, closingTag].join('');
+    var data = {action: action, cssClass: cssClass, tag: tag, text: buttonDef.text};
+    var html = tpl('<{{tag}} data-hg-action="{{action}}" class="{{cssClass}}">{{text}}</{{tag}}>',
+      data);
     return html;
   }
 
@@ -639,7 +671,9 @@ this.HGrid = (function($, window, document, undefined) {
     errorElem: '&nbsp;<span class="error" data-upload-errormessage></span>',
     // CSS Classes
     buttonClass: 'hg-btn',
-    itemClass: 'hg-item-content',
+    nameClass: 'hg-name',
+    folderNameClass: 'hg-folder-name',
+    itemNameClass: 'hg-item-name',
     toggleClass: 'hg-toggle'
   };
 
@@ -946,6 +980,11 @@ this.HGrid = (function($, window, document, undefined) {
     uploadAccept: function(file, folder, done) {
       return done();
     },
+    /**
+     * Called just before an upload request is sent.
+     * @property [uploadSending]
+     */
+    uploadSending: function(file, item, xhr, formData) {},
     /**
      * Returns the url where to download and item
      * @param  {Object} row The row object
@@ -1483,7 +1522,9 @@ this.HGrid = (function($, window, document, undefined) {
     error: function(file, message) {
       var $rowElem = $(file.gridElement);
       $rowElem.addClass('hg-upload-error').removeClass('hg-upload-processing');
-      return this.options.uploadError.call(this, file, message, file.gridItem);
+      // Remove the added row
+      this.removeItem(file.gridItem.id);
+      return this.options.uploadError.call(this, file, message);
     },
     processing: function(file) {
       $(file.gridElement).addClass('hg-upload-processing');
@@ -1504,7 +1545,11 @@ this.HGrid = (function($, window, document, undefined) {
       this.currentTarget._processing = false;
       this.updateItem(this.currentTarget);
       return this.options.uploadComplete.call(this, file, file.gridItem);
+    },
+    sending: function(file, xhr, formData) {
+      return this.options.uploadSending(file, file.gridItem, xhr, formData);
     }
+
   };
 
   /**
@@ -1877,9 +1922,7 @@ this.HGrid = (function($, window, document, undefined) {
    * @return {Object}    The removed item
    */
   HGrid.prototype.removeItem = function(id) {
-    var item = this.getByID(id);
-    this.getDataView().deleteItem(id);
-    return item;
+    return this.tree.remove(id);
   };
 
   /**

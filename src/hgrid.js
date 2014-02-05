@@ -152,33 +152,32 @@ this.HGrid = (function($, window, document, undefined) {
     return this;
   };
 
+  // Remove an and object from an array, searching by an attribute value
   function removeByProperty(arr, attr, value){
-      var i = arr.length;
-      while(i--){
-         if(arr[i] && arr[i].hasOwnProperty(attr) && (arguments.length > 2 && arr[i][attr] === value )){
-             arr.splice(i,1);
-             return true;
-         }
+    var i = arr.length;
+    while(i--){
+      if(arr[i] && arr[i].hasOwnProperty(attr) && (arguments.length > 2 && arr[i][attr] === value )){
+         arr.splice(i,1);
+         return true;
       }
-      return false;
+    }
+    return false;
   }
 
   /**
    * Remove a child node.
    * @param  {Object} child The child node to remove or an id.
    */
-  // TODO: test me
   Tree.prototype.remove = function(child) {
     var childId = typeof child === 'object' ? child.id : child;
     var removed = removeByProperty(this.children, 'id', child);
     if(!removed) {
       for (var i = 0, node; node = this.children[i]; i++) {
-        node.remove(child);
+        removed = node.remove(child);
       }
     } else {
       this.dataView.deleteItem(childId);
     }
-    return this;
   };
 
   /**

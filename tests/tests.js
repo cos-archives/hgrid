@@ -299,10 +299,9 @@
     var item = allData[allData.length - 1];
     // DOM contains the element to begin with
     containsText('.slick-cell', item.name, 'DOM contains element to be removed');
-    var removedItem = myGrid.removeItem(item.id);
+    myGrid.removeItem(item.id);
     var newLength = myGrid.getData().length;
     equal(newLength, oldLength - 1, 'decreases the length of the data by 1');
-    equal(removedItem.id, item.id, 'removes the correct datum');
     notContainsText('.slick-cell', item.name, 'removes the element from the DOM');
   });
 
@@ -682,6 +681,23 @@
     tree.expand();
     isFalse(tree.isCollapsed(), 'tree is expanded');
     isTrue(subtree.isCollapsed(), 'subtree is still collapsed');
+  });
+
+  test('Tree.remove', function() {
+    var root = new HGrid.Tree();
+    var tree = new HGrid.Tree({id: 0});
+    var subtree = new HGrid.Tree({id: 1});
+    var leaf = new HGrid.Leaf({id: 2});
+    root.add(tree, true);
+    tree.add(subtree, true);
+    tree.add(leaf, true);
+    var toRemove = root.dataView.getItemById(2);
+    ok(toRemove, 'sanity check 1');
+    ok(root.children[0].children.length, 2, 'sanity check 2');
+    root.remove(2); // Remove the leaf
+    var nullItem = root.dataView.getItemById(2);
+    ok(!nullItem, 'item was removed from dataview');
+    ok(root.children[0].children.length, 1, 'node was removed from tree');
   });
 
   test('Creating trees with metadata', function() {
@@ -1076,7 +1092,9 @@
     var message = {
       error: 'Could not upload file'
     };
-    file.gridElement = grid.getRowElement(grid.getData()[1].id);
+    var item = grid.getData()[1];
+    file.gridElement = grid.getRowElement(item.id);
+    file.gridItem = item;
     var $row = $(file.gridElement);
     $row.addClass('hg-upload-processing');
     grid.dropzoneEvents.error.call(grid, file, message);

@@ -41,7 +41,6 @@ var grid = new HGrid('#myGrid', {
   maxFilesize: 20, // Mb
   uploadError: function(file, message, item) {
     alert(message);
-    this.removeItem(item.id);
   },
   uploadMethod: function(row) { // Dynamically compute the upload method for an item
     if (row.name === 'PUT stuff') {

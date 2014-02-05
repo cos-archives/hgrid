@@ -152,6 +152,35 @@ this.HGrid = (function($, window, document, undefined) {
     return this;
   };
 
+  function removeByProperty(arr, attr, value){
+      var i = arr.length;
+      while(i--){
+         if(arr[i] && arr[i].hasOwnProperty(attr) && (arguments.length > 2 && arr[i][attr] === value )){
+             arr.splice(i,1);
+             return true;
+         }
+      }
+      return false;
+  }
+
+  /**
+   * Remove a child node.
+   * @param  {Object} child The child node to remove or an id.
+   */
+  // TODO: test me
+  Tree.prototype.remove = function(child) {
+    var childId = typeof child === 'object' ? child.id : child;
+    var removed = removeByProperty(this.children, 'id', child);
+    if(!removed) {
+      for (var i = 0, node; node = this.children[i]; i++) {
+        node.remove(child);
+      }
+    } else {
+      this.dataView.deleteItem(childId);
+    }
+    return this;
+  };
+
   /**
    * Get the tree's corresponding item object from the dataview.
    * @method  getItem
@@ -468,6 +497,8 @@ this.HGrid = (function($, window, document, undefined) {
     item._collapsed = item._hidden = false;
     return this;
   };
+
+  Leaf.prototype.remove = noop;
 
   /**
    * Convert the Leaf to SlickGrid data format
@@ -1487,7 +1518,9 @@ this.HGrid = (function($, window, document, undefined) {
     error: function(file, message) {
       var $rowElem = $(file.gridElement);
       $rowElem.addClass('hg-upload-error').removeClass('hg-upload-processing');
-      return this.options.uploadError.call(this, file, message, file.gridItem);
+      // Remove the added row
+      this.removeItem(file.gridItem.id);
+      return this.options.uploadError.call(this, file, message);
     },
     processing: function(file) {
       $(file.gridElement).addClass('hg-upload-processing');
@@ -1881,9 +1914,7 @@ this.HGrid = (function($, window, document, undefined) {
    * @return {Object}    The removed item
    */
   HGrid.prototype.removeItem = function(id) {
-    var item = this.getByID(id);
-    this.getDataView().deleteItem(id);
-    return item;
+    return this.tree.remove(id);
   };
 
   /**

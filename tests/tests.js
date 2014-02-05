@@ -1220,6 +1220,11 @@
     }), 'Hello world');
   });
 
+  test('tpl does not escape html', function() {
+    equal(HGrid.Fmt.tpl('<div>{{html}}</div>', {html: '<a>works</a>'}),
+        '<div><a>works</a></div>');
+  });
+
   module('Actions', {});
 
   test('download action', function() {

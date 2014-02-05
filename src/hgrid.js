@@ -152,7 +152,7 @@ this.HGrid = (function($, window, document, undefined) {
     return this;
   };
 
-  // Remove an and object from an array, searching by an attribute value
+  // Remove an object from an array, searching by an attribute value
   function removeByProperty(arr, attr, value){
     var i = arr.length;
     while(i--){
@@ -981,6 +981,11 @@ this.HGrid = (function($, window, document, undefined) {
       return done();
     },
     /**
+     * Called just before an upload request is sent.
+     * @property [uploadSending]
+     */
+    uploadSending: function(file, item, xhr, formData) {},
+    /**
      * Returns the url where to download and item
      * @param  {Object} row The row object
      * @return {String} The download url
@@ -1540,7 +1545,11 @@ this.HGrid = (function($, window, document, undefined) {
       this.currentTarget._processing = false;
       this.updateItem(this.currentTarget);
       return this.options.uploadComplete.call(this, file, file.gridItem);
+    },
+    sending: function(file, xhr, formData) {
+      return this.options.uploadSending(file, file.gridItem, xhr, formData);
     }
+
   };
 
   /**

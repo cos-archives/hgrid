@@ -623,7 +623,7 @@ this.HGrid = (function($, window, document, undefined) {
       .replace(/\n/g, "\\n")
       .replace(/\r/g, "\\r")
       .replace(/'/g, "\\'")
-      .replace(/\{\{\s*(\w+)\s*\}\}/g, "'+(_.$1?(_.$1+'').replace(/&/g,'&amp;').replace(/\"/g,'&quot;').replace(/</g,'&lt;').replace(/>/g,'&gt;'):(_.$1===0?0:''))+'") + "'"
+      .replace(/\{\{\s*(\w+)\s*\}\}/g, "'+(_.$1?(_.$1+''):(_.$1===0?0:''))+'") + "'"
     );
     return tpl_fn_cache[template](data);
   };

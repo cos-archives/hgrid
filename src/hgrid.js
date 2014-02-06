@@ -928,7 +928,7 @@ this.HGrid = (function($, window, document, undefined) {
      * @param {Object} item The placeholder item that was added to the grid for the file.
      */
     /*jshint unused: false */
-    uploadError: function(file, message, item) {
+    uploadError: function(file, message, item, folder) {
       // The row element for the added file is stored on the file object
       var $rowElem = $(file.gridElement);
       var msg;
@@ -1533,8 +1533,9 @@ this.HGrid = (function($, window, document, undefined) {
       var $rowElem = $(file.gridElement);
       $rowElem.addClass('hg-upload-error').removeClass('hg-upload-processing');
       // Remove the added row
+      var item = $.extend({}, file.gridItem);
       this.removeItem(file.gridItem.id);
-      return this.options.uploadError.call(this, file, message);
+      return this.options.uploadError.call(this, file, message, item, this.currentTarget);
     },
     processing: function(file) {
       $(file.gridElement).addClass('hg-upload-processing');

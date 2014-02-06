@@ -1500,6 +1500,15 @@
     isFalse(grid.isLazy());
   });
 
+  test('resetLoadedState', function() {
+    var grid = getMockGrid();
+    var item = getMockItem();
+    item._node._loaded = true;
+    grid.resetLoadedState(item);
+    isFalse(item._node._loaded, 'node is no longer loaded');
+
+  });
+
   module('deleting files', {});
 
   test('deleteFile sends ajax request', function() {

@@ -725,7 +725,6 @@ this.HGrid = (function($, window, document, undefined) {
       id: 'name',
       name: 'Name',
       sortkey: 'name',
-      cssClass: 'hg-cell',
       folderView: HGrid.Html.folderIcon + ' {{name}}',
       itemView: HGrid.Html.fileIcon + ' {{name}}',
       sortable: true,
@@ -742,7 +741,6 @@ this.HGrid = (function($, window, document, undefined) {
     ActionButtons: {
       id: 'actions',
       name: 'Actions',
-      cssClass: 'hg-cell',
       width: 50,
       sortable: false,
       folderView: function() {
@@ -1240,6 +1238,11 @@ this.HGrid = (function($, window, document, undefined) {
       }
       if ('text' in col) { // Use 'text' instead of 'name' for column header text
         col.name = col.text;
+      }
+      if ('cssClass' in col) {
+        col.cssClass = col.cssClass + ' ' + 'hg-cell';
+      } else {
+        col.cssClass = 'hg-cell';
       }
       return col;
     });

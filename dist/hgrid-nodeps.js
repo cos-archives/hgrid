@@ -3,10 +3,7 @@
  * @module HGrid
  */
 ; // jshint ignore: line
-if (typeof jQuery === 'undefined') {
-  throw new Error('HGrid requires jQuery to be loaded');
-}
-this.HGrid = (function($, window, document, undefined) {
+(function($) {
   'use strict';
 
   var DEFAULT_INDENT = 20;
@@ -725,7 +722,6 @@ this.HGrid = (function($, window, document, undefined) {
       id: 'name',
       name: 'Name',
       sortkey: 'name',
-      cssClass: 'hg-cell',
       folderView: HGrid.Html.folderIcon + ' {{name}}',
       itemView: HGrid.Html.fileIcon + ' {{name}}',
       sortable: true,
@@ -742,7 +738,6 @@ this.HGrid = (function($, window, document, undefined) {
     ActionButtons: {
       id: 'actions',
       name: 'Actions',
-      cssClass: 'hg-cell',
       width: 50,
       sortable: false,
       folderView: function() {
@@ -794,6 +789,9 @@ this.HGrid = (function($, window, document, undefined) {
      * @property {Function} [fetchUrl]
      */
     fetchUrl: null,
+    fetchSuccess: function(data, item) {},
+    fetchError: function(error, item) {},
+    fetchStart: function(item) {},
     /**
      * Enable uploads (requires DropZone)
      * @property [uploads]
@@ -927,7 +925,7 @@ this.HGrid = (function($, window, document, undefined) {
      * @param {Object} item The placeholder item that was added to the grid for the file.
      */
     /*jshint unused: false */
-    uploadError: function(file, message, item) {
+    uploadError: function(file, message, item, folder) {
       // The row element for the added file is stored on the file object
       var $rowElem = $(file.gridElement);
       var msg;
@@ -1241,6 +1239,11 @@ this.HGrid = (function($, window, document, undefined) {
       if ('text' in col) { // Use 'text' instead of 'name' for column header text
         col.name = col.text;
       }
+      if ('cssClass' in col) {
+        col.cssClass = col.cssClass + ' ' + 'hg-cell';
+      } else {
+        col.cssClass = 'hg-cell';
+      }
       return col;
     });
     return columns;
@@ -1527,8 +1530,9 @@ this.HGrid = (function($, window, document, undefined) {
       var $rowElem = $(file.gridElement);
       $rowElem.addClass('hg-upload-error').removeClass('hg-upload-processing');
       // Remove the added row
+      var item = $.extend({}, file.gridItem);
       this.removeItem(file.gridItem.id);
-      return this.options.uploadError.call(this, file, message);
+      return this.options.uploadError.call(this, file, message, item, this.currentTarget);
     },
     processing: function(file) {
       $(file.gridElement).addClass('hg-upload-processing');
@@ -1797,15 +1801,19 @@ this.HGrid = (function($, window, document, undefined) {
     return Boolean(this.options.fetchUrl);  // Assume lazy loading is enabled if fetchUrl is defined
   };
 
+  // TODO: test fetch callbacks
   HGrid.prototype._lazyLoad = function(item) {
     var self = this;
     var url = self.options.fetchUrl(item);
     if (url !== null) {
+      self.options.fetchStart.call(self, item);
       return self.getFromServer(url, function(newData, error) {
         if (!error) {
           self.addData(newData, item.id);
           item._node._loaded = true; // Add flag to make sure data are only fetched once.
+          self.options.fetchSuccess.call(self, newData, item);
         } else {
+          self.options.fetchError.call(self, error, item);
           throw new HGrid.Error('Could not fetch data from url: "' + url + '". Error: ' + error);
         }
       });
@@ -1823,13 +1831,13 @@ this.HGrid = (function($, window, document, undefined) {
     item = typeof item === 'object' ? item : self.getByID(item);
     var node = self.getNodeByID(item.id);
     item._node.expand();
-    if (self.isLazy() && !node._loaded) {
-      this._lazyLoad(item);
-    }
     var dataview = self.getDataView();
     var hints = self.getRefreshHints(item).expand;
     dataview.setRefreshHints(hints);
     self.getDataView().updateItem(item.id, item);
+    if (self.isLazy() && !node._loaded) {
+      this._lazyLoad(item);
+    }
     self.options.onExpand.call(self, evt, item);
     return self;
   };
@@ -2000,6 +2008,27 @@ this.HGrid = (function($, window, document, undefined) {
     return this;
   };
 
+  /**
+   * Reset a node's loaded state to false. When the node is expanded again and
+   * lazy loading is enabled, a new xhr request will be sent.
+   */
+  HGrid.prototype.resetLoadedState = function(folder, loaded) {
+    folder._node._loaded = Boolean(loaded);
+    return this;
+  };
+
+  /**
+   * Reload a folder contents. Will send a request even if lazy loading is enabled
+   * @method  reloadFolder
+   */
+  HGrid.prototype.reloadFolder = function(folder) {
+    this.resetLoadedState(folder);
+    this.emptyFolder(folder);
+    this.collapseItem(folder);
+    this.expandItem(folder);
+    return this;
+  };
+
   HGrid.prototype.render = function() {
     this.grid.render();
     return this;
@@ -2020,6 +2049,11 @@ this.HGrid = (function($, window, document, undefined) {
     });
   };
 
-  return HGrid;
-
-})(jQuery, window, document);
+  if (typeof define === 'function' && define.amd) {  // AMC/requirejs support
+    define([], function() { return HGrid; });
+  } else if (typeof module === 'object') {  // CommonJS/node support
+    model.exports = HGrid;
+  } else {
+    this.HGrid = HGrid;  // No module system
+  }
+}).call(this, jQuery);

@@ -6,7 +6,7 @@
 if (typeof jQuery === 'undefined') {
   throw new Error('HGrid requires jQuery to be loaded');
 }
-this.HGrid = (function($, window, document, undefined) {
+(function($, window, document, undefined) {
   'use strict';
 
   var DEFAULT_INDENT = 20;
@@ -2052,6 +2052,11 @@ this.HGrid = (function($, window, document, undefined) {
     });
   };
 
-  return HGrid;
-
-})(jQuery, window, document);
+  if (typeof define === 'function' && defind.amd) {  // AMC/requirejs support
+    define([], function() { return HGrid; });
+  } else if (typeof module === 'object') {  // CommonJS/node support
+    model.exports = HGrid;
+  } else {
+    this.HGrid = HGrid;  // No module system
+  }
+}).call(this, jQuery, window, document);

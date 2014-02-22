@@ -15,6 +15,7 @@ logs
 results
 
 node_modules
+bower_components
 
 ### Misc ###
 temp

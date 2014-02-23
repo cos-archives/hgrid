@@ -59,16 +59,13 @@ module.exports = function(grunt) {
         dest: minRelease
       },
       nodepTarget: {
-        files: {
-          'dist/hgrid-nodeps.min.js': ['src/hgrid.js']
-        }
+        src: 'src/hgrid.js',
+        dest: 'dist/hgrid-nodeps.min.js'
       },
-      // amd: {
-      //   files: {
-      //     src: ['amd-header.js', 'src/**/*.js', 'amd-footer.js'],
-      //     dest: latestAMDMinRelease
-      //   }
-      // },
+      amd: {
+        src: latestAMDRelease,
+        dest: latestAMDMinRelease
+      },
       options: {
         banner: '<%= meta.banner %>'
       }

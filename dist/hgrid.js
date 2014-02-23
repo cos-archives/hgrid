@@ -3,20 +3,20 @@
  *  A Javascript-based hierarchical grid that can be used to manage and organize files and folders
  */
 (function (global, factory) {
-  if (typeof define === 'function' && define.amd) {  // AMD/requirejs
+  if (typeof define === 'function' && define.amd) {  // AMD/RequireJS
     define(['jquery'], factory);
+  } else if (typeof module === 'object') {  // CommonJS/Node
+    module.exports = factory(jQuery);
   } else {  // No module system
     global.HGrid = factory(jQuery);
   }
 }(this, function(jQuery) {
-var module = typeof module === 'object' ? module : {exports: {}};
 
 /**
  * Provides the main HGrid class and HGrid.Error.
  * @module HGrid
  */
-; // jshint ignore: line
-(function($) {
+this.HGrid = (function($) {
   'use strict';
 
   var DEFAULT_INDENT = 20;
@@ -2062,11 +2062,6 @@ var module = typeof module === 'object' ? module : {exports: {}};
     });
   };
 
-  if (typeof module === 'object') {
-    module.exports = HGrid;
-  } else {
-    this.HGrid = HGrid;
-  }
   return HGrid;
 }).call(this, jQuery);
 
@@ -7599,5 +7594,5 @@ if (typeof Slick === "undefined") {
   }
 }(jQuery));
 
-    return module.exports;
+    return HGrid;
 }));

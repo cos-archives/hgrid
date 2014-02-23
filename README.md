@@ -2,6 +2,8 @@
 
 [![Build Status](https://travis-ci.org/CenterForOpenScience/hgrid.png?branch=master)](https://travis-ci.org/CenterForOpenScience/hgrid)
 
+**HGrid.js** is a Javascript-based hierarchical grid that can be used to manage and organize files and folders. It allows you to create custom filebrowser widgets that can support file uploads, asynchronous loading, search, and more.
+
 *Full documentation to come*
 
 ## Get it now

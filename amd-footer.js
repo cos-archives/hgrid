@@ -1,2 +1,2 @@
-    return module.exports;
+    return HGrid;
 }));

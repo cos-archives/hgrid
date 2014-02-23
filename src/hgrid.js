@@ -2,8 +2,7 @@
  * Provides the main HGrid class and HGrid.Error.
  * @module HGrid
  */
-; // jshint ignore: line
-(function($) {
+this.HGrid = (function($) {
   'use strict';
 
   var DEFAULT_INDENT = 20;
@@ -2049,10 +2048,5 @@
     });
   };
 
-  if (typeof module === 'object') {
-    module.exports = HGrid;
-  } else {
-    this.HGrid = HGrid;
-  }
   return HGrid;
 }).call(this, jQuery);

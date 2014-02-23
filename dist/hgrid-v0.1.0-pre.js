@@ -2,6 +2,15 @@
  *  HGrid - v0.1.0-pre
  *  A Javascript-based hierarchical grid that can be used to manage and organize files and folders
  */
+(function (global, factory) {
+  if (typeof define === 'function' && define.amd) {  // AMD/requirejs
+    define(['jquery'], factory);
+  } else {  // No module system
+    global.HGrid = factory(jQuery);
+  }
+}(this, function(jQuery) {
+var module = typeof module === 'object' ? module : {exports: {}};
+
 /**
  * Provides the main HGrid class and HGrid.Error.
  * @module HGrid
@@ -7589,3 +7598,6 @@ if (typeof Slick === "undefined") {
     init();
   }
 }(jQuery));
+
+    return module.exports;
+}));

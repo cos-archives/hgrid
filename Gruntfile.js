@@ -12,10 +12,6 @@ module.exports = function(grunt) {
   var latestDevRelease = 'dist/' + latest + '.js';
   var latestMinRelease = 'dist/' + latest + '.min.js';
 
-  // Latest AMD releases
-  var latestAMDRelease = 'dist/' + latest + '-amd.js';
-  var latestAMDMinRelease = 'dist/' + latest + '-amd.min.js';
-
   grunt.initConfig({
 
     // Import package manifest
@@ -32,12 +28,8 @@ module.exports = function(grunt) {
     // Concat definitions
     concat: {
       target: {
-        src: ['src/**/*.js'],
-        dest: devRelease
-      },
-      amd: {
         src: ['amd-header.js', 'src/**/*.js', 'amd-footer.js'],
-        dest: latestAMDRelease
+        dest: devRelease
       },
       options: {
         banner: '<%= meta.banner %>'
@@ -61,10 +53,6 @@ module.exports = function(grunt) {
       nodepTarget: {
         src: 'src/hgrid.js',
         dest: 'dist/hgrid-nodeps.min.js'
-      },
-      amd: {
-        src: latestAMDRelease,
-        dest: latestAMDMinRelease
       },
       options: {
         banner: '<%= meta.banner %>'

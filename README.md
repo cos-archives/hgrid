@@ -16,7 +16,6 @@ bower install hgrid
 
 - Standalone (includes SlickGrid): [Uncompressed](https://raw.github.com/CenterForOpenScience/hgrid/master/dist/hgrid.js) | [Minified](https://raw.github.com/CenterForOpenScience/hgrid/master/dist/hgrid.min.js)
 - No bundled dependencies: [Uncompressed](https://raw.github.com/CenterForOpenScience/hgrid/master/dist/hgrid-nodeps.js) | [Minified](https://raw.github.com/CenterForOpenScience/hgrid/master/dist/hgrid-nodeps.min.js)
-- As an AMD module: [Uncompressed](https://raw.github.com/CenterForOpenScience/hgrid/master/dist/hgrid-amd.js) | [Minified](https://raw.github.com/CenterForOpenScience/hgrid/master/dist/hgrid-amd.min.js) 
 - hgrid.css: [Uncompressed](https://raw.github.com/CenterForOpenScience/hgrid/master/dist/hgrid.css) | [Minified](https://raw.github.com/CenterForOpenScience/hgrid/master/dist/hgrid.min.css)
 - [Images](https://github.com/CenterForOpenScience/hgrid/tree/master/dist/images)
 

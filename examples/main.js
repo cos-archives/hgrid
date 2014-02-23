@@ -1,10 +1,4 @@
-require.config({
-  paths: {
-    'hgrid': '../dist/hgrid-amd'  // Alias hgrid
-  }
-});
-
-require(['hgrid'], function(HGrid) {
+require(['../dist/hgrid'], function(HGrid) {
   var myData = [{
         name: 'My Computer',
         kind: 'folder',

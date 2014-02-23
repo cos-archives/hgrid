@@ -1,5 +1,5 @@
 /*
- *  HGrid - v0.0.1-pre
+ *  HGrid - v0.1.0-pre
  *  A Javascript-based hierarchical grid that can be used to manage and organize files and folders
  */
 /**

@@ -2053,13 +2053,12 @@
     });
   };
 
-  if (typeof define === 'function' && define.amd) {  // AMC/requirejs support
-    define([], function() { return HGrid; });
-  } else if (typeof module === 'object') {  // CommonJS/node support
-    model.exports = HGrid;
+  if (typeof module === 'object') {
+    module.exports = HGrid;
   } else {
-    this.HGrid = HGrid;  // No module system
+    this.HGrid = HGrid;
   }
+  return HGrid;
 }).call(this, jQuery);
 
 /*! 

@@ -1,19 +1,10 @@
 require.config({
   paths: {
-    'jQuery': '../lib/jquery-1.10.2',
-    'hgrid': '../dist/hgrid'
-  },
-  shim: {
-    'jQuery': {
-      exports: '$'
-    },
-    'hgrid': {
-      deps: ['jQuery']
-    }
+    'hgrid': '../dist/hgrid-amd'  // Alias hgrid
   }
 });
 
-require(['jQuery', 'hgrid'], function($, HGrid) {
+require(['hgrid'], function(HGrid) {
   var myData = [{
         name: 'My Computer',
         kind: 'folder',

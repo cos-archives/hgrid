@@ -33,7 +33,7 @@ NOTE: The `images` directory should be in the same directory as `hgrid.css`.
 
 ```html
 <script src="//code.jquery.com/jquery-1.10.2.js"></script>
-<script src="dist/hgrid.min.js"></script>
+<script src="path/to/hgrid.min.js"></script>
 ```
 
 You can also load HGrid as an AMD module with a module loader such as [RequireJS](http://requirejs.org/). See [this wiki page](https://github.com/CenterForOpenScience/hgrid/wiki/Loading-HGrid-with-RequireJS).

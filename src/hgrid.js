@@ -1274,9 +1274,9 @@ this.HGrid = (function($) {
     return self;
   };
 
-  HGrid.prototype.removeHighlight = function() {
-    this.element.find('.' + this.options.highlightClass)
-      .removeClass(this.options.highlightClass);
+  HGrid.prototype.removeHighlight = function(highlightClass) {
+    var cssClass = highlightClass || this.options.highlightClass;
+    this.element.find('.' + cssClass).removeClass(cssClass);
     return this;
   };
 
@@ -1291,7 +1291,8 @@ this.HGrid = (function($) {
     return this.grid.getCellNode(this.getDataView().getRowById(id), 0).parentNode;
   };
 
-  HGrid.prototype.addHighlight = function(item) {
+  HGrid.prototype.addHighlight = function(item, highlightClass) {
+    var cssClass = highlightClass || this.options.highlightClass;
     this.removeHighlight();
     var $rowElement;
     if (item && item.kind === FOLDER) {
@@ -1300,7 +1301,7 @@ this.HGrid = (function($) {
       $rowElement = $(this.getRowElement(item.parentID));
     }
     if ($rowElement) {
-      $rowElement.addClass(this.options.highlightClass);
+      $rowElement.addClass(cssClass);
     }
     return this;
   };

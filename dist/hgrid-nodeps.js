@@ -1283,12 +1283,18 @@ this.HGrid = (function($) {
   /**
    * Get the row element for an item, given its id.
    * @method  getRowElement
+   * @raises  HGrid.Error if item does not exist in the DOM.
    */
   HGrid.prototype.getRowElement = function(id) {
     if (typeof id === 'object') {
       id = id.id;
     }
-    return this.grid.getCellNode(this.getDataView().getRowById(id), 0).parentNode;
+    try { // May throw a TypeError if item is not yet rendered.
+      return this.grid.getCellNode(this.getDataView().getRowById(id), 0).parentNode;
+      // Rethrow as an HGrid error
+    } catch (err) {
+      throw HGrid.Error('Row element is not rendered in the DOM.');
+    }
   };
 
   HGrid.prototype.addHighlight = function(item, highlightClass) {

@@ -1076,6 +1076,7 @@ this.HGrid = (function($) {
     self.options = $.extend({}, defaults, options);
     self.grid = null; // Set upon calling _initSlickGrid()
     self.dropzone = null; // Set upon calling _initDropzone()
+    self.plugins = []; // Registered plugins
     if (self.options.searchInput) {
       var $searchInput = $(self.options.searchInput);
       if ($searchInput.length) {
@@ -2058,6 +2059,11 @@ this.HGrid = (function($) {
   HGrid.prototype.invalidate = function () {
     this.grid.invalidate();
     return this;
+  };
+
+  HGrid.prototype.registerPlugin = function(plugin) {
+    this.plugins.unshift(plugin);
+    plugin.init(this);
   };
 
   $.fn.hgrid = function(options) {

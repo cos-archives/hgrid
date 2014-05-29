@@ -1526,5 +1526,21 @@
     ok($.ajax.calledOnce);
   });
 
+  module('plugin registry', {});
+
+  test('registerPlugin executes a plugin\'s init method', function() {
+    var grid = getMockGrid();
+
+    function FakePlugin() {}
+    // init receives a grid, so that it can make modifications to it
+    FakePlugin.prototype.init = function(grid) {
+      grid.test = 42;
+    };
+
+    grid.registerPlugin(new FakePlugin());
+    equal(grid.plugins.length, 1);
+    equal(grid.test, 42);
+  });
+
 
 })(jQuery);

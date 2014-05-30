@@ -7,6 +7,9 @@ var concat = require('gulp-concat');
 
 var RELEASE_NAME = 'hgrid-draggable.js';
 var RELEASE_MIN_NAME = 'hgrid-draggable.min.js';
+
+
+var WATCH_ACTIONS = ['concat', 'test'];
 var DEFAULT_ACTIONS = ['concat', 'compress', 'test'];
 
 gulp.task('test', function() {
@@ -30,8 +33,8 @@ gulp.task('compress', function() {
 });
 
 gulp.task('watch', function () {
-  gulp.watch('*.js', ['test']);
-  gulp.watch('tests/*.js', ['test']);
+  gulp.watch('src/**/*.js', [WATCH_ACTIONS]);
+  gulp.watch('tests/*.js', [WATCH_ACTIONS]);
 });
 
 gulp.task('default', DEFAULT_ACTIONS);

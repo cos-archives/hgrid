@@ -28,6 +28,12 @@ grid.registerPlugin(draggable);
 
 ```
 
+
+## Available Options
+
+- `rowMoveManagerOptions`: Additional options passed to the `Slick.RowMoveManager` constructor
+
+
 ## TODO and notes
 
 Event callbacks that receive `(event, source, destination)`

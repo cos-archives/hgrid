@@ -1,13 +1,17 @@
 (function (global, factory) {
   if (typeof define === 'function' && define.amd) {  // AMD/RequireJS
-    define(['jquery'], factory);
+    define(['jquery', 'hgrid'], factory);
   } else if (typeof module === 'object') {  // CommonJS/Node
-    module.exports = factory(jQuery);
+    module.exports = factory(jQuery, HGrid);
   } else {  // No module system
-    global.HGrid = factory(jQuery);
+    factory(jQuery, HGrid);
   }
-}(this, function(jQuery) {
+}(this, function(jQuery, HGrid) {
 
+    function Draggable(options) {
 
+    }
+
+    HGrid.plugins.Draggable = Draggable;
     return Draggable;
 }));

@@ -1,6 +1,11 @@
-# hgrid-draggable.js
+# hgrid-draggable.js (experimental)
 
 Drag-and-drop support for hgrid.js.
+
+## Dependencies
+
+- jQuery
+- HGrid >= 0.1.1
 
 ## Usage 
 
@@ -10,19 +15,16 @@ Drag-and-drop support for hgrid.js.
 ```
 
 ```js
-var draggable = new HGrid.plugins.Draggable({
-    # ... config
-});
-
-HGrid.registerPlugin(draggable);
-
-var grid = new HGrid({
-
+var draggable = new HGrid.Draggable({
     onDragStart: function(event, source, target) {
         #...
     },
+});
 
+var grid = new HGrid({
+    # ...
 })
+grid.registerPlugin(draggable);
 
 ```
 

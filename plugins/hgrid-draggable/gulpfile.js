@@ -3,21 +3,29 @@ var gulp = require('gulp');
 var uglify = require('gulp-uglify');
 var rename = require('gulp-rename');
 var qunit = require('gulp-qunit');
+var concat = require('gulp-concat');
 
-
-var NAME = 'hgrid-draggable.js';
-var NAME_MIN = 'hgrid-draggable.min.js';
-var DEFAULT_ACTIONS = ['compress', 'test'];
+var RELEASE_NAME = 'hgrid-draggable.js';
+var RELEASE_MIN_NAME = 'hgrid-draggable.min.js';
+var DEFAULT_ACTIONS = ['concat', 'compress', 'test'];
 
 gulp.task('test', function() {
   gulp.src('./tests/index.html')
     .pipe(qunit());
 });
 
+// Concatenate files
+// Slickgrid files are bundled
+gulp.task('concat', function() {
+  gulp.src(['amd-header.js', 'src/vendor/*.js', 'src/*.js', 'amd-footer.js'])
+    .pipe(concat(RELEASE_NAME))
+    .pipe(gulp.dest('.'));
+});
+
 gulp.task('compress', function() {
-  return gulp.src(NAME)
+  return gulp.src(RELEASE_NAME)
     .pipe(uglify())
-    .pipe(rename(NAME_MIN))
+    .pipe(rename(RELEASE_MIN_NAME))
     .pipe(gulp.dest('.'));
 });
 

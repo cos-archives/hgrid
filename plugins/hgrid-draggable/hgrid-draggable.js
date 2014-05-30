@@ -12,6 +12,10 @@
 
     }
 
-    HGrid.plugins.Draggable = Draggable;
+    Draggable.prototype.init = function() {
+
+    };
+
+    HGrid.Draggable = Draggable;
     return Draggable;
 }));

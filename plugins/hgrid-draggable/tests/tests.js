@@ -92,10 +92,10 @@
   });
 
   test('Basic instantiation and registration', function() {
-    var draggable = new HGrid.plugins.Draggable();
+    var draggable = new HGrid.Draggable();
     myGrid.registerPlugin(draggable);
-
-    isTrue(myGrid.plugins.find(draggable) > 0);
+    // $.inArray returns index of the passed in value, or -1 if not found
+    isTrue($.inArray(draggable, myGrid.plugins) >= 0);
   });
 
 })(jQuery);

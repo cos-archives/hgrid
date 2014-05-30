@@ -22,8 +22,8 @@ gulp.task('compress', function() {
 });
 
 gulp.task('watch', function () {
-  gulp.watch('*.js', DEFAULT_ACTIONS);
-  gulp.watch('tests/*.js', DEFAULT_ACTIONS);
+  gulp.watch('*.js', ['test']);
+  gulp.watch('tests/*.js', ['test']);
 });
 
 gulp.task('default', DEFAULT_ACTIONS);

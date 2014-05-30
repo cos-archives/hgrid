@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>hgrid-draggable Tests</title>
+    <link rel="stylesheet" href="../bower_components/qunit/qunit/qunit.css">
+</head>
+<body>
+<h1 id="qunit-header">hgrid-draggable Test Suite</h1>
+<h2 id="qunit-banner"></h2>
+<div id="qunit-testrunner-toolbar"></div>
+<h2 id="qunit-userAgent"></h2>
+<ol id="qunit-tests"></ol>
+<div id="qunit-test-area"></div>
+
+<div id="qunit-fixture">
+    <div id="myGrid" class='hgrid'></div>
+    <div class='no-id'></div>
+</div>
+
+<script>
+// Polyfill for Function.bind
+if (!Function.prototype.bind) {
+  Function.prototype.bind = function (oThis) {
+    if (typeof this !== "function") {
+      // closest thing possible to the ECMAScript 5 internal IsCallable function
+      throw new TypeError("Function.prototype.bind - what is trying to be bound is not callable");
+    }
+
+    var aArgs = Array.prototype.slice.call(arguments, 1),
+        fToBind = this,
+        fNOP = function () {},
+        fBound = function () {
+          return fToBind.apply(this instanceof fNOP && oThis
+                                 ? this
+                                 : oThis,
+                               aArgs.concat(Array.prototype.slice.call(arguments)));
+        };
+
+    fNOP.prototype = this.prototype;
+    fBound.prototype = new fNOP();
+
+    return fBound;
+  };
+}
+</script>
+
+<!-- The library -->
+<script src="../bower_components/jQuery/dist/jquery.js"></script>
+<script src="../bower_components/hgrid/dist/hgrid.js"></script>
+<script src="../hgrid-draggable.js"></script>
+<!-- testing framework -->
+<script src="../bower_components/qunit/qunit/qunit.js"></script>
+<!-- The tests -->
+<script src="./tests.js"></script>
+</body>
+</html>

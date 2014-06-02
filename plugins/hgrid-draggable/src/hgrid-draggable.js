@@ -1,5 +1,7 @@
 /**
  * hgrid-draggable - Drag and drop support for HGrid
+ *
+ * Depends on hgrid-rowmovemanager.js and hgrid-rowselectionmodel.js.
  */
 this.Draggable = (function($, HGrid) {
   'use strict';
@@ -52,7 +54,7 @@ this.Draggable = (function($, HGrid) {
     var rowMoveManagerOptions = $.extend(
       {}, rowMoveManagerDefaults, self.options.rowMoveManagerOptions
     );
-    self.rowMoveManager = new Slick.RowMoveManager(rowMoveManagerOptions);
+    self.rowMoveManager = new HGrid.RowMoveManager(rowMoveManagerOptions);
 
     /** Callbacks **/
 

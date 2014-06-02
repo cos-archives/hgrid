@@ -1,6 +1,6 @@
 /**
- * Customized row selection model, modified from slickgrid's rowmovemanger.js (MIT Licensed)
- * https://github.com/mleibman/SlickGrid/blob/master/plugins/slick.rowmovemanager.js
+ * Customized row selection model, modified from slickgrid's rowselectionmodel.js (MIT Licensed)
+ * https://github.com/mleibman/SlickGrid/blob/master/plugins/slick.rowselectionmodel.js
  */
 (function ($, HGrid) {
 

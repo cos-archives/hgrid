@@ -1,10 +1,8 @@
-(function ($) {
-  // register namespace
-  $.extend(true, window, {
-    "Slick": {
-      "RowMoveManager": RowMoveManager
-    }
-  });
+/**
+ * Customized row move manager, modified from slickgrid's rowmovemanger.js (MIT Licensed)
+ * https://github.com/mleibman/SlickGrid/blob/master/plugins/slick.rowmovemanager.js
+ */
+(function ($, HGrid) {
 
   function RowMoveManager(options) {
     var _grid;
@@ -105,6 +103,7 @@
 
         dd.insertBefore = insertBefore;
       }
+      _self.onDragRows.notify({rows: dd.selectedRows, insertBefore: dd.insertV})
     }
 
     function handleDragEnd(e, dd) {
@@ -130,9 +129,11 @@
     $.extend(this, {
       "onBeforeMoveRows": new Slick.Event(),
       "onMoveRows": new Slick.Event(),
-
+      'onDragRows': new Slick.Event(),
       "init": init,
       "destroy": destroy
     });
   }
-})(jQuery);
+
+  HGrid.RowMoveManager = RowMoveManager;
+})(jQuery, HGrid);

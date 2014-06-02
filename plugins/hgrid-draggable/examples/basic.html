@@ -57,7 +57,12 @@ var myData = {
 };
 
 
-var draggablePlugin = new HGrid.Draggable();
+var draggablePlugin = new HGrid.Draggable({
+  onMoved: function(event, moved, folder) {
+    console.log('moved: ');
+    console.log(moved);
+  }
+});
 
 // Make HGrid name rows draggable
 

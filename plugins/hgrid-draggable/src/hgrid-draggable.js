@@ -17,7 +17,8 @@ this.Draggable = (function($, HGrid) {
    * @type {Object}
    */
   var defaults = {
-    draggableNameCol: true,
+    onMoved: function(event, movedItems, folder) {},
+
     // Additional options passed to the Slick.RowMoveManager constructor
     rowMoveManagerOptions: {}
   };
@@ -42,11 +43,6 @@ this.Draggable = (function($, HGrid) {
     var data = grid.getData();
     var dataView = grid.getDataView();
     var slickgrid = grid.grid;
-
-    // Make grid's name column draggable
-    if (self.options.draggableNameCol) {
-      HGrid.Col.Name.behavior = 'move';
-    }
 
     // Set selection model
     slickgrid.setSelectionModel(new HGrid.RowSelectionModel());
@@ -123,10 +119,12 @@ this.Draggable = (function($, HGrid) {
       dataView.setItems(newData);
       slickgrid.setSelectedRows(selectedRows);
       slickgrid.render();
+
+      self.options.onMoved.call(self, event, movedItems);
     };
 
     var onDragStart = function(event, dd) {
-      var cell = slickgrid.getCellFromEvent(e);
+      var cell = slickgrid.getCellFromEvent(event);
       if (!cell) {
         return;
       }

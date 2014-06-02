@@ -32,6 +32,7 @@ grid.registerPlugin(draggable);
 ## Available Options
 
 - `rowMoveManagerOptions`: Additional options passed to the `Slick.RowMoveManager` constructor
+- `onMoved(event, items, folder)`
 
 
 ## TODO and notes

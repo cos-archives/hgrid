@@ -1,7 +1,7 @@
 /**
  * hgrid-draggable - Drag and drop support for HGrid
  */
-this.Draggable = (function($) {
+this.Draggable = (function($, HGrid) {
   'use strict';
 
   /**
@@ -17,13 +17,10 @@ this.Draggable = (function($) {
    * @type {Object}
    */
   var defaults = {
-
     draggableNameCol: true,
     // Additional options passed to the Slick.RowMoveManager constructor
     rowMoveManagerOptions: {}
   };
-
-
 
   /** Public interface **/
 
@@ -46,8 +43,13 @@ this.Draggable = (function($) {
     var dataView = grid.getDataView();
     var slickgrid = grid.grid;
 
+    // Make grid's name column draggable
+    if (self.options.draggableNameCol) {
+      HGrid.Col.Name.behavior = 'move';
+    }
+
     // Set selection model
-    slickgrid.setSelectionModel(new Slick.RowSelectionModel());
+    slickgrid.setSelectionModel(new HGrid.RowSelectionModel());
 
 
     // Configure the RowMoveManager
@@ -62,31 +64,46 @@ this.Draggable = (function($) {
       // Prevent moving row before or after itself
       for (var i = 0; i < data.rows.length; i++) {
         if (data.rows[i] === data.insertBefore || data.rows[i] === data.insertBefore - 1) {
-          event.stopPropagation;
+          event.stopPropagation();
           return false;
         }
       }
     };
 
     // TODO(sloria): Test me
+
+    /**
+     * Callback executed when rows are moved and dropped into a new location
+     * on the grid.
+     * @param  {Event} event
+     * @param  {Object} args  Object containing information about the event,
+     *                        including insertBefore.
+     */
     var onMoveRows = function (event, args) {
       var extractedRows = [];
-      var rows = args.rows;
+      // indices of the moved rows
+      var indices = args.rows;
+
+      // The moved data items
+      var movedItems = indices.map(function(rowIdx) {
+        return dataView.getItemByIdx(rowIdx);
+      });
+
       var insertBefore = args.insertBefore;
       var left = data.slice(0, insertBefore);
       var right = data.slice(insertBefore, data.length);
 
-      rows.sort(function(a, b) { return a - b; });
+      indices.sort(function(a, b) { return a - b; });
 
       var i;
-      for (i = 0; i < rows.length; i++) {
-        extractedRows.push(data[rows[i]]);
+      for (i = 0; i < indices.length; i++) {
+        extractedRows.push(data[indices[i]]);
       }
 
-      rows.reverse();
+      indices.reverse();
 
-      for (i = 0; i < rows.length; i++) {
-        var row = rows[i];
+      for (i = 0; i < indices.length; i++) {
+        var row = indices[i];
         if (row < insertBefore) {
           left.splice(row, 1);
         } else {
@@ -94,20 +111,18 @@ this.Draggable = (function($) {
         }
       }
 
-
-      data = left.concat(extractedRows.concat(right));
+      // TODO(sloria): Is there a more performant way to do this?
+      var newData = left.concat(extractedRows.concat(right));
 
       var selectedRows = [];
-      for (i = 0; i < rows.length; i++) {
+      for (i = 0; i < indices.length; i++) {
         selectedRows.push(left.length + i);
       }
 
-
       slickgrid.resetActiveCell();
-      dataView.setItems(data);
+      dataView.setItems(newData);
       slickgrid.setSelectedRows(selectedRows);
       slickgrid.render();
-
     };
 
     var onDragStart = function(event, dd) {
@@ -150,9 +165,13 @@ this.Draggable = (function($) {
     });
 
     slickgrid.onDragStart.subscribe(onDragStart);
+  };
 
+  Draggable.prototype.destroy = function() {
+    this.rowMoveManager.destroy();
+    HGrid.Col.Name.behavior = null;
   };
 
   HGrid.Draggable = Draggable;
   return Draggable;
-}).call(this, jQuery);
+}).call(this, jQuery, HGrid);

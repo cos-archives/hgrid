@@ -61,6 +61,10 @@ var draggablePlugin = new HGrid.Draggable({
   onMoved: function(event, moved, folder) {
     console.log('moved: ');
     console.log(moved);
+  },
+  onDrag: function(event, items) {
+    console.log('dragging :');
+    console.log(items);
   }
 });
 

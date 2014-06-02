@@ -20,6 +20,7 @@ this.Draggable = (function($, HGrid) {
    */
   var defaults = {
     onMoved: function(event, movedItems, folder) {},
+    onDrag: function(event, items) {},
 
     // Additional options passed to the Slick.RowMoveManager constructor
     rowMoveManagerOptions: {}
@@ -121,7 +122,8 @@ this.Draggable = (function($, HGrid) {
       dataView.setItems(newData);
       slickgrid.setSelectedRows(selectedRows);
       slickgrid.render();
-
+      // invoke user-defined callback
+      // TODO(sloria): add target folder as an argument
       self.options.onMoved.call(self, event, movedItems);
     };
 
@@ -153,8 +155,16 @@ this.Draggable = (function($, HGrid) {
       dd.count = selectedRows.length;
     };
 
+
+    var onDragRows = function(event, args) {
+      // TODO: set target folder
+      // invoke user-defined callback
+      self.options.onDrag.call(self, event, args.rows);
+    };
+
     self.rowMoveManager.onBeforeMoveRows.subscribe(onBeforeMoveRows);
     self.rowMoveManager.onMoveRows.subscribe(onMoveRows);
+    self.rowMoveManager.onDragRows.subscribe(onDragRows);
 
     // Register the slickgrid plugin
     slickgrid.registerPlugin(self.rowMoveManager);

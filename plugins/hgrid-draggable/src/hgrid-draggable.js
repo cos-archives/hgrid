@@ -41,6 +41,7 @@ function Draggable(options) {
 Draggable.prototype.init = function(grid) {
   var self = this;
   var data = grid.getData();
+  var dataView = grid.getDataView();
   var slickgrid = grid.grid;
 
   // Set selection model
@@ -96,7 +97,7 @@ Draggable.prototype.init = function(grid) {
 
 
     slickgrid.resetActiveCell();
-    slickgrid.setData(data);
+    dataView.setItems(data);
     slickgrid.setSelectedRows(selectedRows);
     slickgrid.render();
 

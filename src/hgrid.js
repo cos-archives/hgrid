@@ -1045,7 +1045,7 @@ this.HGrid = (function($) {
     this.name = 'HGrid.Error';
     this.message = message || '';
   };
-  HGrid.Error.prototype = Object.create(Object.prototype);
+  HGrid.Error.prototype = Object.create(Error.prototype);
 
   /**
    * Construct an HGrid.

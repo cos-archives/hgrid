@@ -162,17 +162,16 @@ this.Draggable = (function($, HGrid) {
 
     var onDragRows = function(event, args) {
       // set the current drag target
-      var item = grid.getItemFromEvent(event);
-      if (item.kind === FOLDER) {
-        self._folderTarget = item;
-      } else {
-        self._folderTarget = grid.getByID(item.parentID);
+      var movedItems = args.items;
+      // get the parent of the current item being dragged over
+      var parent;
+      if (args.insertBefore) {
+        var insertItem = dataView.getItemByIdx(args.insertBefore);
+        parent = grid.getByID(insertItem.parentID);
+        self._folderTarget = parent;
+        grid.addHighlight(self._folderTarget);
       }
-      grid.addHighlight(self._folderTarget);
-
-      // TODO: set target folder
-      // invoke user-defined callback
-      self.options.onDrag.call(self, event, args.rows);
+      self.options.onDrag.call(self, event, args.items, parent);
     };
 
     self.rowMoveManager.onBeforeMoveRows.subscribe(onBeforeMoveRows);

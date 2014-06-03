@@ -87,10 +87,17 @@
       dd.selectionProxy.css("top", top - 5);
 
       var insertBefore = Math.max(0, Math.min(Math.round(top / _grid.getOptions().rowHeight), _grid.getDataLength()));
+
+      // The moved data items
+      var movedItems = dd.selectedRows.map(function(rowIdx) {
+        return _grid.getData().getItemByIdx(rowIdx);
+      });
+
       if (insertBefore !== dd.insertBefore) {
         var eventData = {
-          "rows": dd.selectedRows,
-          "insertBefore": insertBefore
+          rows: dd.selectedRows,
+          insertBefore: insertBefore,
+          items: movedItems
         };
 
         if (_self.onBeforeMoveRows.notify(eventData) === false) {
@@ -103,7 +110,12 @@
 
         dd.insertBefore = insertBefore;
       }
-      _self.onDragRows.notify({rows: dd.selectedRows, insertBefore: dd.insertV})
+
+      _self.onDragRows.notify({
+        rows: dd.selectedRows,
+        insertBefore: dd.insertBefore,
+        items: movedItems
+      });
     }
 
     function handleDragEnd(e, dd) {

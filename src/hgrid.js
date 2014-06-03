@@ -1294,7 +1294,7 @@ this.HGrid = (function($) {
       return this.grid.getCellNode(this.getDataView().getRowById(id), 0).parentNode;
       // Rethrow as an HGrid error
     } catch (err) {
-      throw HGrid.Error('Row element is not rendered in the DOM.');
+      throw new HGrid.Error('Row element is not rendered in the DOM.');
     }
   };
 

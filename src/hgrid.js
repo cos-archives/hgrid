@@ -1041,10 +1041,11 @@ this.HGrid = (function($) {
    * @constructor
    */
   HGrid.Error = function(message) {
+    Error.call(this, message);
     this.name = 'HGrid.Error';
     this.message = message || '';
   };
-  HGrid.Error.prototype = new Error();
+  HGrid.Error.prototype = Object.create(Object.prototype);
 
   /**
    * Construct an HGrid.
@@ -1294,7 +1295,7 @@ this.HGrid = (function($) {
       return this.grid.getCellNode(this.getDataView().getRowById(id), 0).parentNode;
       // Rethrow as an HGrid error
     } catch (err) {
-      throw HGrid.Error('Row element is not rendered in the DOM.');
+      throw new HGrid.Error('Row element is not rendered in the DOM.');
     }
   };
 

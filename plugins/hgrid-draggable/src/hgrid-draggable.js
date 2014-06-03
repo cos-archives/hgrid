@@ -19,6 +19,8 @@ this.Draggable = (function($, HGrid) {
    * @type {Object}
    */
   var defaults = {
+    /*jshint unused: false */
+
     onMoved: function(event, movedItems, folder) {},
     onDrag: function(event, items) {},
 
@@ -38,6 +40,8 @@ this.Draggable = (function($, HGrid) {
     var self = this;
     self.options = $.extend({}, defaults, options);
     self.rowMoveManager = null;  // Initialized in init
+    // The current drag target
+    self._folderTarget = null;
   }
 
   // Initialization function called by HGrid#registerPlugin
@@ -157,6 +161,15 @@ this.Draggable = (function($, HGrid) {
 
 
     var onDragRows = function(event, args) {
+      // set the current drag target
+      var item = grid.getItemFromEvent(event);
+      if (item.kind === FOLDER) {
+        self._folderTarget = item;
+      } else {
+        self._folderTarget = grid.getByID(item.parentID);
+      }
+      grid.addHighlight(self._folderTarget);
+
       // TODO: set target folder
       // invoke user-defined callback
       self.options.onDrag.call(self, event, args.rows);

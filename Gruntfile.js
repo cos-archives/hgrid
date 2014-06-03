@@ -1,16 +1,9 @@
 module.exports = function(grunt) {
 
   var latest = '<%= pkg.name %>';
-  var name = '<%= pkg.name %>-v<%= pkg.version%>';
 
-  // Latest releases including version number in filename
-  var devRelease = 'dist/' + name + '.js';
-  var minRelease = 'dist/' + name + '.min.js';
-
-  // Latest releases without version number in filename for easier imports
-  // These go in the project root
-  var latestDevRelease = 'dist/' + latest + '.js';
-  var latestMinRelease = 'dist/' + latest + '.min.js';
+  var release = 'dist/' + latest + '.js';
+  var minRelease = 'dist/' + latest + '.min.js';
 
   grunt.initConfig({
 
@@ -29,7 +22,7 @@ module.exports = function(grunt) {
     concat: {
       target: {
         src: ['amd-header.js', 'src/**/*.js', 'amd-footer.js'],
-        dest: devRelease
+        dest: release
       },
       options: {
         banner: '<%= meta.banner %>'
@@ -75,12 +68,6 @@ module.exports = function(grunt) {
     copy: {
       main: {
         files: [{
-          src: devRelease,
-          dest: latestDevRelease
-        }, {
-          src: minRelease,
-          dest: latestMinRelease
-        }, {
           src: 'src/hgrid.js',
           dest: 'dist/hgrid-nodeps.js'
         }, {

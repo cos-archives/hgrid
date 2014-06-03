@@ -1,6 +1,6 @@
 {
   "name": "hgrid",
-  "version": "0.1.1",
+  "version": "0.1.2-dev",
   "homepage": "https://github.com/CenterForOpenScience/hgrid.git",
   "authors": [
     "Jake Rosenberg <jakerose27@gmail.com>",

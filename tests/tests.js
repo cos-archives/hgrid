@@ -1527,19 +1527,26 @@
   });
 
   module('plugin registry', {});
+  function FakePlugin() {}
+  // init receives a grid, so that it can make modifications to it
+  FakePlugin.prototype.init = sinon.spy();
+  FakePlugin.prototype.destroy = sinon.spy();
 
   test('registerPlugin executes a plugin\'s init method', function() {
     var grid = getMockGrid();
-
-    function FakePlugin() {}
-    // init receives a grid, so that it can make modifications to it
-    FakePlugin.prototype.init = function(grid) {
-      grid.test = 42;
-    };
-
     grid.registerPlugin(new FakePlugin());
+    equal(grid.plugins.length, 1, 'plugin was added');
+    ok(FakePlugin.prototype.init.calledWith(grid), 'init was invoked');
+  });
+
+  test('unregisterPlugin removes plugin and executes destroy', function() {
+    var grid = getMockGrid();
+    var plugin = new FakePlugin();
+    grid.registerPlugin(plugin);
     equal(grid.plugins.length, 1);
-    equal(grid.test, 42);
+    grid.unregisterPlugin(plugin);
+    equal(grid.plugins.length, 0, 'plugin was removed');
+    ok(FakePlugin.prototype.destroy.calledOnce, 'destroy() was invoked');
   });
 
 

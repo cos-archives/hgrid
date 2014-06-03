@@ -2052,6 +2052,19 @@ this.HGrid = (function($) {
     plugin.init(this);
   };
 
+  HGrid.prototype.unregisterPlugin = function(plugin) {
+    var plugins = this.plugins;
+    for (var i = plugins.length; i >= 0; i--) {
+      if (plugins[i] === plugin) {
+        if (plugins[i].destroy) {
+          plugins[i].destroy();
+        }
+        plugins.splice(i, 1);
+        break;
+      }
+    }
+  };
+
   $.fn.hgrid = function(options) {
     this.each(function() {
       if (!this.id) { // Must have ID because SlickGrid requires a selector

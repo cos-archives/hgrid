@@ -1294,7 +1294,7 @@ this.HGrid = (function($) {
       return this.grid.getCellNode(this.getDataView().getRowById(id), 0).parentNode;
       // Rethrow as an HGrid error
     } catch (err) {
-      throw HGrid.Error('Row element is not rendered in the DOM.');
+      throw new HGrid.Error('Row element is not rendered in the DOM.');
     }
   };
 
@@ -2050,6 +2050,19 @@ this.HGrid = (function($) {
   HGrid.prototype.registerPlugin = function(plugin) {
     this.plugins.unshift(plugin);
     plugin.init(this);
+  };
+
+  HGrid.prototype.unregisterPlugin = function(plugin) {
+    var plugins = this.plugins;
+    for (var i = plugins.length; i >= 0; i--) {
+      if (plugins[i] === plugin) {
+        if (plugins[i].destroy) {
+          plugins[i].destroy();
+        }
+        plugins.splice(i, 1);
+        break;
+      }
+    }
   };
 
   $.fn.hgrid = function(options) {

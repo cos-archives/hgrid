@@ -350,3 +350,14 @@ Run tests with grunt.
 Tests are written using the [QUnit](http://qunitjs.com/) framework.
 
 Tests are located in `tests/tests.js`.
+
+
+### Releasing
+
+- Bump version in bower.json
+- Bump version in package.json
+- Run `grunt`
+- Commit to dev
+- Merge to master
+- Create git tag
+- Push

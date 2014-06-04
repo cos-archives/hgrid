@@ -121,6 +121,7 @@ this.Draggable = (function($, HGrid) {
       self.options.onMoved.call(self, event, movedItems, self._folderTarget);
     };
 
+    // TODO: Is this callback necessary?
     var onDragStart = function(event, dd) {
       var cell = slickgrid.getCellFromEvent(event);
       if (!cell) {
@@ -149,6 +150,22 @@ this.Draggable = (function($, HGrid) {
       dd.count = selectedRows.length;
     };
 
+    /**
+     * Given an index, return the correct parent folder to insert an item into.
+     * @param  {Number} index
+     * @return {Object}     Parent folder object or null
+     */
+    var getParent = function(index) {
+      // First check if the dragged over item is an empty folder
+      var prev = dataView.getItemByIdx(index - 1);
+      if (prev.kind === HGrid.FOLDER) {
+        parent = prev;
+      } else{  // The item being dragged over is an item; get it's parent folder
+        var insertItem = dataView.getItemByIdx(index);
+        parent = grid.getByID(insertItem.parentID);
+      }
+      return parent;
+    };
 
     var onDragRows = function(event, args) {
       // set the current drag target
@@ -156,8 +173,7 @@ this.Draggable = (function($, HGrid) {
       // get the parent of the current item being dragged over
       var parent;
       if (args.insertBefore) {
-        var insertItem = dataView.getItemByIdx(args.insertBefore);
-        parent = grid.getByID(insertItem.parentID);
+        parent = getParent(args.insertBefore);
         self._folderTarget = parent;
         grid.addHighlight(self._folderTarget);
       }

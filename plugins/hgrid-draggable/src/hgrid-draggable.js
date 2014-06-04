@@ -92,41 +92,29 @@ this.Draggable = (function($, HGrid) {
         return dataView.getItemByIdx(rowIdx);
       });
 
+      // ID of the folder to transfer the items to
+      var parentID = self._folderTarget.id;
+      // Copy the moved items, but change the parentID to the target folder's ID
+      var newItems = movedItems.map(function(item) {
+        var newItem = $.extend({}, item);
+        newItem.parentID = parentID;
+        // remove depth and _node properties
+        // these will be set upon adding the item to the grid
+        delete newItem.depth;
+        delete newItem._node;
+        return newItem;
+      });
 
 
-      var insertBefore = args.insertBefore;
-      var left = data.slice(0, insertBefore);
-      var right = data.slice(insertBefore, data.length);
-
-      indices.sort(function(a, b) { return a - b; });
-
-      var i;
-      for (i = 0; i < indices.length; i++) {
-        extractedRows.push(data[indices[i]]);
+      for (var i = 0, item; item = newItems[i]; i++) {
+        grid.removeItem(item.id);
       }
 
-      indices.reverse();
-
-      for (i = 0; i < indices.length; i++) {
-        var row = indices[i];
-        if (row < insertBefore) {
-          left.splice(row, 1);
-        } else {
-          right.splice(row - insertBefore, 1);
-        }
-      }
-
-      // TODO(sloria): Is there a more performant way to do this?
-      var newData = left.concat(extractedRows.concat(right));
-
-      var selectedRows = [];
-      for (i = 0; i < indices.length; i++) {
-        selectedRows.push(left.length + i);
-      }
+      grid.addItems(newItems);
+      grid.removeHighlight();
 
       slickgrid.resetActiveCell();
-      dataView.setItems(newData);
-      slickgrid.setSelectedRows(selectedRows);
+      slickgrid.setSelectedRows([]);
       slickgrid.render();
       // invoke user-defined callback
       // TODO(sloria): add target folder as an argument

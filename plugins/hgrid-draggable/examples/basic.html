@@ -7,9 +7,9 @@
     <title>Basic Drag-and-Drop Example With Minimal Configuration</title>
 
     <style type="text/css">
-      .slick-row.active {
+/*      .slick-row.active {
         background: #25d1e9;
-      }
+      }*/
     </style>
 </head>
 <body>
@@ -61,6 +61,8 @@ var draggablePlugin = new HGrid.Draggable({
   onMoved: function(event, moved, folder) {
     console.log('moved: ');
     console.log(moved);
+    console.log('to:');
+    console.log(folder);
   },
   onDrag: function(event, items) {
     console.log('dragging :');

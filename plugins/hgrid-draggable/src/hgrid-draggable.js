@@ -92,6 +92,8 @@ this.Draggable = (function($, HGrid) {
         return dataView.getItemByIdx(rowIdx);
       });
 
+
+
       var insertBefore = args.insertBefore;
       var left = data.slice(0, insertBefore);
       var right = data.slice(insertBefore, data.length);
@@ -128,7 +130,7 @@ this.Draggable = (function($, HGrid) {
       slickgrid.render();
       // invoke user-defined callback
       // TODO(sloria): add target folder as an argument
-      self.options.onMoved.call(self, event, movedItems);
+      self.options.onMoved.call(self, event, movedItems, self._folderTarget);
     };
 
     var onDragStart = function(event, dd) {

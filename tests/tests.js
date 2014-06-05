@@ -697,7 +697,25 @@
     root.remove(2); // Remove the leaf
     var nullItem = root.dataView.getItemById(2);
     ok(!nullItem, 'item was removed from dataview');
-    ok(root.children[0].children.length, 1, 'node was removed from tree');
+    equal(root.children[0].children.length, 1, 'node was removed from tree');
+  });
+
+
+  test('Tree.remove is recursive', function() {
+    var root = new HGrid.Tree();
+    var tree = new HGrid.Tree({id: 0});
+    var subtree = new HGrid.Tree({id: 1});
+    var leaf = new HGrid.Leaf({id: 2});
+    root.add(tree, true);
+    tree.add(subtree, true);
+    tree.add(leaf, true);
+
+    var toRemove = root.dataView.getItemById(0);
+    equal(root.children.length, 1);
+    root.remove(0);
+    var nullItem = root.dataView.getItemById(0);
+    ok(!nullItem, 'item was removed from dataview');
+    equal(root.children.length, 0);
   });
 
   test('Creating trees with metadata', function() {

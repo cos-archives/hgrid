@@ -1,7 +1,5 @@
 /**
  * hgrid-draggable - Drag and drop support for HGrid
- *
- * Depends on hgrid-rowmovemanager.js and hgrid-rowselectionmodel.js.
  */
 this.Draggable = (function($, HGrid) {
   'use strict';
@@ -68,6 +66,7 @@ this.Draggable = (function($, HGrid) {
       for (var i = 0; i < data.rows.length; i++) {
         if (data.rows[i] === data.insertBefore || data.rows[i] === data.insertBefore - 1) {
           event.stopPropagation();
+          grid.removeHighlight();
           return false;
         }
       }
@@ -83,11 +82,21 @@ this.Draggable = (function($, HGrid) {
      *                        including insertBefore.
      */
     var onMoveRows = function (event, args) {
+      grid.removeHighlight();
       var extractedRows = [];
-      // indices of the moved rows
+      // indices of the rows to move
       var indices = args.rows;
 
-      // The moved data items
+      // The data items to move
+      // var movedItems = [];
+
+      // for (var i = 0, rowIdx; rowIdx = indices[i]; i++) {
+      //   var item = dataView.getItemByIdx(indices[i]);
+      //   movedItems.push(item);
+      //   for (var j = 0, child; child = item.children[j]; j++) {
+      //     movedItems.push(child);
+      //   }
+      // }
       var movedItems = indices.map(function(rowIdx) {
         return dataView.getItemByIdx(rowIdx);
       });
@@ -105,13 +114,12 @@ this.Draggable = (function($, HGrid) {
         return newItem;
       });
 
-
-      for (var i = 0, item; item = newItems[i]; i++) {
+      // Remove dragged items from grid
+      for (var i = 0, item; item = movedItems[i]; i++) {
         grid.removeItem(item.id);
       }
-
+      // Add items at new location
       grid.addItems(newItems);
-      grid.removeHighlight();
 
       slickgrid.resetActiveCell();
       slickgrid.setSelectedRows([]);
@@ -174,8 +182,10 @@ this.Draggable = (function($, HGrid) {
       var parent;
       if (args.insertBefore) {
         parent = getParent(args.insertBefore);
-        self._folderTarget = parent;
-        grid.addHighlight(self._folderTarget);
+        if (parent) {
+          self._folderTarget = parent;
+          grid.addHighlight(self._folderTarget);
+        }
       }
       self.options.onDrag.call(self, event, args.items, parent);
     };

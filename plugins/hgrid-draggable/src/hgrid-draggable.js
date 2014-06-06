@@ -49,6 +49,9 @@ this.Draggable = (function($, HGrid) {
     self._folderTarget = null;
   }
 
+  Draggable.prototype.setTarget = function(folder) {
+    this._folderTarget = folder;
+  };
 
   // Initialization function called by HGrid#registerPlugin
   Draggable.prototype.init = function(grid) {
@@ -95,10 +98,7 @@ this.Draggable = (function($, HGrid) {
       // indices of the rows to move
       var indices = args.rows;
 
-      var movedItems = indices.map(function(rowIdx) {
-        return dataView.getItemByIdx(rowIdx);
-      });
-
+      var movedItems = args.items;
       var errorFunc = function(error){
         if (error) {
           throw new HGrid.Error(error);
@@ -192,7 +192,7 @@ this.Draggable = (function($, HGrid) {
       if (args.insertBefore) {
         parent = getParent(args.insertBefore);
         if (parent) {
-          self._folderTarget = parent;
+          self.setTarget(parent);
           grid.addHighlight(self._folderTarget);
         }
       }
@@ -219,6 +219,7 @@ this.Draggable = (function($, HGrid) {
 
     slickgrid.onDragStart.subscribe(onDragStart);
   };
+
 
   Draggable.prototype.destroy = function() {
     this.rowMoveManager.destroy();

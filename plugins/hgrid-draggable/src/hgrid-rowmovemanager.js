@@ -107,12 +107,13 @@
       var movedItems = dd.selectedRows.map(function(rowIdx) {
         return _grid.getData().getItemByIdx(rowIdx);
       });
+      dd.movedItems = movedItems;
 
       if (insertBefore !== dd.insertBefore) {
         var eventData = {
           rows: dd.selectedRows,
           insertBefore: insertBefore,
-          items: movedItems
+          items: dd.movedItems
         };
 
         if (_self.onBeforeMoveRows.notify(eventData) === false) {
@@ -146,6 +147,7 @@
       if (dd.canMove) {
         var eventData = {
           "rows": dd.selectedRows,
+          'items': dd.movedItems,
           "insertBefore": dd.insertBefore
         };
         // TODO:  _grid.remapCellCssClasses ?

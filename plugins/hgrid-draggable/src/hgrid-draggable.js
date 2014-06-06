@@ -22,7 +22,12 @@ this.Draggable = (function($, HGrid) {
     onDrop: function(event, movedItems, folder) {},
     onDrag: function(event, items) {},
 
-    canDrag: function(item) { return true; },
+    canDrag: function(item) {
+      if (item.kind === HGrid.FOLDER) {
+        return false;
+      }
+      return true;
+    },
 
     // Additional options passed to the Slick.RowMoveManager constructor
     rowMoveManagerOptions: {}

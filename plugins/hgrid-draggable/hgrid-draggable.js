@@ -39,8 +39,10 @@ this.Draggable = (function($, HGrid) {
       return true;
     },
 
-    // Additional options passed to the Slick.RowMoveManager constructor
-    rowMoveManagerOptions: {}
+    // Additional options passed to the HGrid.RowMoveManager constructor
+    rowMoveManagerOptions: {},
+    // Additional options passed to the HGrid.RowSelectionModel constructor
+    rowSelectionModelOptions: {}
   };
 
   /** Public interface **/
@@ -71,7 +73,8 @@ this.Draggable = (function($, HGrid) {
     var slickgrid = grid.grid;
 
     // Set selection model
-    slickgrid.setSelectionModel(new HGrid.RowSelectionModel());
+    var rowSelectionModelOptions = self.options.rowSelectionModelOptions;
+    slickgrid.setSelectionModel(new HGrid.RowSelectionModel(rowSelectionModelOptions));
 
     // Configure the RowMoveManager
     var rowMoveManagerOptions = $.extend(

@@ -156,11 +156,11 @@ this.Draggable = (function($, HGrid) {
 
       event.stopImmediatePropagation();
 
-      var selectedRows = grid.getSelectedRows();
+      var selectedRows = slickgrid.getSelectedRows();
 
       if (!selectedRows.length || $.inArray(dd.row, selectedRows) === -1) {
         selectedRows = [dd.row];
-        grid.setSelectedRows(selectedRows);
+        slickgrid.setSelectedRows(selectedRows);
       }
 
       dd.rows = selectedRows;

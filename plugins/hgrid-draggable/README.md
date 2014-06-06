@@ -16,9 +16,18 @@ Drag-and-drop support for hgrid.js.
 
 ```js
 var draggable = new HGrid.Draggable({
-    onDragStart: function(event, source, target) {
-        #...
-    },
+  onMoved: function(event, items, folder) {
+    # ...
+  }
+  onDrag: function(event, items) {
+    # ... 
+  },
+  canDrag: function(item) {
+    if (item.name === "Don't drag me") {
+        return false;
+    }
+    return true;
+  }
 });
 
 var grid = new HGrid({
@@ -31,9 +40,10 @@ grid.registerPlugin(draggable);
 
 ## Available Options
 
+- `onMoved(event, items, folder)`: Fired when items are dropped into a folder.
+- `onDrag(event, items)`: Fired while items are being dragged
+- `canDrag(item)`: Returns whether an item can be dragged.
 - `rowMoveManagerOptions`: Additional options passed to the `Slick.RowMoveManager` constructor
-- `onMoved(event, items, folder)`
-- `onDragRows(event, items, folder)`
 
 
 ## TODO and notes

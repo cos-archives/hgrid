@@ -22,6 +22,8 @@ this.Draggable = (function($, HGrid) {
     onMoved: function(event, movedItems, folder) {},
     onDrag: function(event, items) {},
 
+    canDrag: function(item) { return true; },
+
     // Additional options passed to the Slick.RowMoveManager constructor
     rowMoveManagerOptions: {}
   };
@@ -87,16 +89,6 @@ this.Draggable = (function($, HGrid) {
       // indices of the rows to move
       var indices = args.rows;
 
-      // The data items to move
-      // var movedItems = [];
-
-      // for (var i = 0, rowIdx; rowIdx = indices[i]; i++) {
-      //   var item = dataView.getItemByIdx(indices[i]);
-      //   movedItems.push(item);
-      //   for (var j = 0, child; child = item.children[j]; j++) {
-      //     movedItems.push(child);
-      //   }
-      // }
       var movedItems = indices.map(function(rowIdx) {
         return dataView.getItemByIdx(rowIdx);
       });
@@ -158,6 +150,10 @@ this.Draggable = (function($, HGrid) {
       dd.count = selectedRows.length;
     };
 
+    var onDragRowsStart = function(event, args) {
+      return false;
+    };
+
     /**
      * Given an index, return the correct parent folder to insert an item into.
      * @param  {Number} index
@@ -190,9 +186,16 @@ this.Draggable = (function($, HGrid) {
       self.options.onDrag.call(self, event, args.items, parent);
     };
 
+    var canDrag = function(item) {
+      // invoke user-defined function
+      return self.options.canDrag(item);
+    };
+
     self.rowMoveManager.onBeforeMoveRows.subscribe(onBeforeMoveRows);
     self.rowMoveManager.onMoveRows.subscribe(onMoveRows);
     self.rowMoveManager.onDragRows.subscribe(onDragRows);
+    self.rowMoveManager.onDragRowsStart.subscribe(onDragRowsStart);
+    self.rowMoveManager.canDrag = canDrag;
 
     // Register the slickgrid plugin
     slickgrid.registerPlugin(self.rowMoveManager);

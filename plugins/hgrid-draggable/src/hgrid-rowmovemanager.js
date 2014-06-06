@@ -59,6 +59,16 @@
 
       dd.selectedRows = selectedRows;
 
+      var movedItems = dd.selectedRows.map(function(rowIdx) {
+        return _grid.getData().getItemByIdx(rowIdx);
+      });
+
+      for (var i = 0, item; item = movedItems[i]; i++) {
+        if (_self.canDrag(item) === false) {
+          return false;
+        }
+      }
+
       dd.selectionProxy = $("<div class='slick-reorder-proxy'/>")
           .css("position", "absolute")
           .css("zIndex", "99999")
@@ -74,6 +84,11 @@
           .appendTo(_canvas);
 
       dd.insertBefore = -1;
+
+      _self.onDragRowsStart.notify({
+        rows: dd.selectedRows,
+        items: movedItems
+      });
     }
 
     function handleDrag(e, dd) {
@@ -139,11 +154,14 @@
     }
 
     $.extend(this, {
-      "onBeforeMoveRows": new Slick.Event(),
-      "onMoveRows": new Slick.Event(),
+      'onDragRowsStart': new Slick.Event(),
+      'onBeforeMoveRows': new Slick.Event(),
+      'onMoveRows': new Slick.Event(),
       'onDragRows': new Slick.Event(),
-      "init": init,
-      "destroy": destroy
+      /*jshint unused:false */
+      'canDrag': function(item) { return true; },
+      'init': init,
+      'destroy': destroy
     });
   }
 

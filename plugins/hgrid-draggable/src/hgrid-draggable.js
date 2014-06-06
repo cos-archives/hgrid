@@ -21,7 +21,7 @@ this.Draggable = (function($, HGrid) {
 
     onDrop: function(event, movedItems, folder) {},
     onDrag: function(event, items) {},
-
+    accept: function(item, folder, done) {},
     canDrag: function(item) {
       if (item.kind === HGrid.FOLDER) {
         return false;
@@ -48,6 +48,7 @@ this.Draggable = (function($, HGrid) {
     // The current drag target
     self._folderTarget = null;
   }
+
 
   // Initialization function called by HGrid#registerPlugin
   Draggable.prototype.init = function(grid) {
@@ -97,6 +98,16 @@ this.Draggable = (function($, HGrid) {
       var movedItems = indices.map(function(rowIdx) {
         return dataView.getItemByIdx(rowIdx);
       });
+
+      var errorFunc = function(error){
+        if (error) {
+          throw new HGrid.Error(error);
+        }
+      };
+
+      for (var i = 0, item; item = movedItems[i]; i++) {
+        self.options.accept.call(self, item, self._folderTarget, errorFunc);
+      }
 
       // ID of the folder to transfer the items to
       var parentID = self._folderTarget.id;
@@ -190,7 +201,7 @@ this.Draggable = (function($, HGrid) {
 
     var canDrag = function(item) {
       // invoke user-defined function
-      return self.options.canDrag(item);
+      return self.options.canDrag.call(this, item);
     };
 
     self.rowMoveManager.onBeforeMoveRows.subscribe(onBeforeMoveRows);

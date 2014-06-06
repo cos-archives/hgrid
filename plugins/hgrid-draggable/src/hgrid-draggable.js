@@ -19,7 +19,7 @@ this.Draggable = (function($, HGrid) {
   var defaults = {
     /*jshint unused: false */
 
-    onMoved: function(event, movedItems, folder) {},
+    onDrop: function(event, movedItems, folder) {},
     onDrag: function(event, items) {},
 
     canDrag: function(item) { return true; },
@@ -118,7 +118,7 @@ this.Draggable = (function($, HGrid) {
       slickgrid.render();
       // invoke user-defined callback
       // TODO(sloria): add target folder as an argument
-      self.options.onMoved.call(self, event, movedItems, self._folderTarget);
+      self.options.onDrop.call(self, event, movedItems, self._folderTarget);
     };
 
     // TODO: Is this callback necessary?
@@ -150,9 +150,6 @@ this.Draggable = (function($, HGrid) {
       dd.count = selectedRows.length;
     };
 
-    var onDragRowsStart = function(event, args) {
-      return false;
-    };
 
     /**
      * Given an index, return the correct parent folder to insert an item into.
@@ -194,7 +191,6 @@ this.Draggable = (function($, HGrid) {
     self.rowMoveManager.onBeforeMoveRows.subscribe(onBeforeMoveRows);
     self.rowMoveManager.onMoveRows.subscribe(onMoveRows);
     self.rowMoveManager.onDragRows.subscribe(onDragRows);
-    self.rowMoveManager.onDragRowsStart.subscribe(onDragRowsStart);
     self.rowMoveManager.canDrag = canDrag;
 
     // Register the slickgrid plugin

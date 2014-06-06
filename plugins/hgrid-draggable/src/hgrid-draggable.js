@@ -19,7 +19,7 @@ this.Draggable = (function($, HGrid) {
   var defaults = {
     /*jshint unused: false */
 
-    onDrop: function(event, movedItems, folder) {},
+    onDrop: function(event, items, folder) {},
     onDrag: function(event, items) {},
     acceptDrop: function(item, folder, done) {},
     canDrag: function(item) {
@@ -62,7 +62,6 @@ this.Draggable = (function($, HGrid) {
 
     // Set selection model
     slickgrid.setSelectionModel(new HGrid.RowSelectionModel());
-
 
     // Configure the RowMoveManager
     var rowMoveManagerOptions = $.extend(
@@ -137,7 +136,6 @@ this.Draggable = (function($, HGrid) {
       self.options.onDrop.call(self, event, movedItems, self._folderTarget);
     };
 
-    // TODO: Is this callback necessary?
     var onDragStart = function(event, dd) {
       var cell = slickgrid.getCellFromEvent(event);
       if (!cell) {
@@ -199,6 +197,7 @@ this.Draggable = (function($, HGrid) {
       self.options.onDrag.call(self, event, args.items, parent);
     };
 
+    // TODO: test that this works
     var canDrag = function(item) {
       // invoke user-defined function
       return self.options.canDrag.call(this, item);

@@ -146,9 +146,9 @@
 
       if (dd.canMove) {
         var eventData = {
-          "rows": dd.selectedRows,
+          'rows': dd.selectedRows,
           'items': dd.movedItems,
-          "insertBefore": dd.insertBefore
+          'insertBefore': dd.insertBefore
         };
         // TODO:  _grid.remapCellCssClasses ?
         _self.onMoveRows.notify(eventData);

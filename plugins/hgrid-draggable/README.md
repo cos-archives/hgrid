@@ -27,6 +27,12 @@ var draggable = new HGrid.Draggable({
         return false;
     }
     return true;
+  },
+  acceptDrop: function(item, folder, done) {
+    if (folder.name === 'Forbidden') {
+      done('Cannot drop here');
+    }
+    done();
   }
 });
 
@@ -44,6 +50,7 @@ grid.registerPlugin(draggable);
 - `onDrop(event, items, folder)`: Fired when items are dropped into a folder.
 - `canDrag(item)`: Returns whether an item can be dragged.
 - `rowMoveManagerOptions`: Additional options passed to the `Slick.RowMoveManager` constructor
+- `acceptDrop(item, folder, done)`: Validation function that is invoked when an item is dropped into a folder. `done` is a function that, if called with a string argument, raises the error message and prevents the drop from proceeding.
 
 
 ## TODO

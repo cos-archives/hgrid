@@ -21,7 +21,7 @@ this.Draggable = (function($, HGrid) {
 
     onDrop: function(event, movedItems, folder) {},
     onDrag: function(event, items) {},
-    accept: function(item, folder, done) {},
+    acceptDrop: function(item, folder, done) {},
     canDrag: function(item) {
       if (item.kind === HGrid.FOLDER) {
         return false;
@@ -106,7 +106,7 @@ this.Draggable = (function($, HGrid) {
       };
 
       for (var i = 0, item; item = movedItems[i]; i++) {
-        self.options.accept.call(self, item, self._folderTarget, errorFunc);
+        self.options.acceptDrop.call(self, item, self._folderTarget, errorFunc);
       }
 
       // ID of the folder to transfer the items to

@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
+    <meta charset="utf-8">
     <link rel="stylesheet" href="../bower_components/hgrid/dist/hgrid.css" type="text/css" />
     <link rel="stylesheet" href="../bower_components/hgrid/examples/normalize.css">
     <link rel="stylesheet" href="../bower_components/hgrid/examples/examples.css">
@@ -58,16 +59,23 @@ var myData = {
 
 
 var draggablePlugin = new HGrid.Draggable({
-  onMoved: function(event, moved, folder) {
+  onDrop: function(event, moved, folder) {
     console.log('moved: ');
     console.log(moved);
     console.log('to:');
     console.log(folder);
   },
-  onDrag: function(event, items) {
-    console.log('dragging :');
-    console.log(items);
+  acceptDrop: function(item, folder, done) {
+    if (item.name ===  'foo.py') {
+      done('no no no');
+    } else {
+      done();
+    }
   }
+  // onDrag: function(event, items) {
+  //   console.log('dragging :');
+  //   console.log(items);
+  // }
 });
 
 // Make HGrid name rows draggable

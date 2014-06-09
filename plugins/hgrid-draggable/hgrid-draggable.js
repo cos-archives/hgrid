@@ -255,7 +255,8 @@ this.Draggable = (function($, HGrid) {
     var _self = this;
     var _handler = new Slick.EventHandler();
     var _defaults = {
-      cancelEditOnDrag: false
+      cancelEditOnDrag: false,
+      proxyClass: 'slick-reorder-proxy'
     };
 
     function init(grid) {
@@ -273,7 +274,7 @@ this.Draggable = (function($, HGrid) {
       _handler.unsubscribeAll();
     }
 
-    function handleDragInit(e, dd) {
+    function handleDragInit(e) {
       // prevent the grid from cancelling drag'n'drop by default
       e.stopImmediatePropagation();
     }
@@ -313,7 +314,7 @@ this.Draggable = (function($, HGrid) {
         }
       }
 
-      dd.selectionProxy = $("<div class='slick-reorder-proxy'/>")
+      dd.selectionProxy = $("<div class='" + options.proxyClass + "'/>")
           .css("position", "absolute")
           .css("zIndex", "99999")
           .css("width", $(_canvas).innerWidth())

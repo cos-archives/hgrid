@@ -12,7 +12,8 @@
     var _handler = new Slick.EventHandler();
     var _defaults = {
       cancelEditOnDrag: false,
-      proxyClass: 'slick-reorder-proxy'
+      proxyClass: 'slick-reorder-proxy',
+      guideClass: 'slick-reorder-guide',
     };
 
     function init(grid) {
@@ -77,7 +78,7 @@
           .css("height", rowHeight * selectedRows.length)
           .appendTo(_canvas);
 
-      dd.guide = $("<div class='slick-reorder-guide'/>")
+      dd.guide = $("<div class='" + options.guideClass + "'/>")
           .css("position", "absolute")
           .css("zIndex", "99998")
           .css("width", $(_canvas).innerWidth())

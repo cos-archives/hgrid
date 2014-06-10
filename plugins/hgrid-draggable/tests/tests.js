@@ -42,7 +42,7 @@
         kind: HGrid.FOLDER
       }]
     }]
-  }
+  };
   var myGrid;
 
   function getMockGrid(args) {
@@ -88,6 +88,7 @@
     myGrid.registerPlugin(draggable);
     // $.inArray returns index of the passed in value, or -1 if not found
     isTrue($.inArray(draggable, myGrid.plugins) >= 0);
+    equal(draggable.grid, myGrid, 'plugin has access to the grid');
   });
 
   var draggable; // Draggable plugin

@@ -57,6 +57,7 @@ this.Draggable = (function($, HGrid) {
    */
   function Draggable(options) {
     var self = this;
+    self.grid = null;  // set upon calling Draggable.init
     self.options = $.extend({}, defaults, options);
     self.rowMoveManager = null;  // Initialized in init
     // The current drag target
@@ -70,6 +71,7 @@ this.Draggable = (function($, HGrid) {
   // Initialization function called by HGrid#registerPlugin
   Draggable.prototype.init = function(grid) {
     var self = this;
+    self.grid = grid;
     var data = grid.getData();
     var dataView = grid.getDataView();
     var slickgrid = grid.grid;

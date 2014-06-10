@@ -3,7 +3,7 @@
  * https://github.com/mleibman/SlickGrid/blob/master/plugins/slick.rowmovemanager.js
  */
 (function ($, HGrid) {
-
+  'use strict';
   function RowMoveManager(options) {
     var _grid;
     var _canvas;
@@ -13,7 +13,7 @@
     var _defaults = {
       cancelEditOnDrag: false,
       proxyClass: 'slick-reorder-proxy',
-      guideClass: 'slick-reorder-guide',
+      guideClass: 'slick-reorder-guide'
     };
 
     function init(grid) {
@@ -52,7 +52,7 @@
 
       var selectedRows = _grid.getSelectedRows();
 
-      if (selectedRows.length == 0 || $.inArray(cell.row, selectedRows) == -1) {
+      if (selectedRows.length === 0 || $.inArray(cell.row, selectedRows) === -1) {
         selectedRows = [cell.row];
         _grid.setSelectedRows(selectedRows);
       }
@@ -71,18 +71,18 @@
         }
       }
 
-      dd.selectionProxy = $("<div class='" + options.proxyClass + "'/>")
-          .css("position", "absolute")
-          .css("zIndex", "99999")
-          .css("width", $(_canvas).innerWidth())
-          .css("height", rowHeight * selectedRows.length)
+      dd.selectionProxy = $('<div class="' + options.proxyClass + '"/>')
+          .css('position', 'absolute')
+          .css('zIndex', '99999')
+          .css('width', $(_canvas).innerWidth())
+          .css('height', rowHeight * selectedRows.length)
           .appendTo(_canvas);
 
-      dd.guide = $("<div class='" + options.guideClass + "'/>")
-          .css("position", "absolute")
-          .css("zIndex", "99998")
-          .css("width", $(_canvas).innerWidth())
-          .css("top", -1000)
+      dd.guide = $('<div class="' + options.guideClass + '"/>')
+          .css('position', 'absolute')
+          .css('zIndex', '99998')
+          .css('width', $(_canvas).innerWidth())
+          .css('top', -1000)
           .appendTo(_canvas);
 
       dd.insertBefore = -1;
@@ -101,7 +101,7 @@
       e.stopImmediatePropagation();
 
       var top = e.pageY - $(_canvas).offset().top;
-      dd.selectionProxy.css("top", top - 5);
+      dd.selectionProxy.css('top', top - 5);
 
       var insertBefore = Math.max(0, Math.min(Math.round(top / _grid.getOptions().rowHeight), _grid.getDataLength()));
 
@@ -119,10 +119,10 @@
         };
 
         if (_self.onBeforeMoveRows.notify(eventData) === false) {
-          dd.guide.css("top", -1000);
+          dd.guide.css('top', -1000);
           dd.canMove = false;
         } else {
-          dd.guide.css("top", insertBefore * _grid.getOptions().rowHeight);
+          dd.guide.css('top', insertBefore * _grid.getOptions().rowHeight);
           dd.canMove = true;
         }
 

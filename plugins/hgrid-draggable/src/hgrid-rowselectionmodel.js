@@ -3,8 +3,7 @@
  * https://github.com/mleibman/SlickGrid/blob/master/plugins/slick.rowselectionmodel.js
  */
 (function ($, HGrid) {
-
-
+    'use strict';
     function RowSelectionModel(options) {
       var _grid;
       var _ranges = [];
@@ -84,7 +83,7 @@
           var originalParent = originalRow.parentID;
           for (i = 0; i < rows.length; i++) {
             var currentItem = gridData.getItem(rows[i]);
-            if(currentItem.parentID == originalParent){
+            if(currentItem.parentID === originalParent){
               newRows.push(rows[i]);
             }
           }
@@ -113,10 +112,11 @@
 
       function handleKeyDown(e) {
         var activeRow = _grid.getActiveCell();
-        if (activeRow && e.shiftKey && !e.ctrlKey && !e.altKey && !e.metaKey && (e.which == 38 || e.which == 40)) {
+        if (activeRow && e.shiftKey && !e.ctrlKey && !e.altKey && !e.metaKey &&
+           (e.which === 38 || e.which === 40)) {
           var selectedRows = getSelectedRows();
           selectedRows.sort(function (x, y) {
-            return x - y
+            return x - y;
           });
 
           if (!selectedRows.length) {
@@ -127,8 +127,8 @@
           var bottom = selectedRows[selectedRows.length - 1];
           var active;
 
-          if (e.which == 40) {
-            active = activeRow.row < bottom || top == bottom ? ++bottom : ++top;
+          if (e.which === 40) {
+            active = activeRow.row < bottom || top === bottom ? ++bottom : ++top;
           } else {
             active = activeRow.row < bottom ? --bottom : --top;
           }
@@ -162,7 +162,7 @@
         selection.push(cell.row);
         _grid.setActiveCell(cell.row, cell.cell);
       } else if (idx !== -1 && (e.ctrlKey || e.metaKey)) {
-        selection = $.grep(selection, function (o, i) {
+        selection = $.grep(selection, function (o) {
           return (o !== cell.row);
         });
         _grid.setActiveCell(cell.row, cell.cell);

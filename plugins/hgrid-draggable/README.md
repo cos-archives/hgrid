@@ -49,8 +49,8 @@ grid.registerPlugin(draggable);
 
 ## Available Options
 
-- `onDrag(event, items)`: Fired while items are being dragged
-- `onDrop(event, items, folder)`: Fired when items are dropped into a folder.
+- `onDrag(event, items, insertBefore)`: Fired while items are being dragged
+- `onDrop(event, items, folder, insertBefore)`: Fired when items are dropped into a folder.
 - `onBeforeDrag(event, items, insertBefore)`: Fired before the drag event is triggered. If this returns `false`, dragging is terminated.
 - `canDrag(item)`: Returns whether an item can be dragged.
 - `acceptDrop(item, folder, done)`: Validation function that is invoked when an item is dropped into a folder. `done` is a function that, if called with a string argument, raises the error message and prevents the drop from proceeding.

@@ -19,8 +19,8 @@ this.Draggable = (function($, HGrid) {
   var defaults = {
     /*jshint unused: false */
 
-    onDrop: function(event, items, folder) {},
-    onDrag: function(event, items) {},
+    onDrop: function(event, items, folder, insertBefore) {},
+    onDrag: function(event, items, insertBefore) {},
     onBeforeDrag: function(event, items, insertBefore) {},
     acceptDrop: function(item, folder, done) {},
     canDrag: function(item) {
@@ -102,6 +102,7 @@ this.Draggable = (function($, HGrid) {
       var extractedRows = [];
       // indices of the rows to move
       var indices = args.rows;
+      var insertBefore = args.insertBefore;
 
       var movedItems = args.items;
       var errorFunc = function(error){
@@ -139,7 +140,7 @@ this.Draggable = (function($, HGrid) {
       slickgrid.setSelectedRows([]);
       slickgrid.render();
       // invoke user-defined callback
-      self.options.onDrop.call(self, event, movedItems, self._folderTarget);
+      self.options.onDrop.call(self, event, movedItems, self._folderTarget, insertBefore);
     };
 
     var onDragStart = function(event, dd) {
@@ -191,6 +192,7 @@ this.Draggable = (function($, HGrid) {
     var onDragRows = function(event, args) {
       // set the current drag target
       var movedItems = args.items;
+      var insertBefore = args.insertBefore;
       // get the parent of the current item being dragged over
       var parent;
       if (args.insertBefore) {
@@ -207,7 +209,7 @@ this.Draggable = (function($, HGrid) {
           grid.addHighlight(self._folderTarget);
         }
       }
-      self.options.onDrag.call(self, event, args.items, parent);
+      self.options.onDrag.call(self, event, args.items, parent, insertBefore);
     };
 
     // TODO: test that this works

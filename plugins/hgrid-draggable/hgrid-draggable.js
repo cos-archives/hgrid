@@ -97,7 +97,7 @@ this.Draggable = (function($, HGrid) {
     var onBeforeMoveRows = function(event, data) {
       var movedItems = data.items;
       var insertBefore = data.insertBefore;
-      return self.options.onBeforeDrag.call(self, movedItems, insertBefore);
+      return self.options.onBeforeDrag.call(self, event, movedItems, insertBefore);
     };
 
     /**

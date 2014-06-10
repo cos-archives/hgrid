@@ -268,6 +268,8 @@ this.Draggable = (function($, HGrid) {
     var _handler = new Slick.EventHandler();
     var _defaults = {
       cancelEditOnDrag: false,
+      enableReorder: false, // TODO(sloria): reordering not implemented yet.
+                            // Setting to false will disable the reorder guide.
       proxyClass: 'slick-reorder-proxy',
       guideClass: 'slick-reorder-guide'
     };
@@ -334,12 +336,14 @@ this.Draggable = (function($, HGrid) {
           .css('height', rowHeight * selectedRows.length)
           .appendTo(_canvas);
 
-      dd.guide = $('<div class="' + options.guideClass + '"/>')
-          .css('position', 'absolute')
-          .css('zIndex', '99998')
-          .css('width', $(_canvas).innerWidth())
-          .css('top', -1000)
-          .appendTo(_canvas);
+      if (options.enableReorder) {
+        dd.guide = $('<div class="' + options.guideClass + '"/>')
+            .css('position', 'absolute')
+            .css('zIndex', '99998')
+            .css('width', $(_canvas).innerWidth())
+            .css('top', -1000)
+            .appendTo(_canvas);
+      }
 
       dd.insertBefore = -1;
 
@@ -375,10 +379,14 @@ this.Draggable = (function($, HGrid) {
         };
 
         if (_self.onBeforeMoveRows.notify(eventData) === false) {
-          dd.guide.css('top', -1000);
+          if (options.enableReorder) {
+            dd.guide.css('top', -1000);
+          }
           dd.canMove = false;
         } else {
-          dd.guide.css('top', insertBefore * _grid.getOptions().rowHeight);
+          if (options.enableReorder) {
+            dd.guide.css('top', insertBefore * _grid.getOptions().rowHeight);
+          }
           dd.canMove = true;
         }
 
@@ -399,7 +407,9 @@ this.Draggable = (function($, HGrid) {
       _dragging = false;
       e.stopImmediatePropagation();
 
-      dd.guide.remove();
+      if (options.enableReorder) {
+        dd.guide.remove();
+      }
       dd.selectionProxy.remove();
 
       if (dd.canMove) {

@@ -108,7 +108,8 @@ this.Draggable = (function($, HGrid) {
         }
       };
 
-      for (var i = 0, item; item = movedItems[i]; i++) {
+      var i, item;
+      for (i = 0, item = null; item = movedItems[i]; i++) {
         self.options.acceptDrop.call(self, item, self._folderTarget, errorFunc);
       }
 
@@ -126,7 +127,7 @@ this.Draggable = (function($, HGrid) {
       });
 
       // Remove dragged items from grid
-      for (var i = 0, item; item = movedItems[i]; i++) {
+      for (i = 0, item = null; item = movedItems[i]; i++) {
         grid.removeItem(item.id);
       }
       // Add items at new location

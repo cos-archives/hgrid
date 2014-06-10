@@ -195,7 +195,7 @@ this.Draggable = (function($, HGrid) {
         parent = getParent(args.insertBefore);
         // Check if folder can accep drop
         // NOTE: canAccept must return false to disallow dropping, not just a falsy value
-        if (self.options.canAcceptDrop.call(self, parent) === false) {
+        if (self.options.canAcceptDrop.call(self, movedItems, parent) === false) {
           return false;
         }
         // set the folder target

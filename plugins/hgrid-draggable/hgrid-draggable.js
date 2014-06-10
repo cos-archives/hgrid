@@ -32,6 +32,7 @@ this.Draggable = (function($, HGrid) {
     onDrop: function(event, items, folder, insertBefore) {},
     onDrag: function(event, items, insertBefore) {},
     onBeforeDrag: function(event, items, insertBefore) {},
+    onBeforeDrop: function(event, items, insertBefore) {},
     acceptDrop: function(item, folder, done) {},
     canDrag: function(item) {
       if (item.kind === HGrid.FOLDER) {
@@ -94,7 +95,7 @@ this.Draggable = (function($, HGrid) {
 
     /** Callbacks **/
 
-    var onBeforeMoveRows = function(event, data) {
+    var onBeforeDragRows = function(event, data) {
       var movedItems = data.items;
       var insertBefore = data.insertBefore;
       return self.options.onBeforeDrag.call(self, event, movedItems, insertBefore);
@@ -228,7 +229,7 @@ this.Draggable = (function($, HGrid) {
       return self.options.canDrag.call(self, item);
     };
 
-    self.rowMoveManager.onBeforeMoveRows.subscribe(onBeforeMoveRows);
+    self.rowMoveManager.onBeforeDragRows.subscribe(onBeforeDragRows);
     self.rowMoveManager.onMoveRows.subscribe(onMoveRows);
     self.rowMoveManager.onDragRows.subscribe(onDragRows);
     self.rowMoveManager.canDrag = canDrag;
@@ -378,7 +379,7 @@ this.Draggable = (function($, HGrid) {
           items: dd.movedItems
         };
 
-        if (_self.onBeforeMoveRows.notify(eventData) === false) {
+        if (_self.onBeforeDragRows.notify(eventData) === false) {
           if (options.enableReorder) {
             dd.guide.css('top', -1000);
           }
@@ -425,7 +426,7 @@ this.Draggable = (function($, HGrid) {
 
     $.extend(this, {
       'onDragRowsStart': new Slick.Event(),
-      'onBeforeMoveRows': new Slick.Event(),
+      'onBeforeDragRows': new Slick.Event(),
       'onMoveRows': new Slick.Event(),
       'onDragRows': new Slick.Event(),
       /*jshint unused:false */

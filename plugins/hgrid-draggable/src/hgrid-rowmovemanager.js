@@ -122,7 +122,7 @@
           items: dd.movedItems
         };
 
-        if (_self.onBeforeMoveRows.notify(eventData) === false) {
+        if (_self.onBeforeDragRows.notify(eventData) === false) {
           if (options.enableReorder) {
             dd.guide.css('top', -1000);
           }
@@ -169,7 +169,7 @@
 
     $.extend(this, {
       'onDragRowsStart': new Slick.Event(),
-      'onBeforeMoveRows': new Slick.Event(),
+      'onBeforeDragRows': new Slick.Event(),
       'onMoveRows': new Slick.Event(),
       'onDragRows': new Slick.Event(),
       /*jshint unused:false */

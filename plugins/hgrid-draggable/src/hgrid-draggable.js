@@ -22,6 +22,7 @@ this.Draggable = (function($, HGrid) {
     onDrop: function(event, items, folder, insertBefore) {},
     onDrag: function(event, items, insertBefore) {},
     onBeforeDrag: function(event, items, insertBefore) {},
+    onBeforeDrop: function(event, items, insertBefore) {},
     acceptDrop: function(item, folder, done) {},
     canDrag: function(item) {
       if (item.kind === HGrid.FOLDER) {
@@ -84,7 +85,7 @@ this.Draggable = (function($, HGrid) {
 
     /** Callbacks **/
 
-    var onBeforeMoveRows = function(event, data) {
+    var onBeforeDragRows = function(event, data) {
       var movedItems = data.items;
       var insertBefore = data.insertBefore;
       return self.options.onBeforeDrag.call(self, event, movedItems, insertBefore);
@@ -218,7 +219,7 @@ this.Draggable = (function($, HGrid) {
       return self.options.canDrag.call(self, item);
     };
 
-    self.rowMoveManager.onBeforeMoveRows.subscribe(onBeforeMoveRows);
+    self.rowMoveManager.onBeforeDragRows.subscribe(onBeforeDragRows);
     self.rowMoveManager.onMoveRows.subscribe(onMoveRows);
     self.rowMoveManager.onDragRows.subscribe(onDragRows);
     self.rowMoveManager.canDrag = canDrag;

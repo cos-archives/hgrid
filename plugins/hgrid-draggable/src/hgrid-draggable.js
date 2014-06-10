@@ -117,6 +117,13 @@ this.Draggable = (function($, HGrid) {
         self.options.acceptDrop.call(self, item, self._folderTarget, errorFunc);
       }
 
+
+      var beforeDrop = self.options.onBeforeDrop.call(self, event, movedItems, self._folderTarget, insertBefore);
+      // If user-defined callback returns false, return early
+      if (beforeDrop === false) {
+        return false;
+      }
+
       // ID of the folder to transfer the items to
       var parentID = self._folderTarget.id;
       // Copy the moved items, but change the parentID to the target folder's ID

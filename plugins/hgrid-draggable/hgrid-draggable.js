@@ -42,6 +42,7 @@ this.Draggable = (function($, HGrid) {
     },
 
     canAcceptDrop: function(folder) {},
+    enableMove: true,
 
     // Additional options passed to the HGrid.RowMoveManager constructor
     rowMoveManagerOptions: {},
@@ -147,16 +148,18 @@ this.Draggable = (function($, HGrid) {
         return newItem;
       });
 
-      // Remove dragged items from grid
-      for (i = 0, item = null; item = movedItems[i]; i++) {
-        grid.removeItem(item.id);
-      }
-      // Add items at new location
-      grid.addItems(newItems);
+      if (self.options.enableMove) {
+        // Remove dragged items from grid
+        for (i = 0, item = null; item = movedItems[i]; i++) {
+          grid.removeItem(item.id);
+        }
+        // Add items at new location
+        grid.addItems(newItems);
 
-      slickgrid.resetActiveCell();
-      slickgrid.setSelectedRows([]);
-      slickgrid.render();
+        slickgrid.resetActiveCell();
+        slickgrid.setSelectedRows([]);
+        slickgrid.render();
+      }
       // invoke user-defined callback
       self.options.onDrop.call(self, event, movedItems, self._folderTarget, insertBefore);
     };

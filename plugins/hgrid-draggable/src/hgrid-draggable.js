@@ -29,6 +29,8 @@ this.Draggable = (function($, HGrid) {
       return true;
     },
 
+    canAcceptDrop: function(folder) {},
+
     // Additional options passed to the HGrid.RowMoveManager constructor
     rowMoveManagerOptions: {},
     // Additional options passed to the HGrid.RowSelectionModel constructor
@@ -85,7 +87,6 @@ this.Draggable = (function($, HGrid) {
       }
     };
 
-    // TODO(sloria): Test me
 
     /**
      * Callback executed when rows are moved and dropped into a new location
@@ -135,7 +136,6 @@ this.Draggable = (function($, HGrid) {
       slickgrid.setSelectedRows([]);
       slickgrid.render();
       // invoke user-defined callback
-      // TODO(sloria): add target folder as an argument
       self.options.onDrop.call(self, event, movedItems, self._folderTarget);
     };
 
@@ -192,6 +192,12 @@ this.Draggable = (function($, HGrid) {
       var parent;
       if (args.insertBefore) {
         parent = getParent(args.insertBefore);
+        // Check if folder can accep drop
+        // NOTE: canAccept must return false to disallow dropping, not just a falsy value
+        if (self.options.canAcceptDrop.call(self, parent) === false) {
+          return false;
+        }
+        // set the folder target
         if (parent) {
           self.setTarget(parent);
           grid.addHighlight(self._folderTarget);

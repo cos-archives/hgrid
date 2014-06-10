@@ -36,6 +36,9 @@ var draggable = new HGrid.Draggable({
   }
 });
 
+// Make the name column draggable
+HGrid.Col.Name.behavior = 'move';
+
 var grid = new HGrid({
     # ...
 })
@@ -50,6 +53,7 @@ grid.registerPlugin(draggable);
 - `onDrop(event, items, folder)`: Fired when items are dropped into a folder.
 - `canDrag(item)`: Returns whether an item can be dragged.
 - `acceptDrop(item, folder, done)`: Validation function that is invoked when an item is dropped into a folder. `done` is a function that, if called with a string argument, raises the error message and prevents the drop from proceeding.
+- `canAcceptDrop(folder)`: Returns whether a folder is a valid drop target.
 - `rowMoveManagerOptions`: Additional options passed to the `Slick.RowMoveManager` constructor. Available options: ``cancelEditOnDrag``, ``proxyClass``, and ``guideClass``.
 - `rowSelectionModelOptions`: Additional options passed to the `HGrid.RowSelectionModel` constructor. Available options: ``selectActiveRow``.
 
@@ -74,7 +78,7 @@ $ bower install  # installs dependencies (e.g. HGrid, qUnit...)
 ```
 
 
-### Running tests
+### Running tests and building
 
 Tests are run using the `gulp` build tool.
 
@@ -82,7 +86,7 @@ Tests are run using the `gulp` build tool.
 $ gulp
 ```
 
-You can also start watch mode
+You can also start watch mode, which will build and run tests whenever a file is changed.
 
 ```sh
 $ gulp watch

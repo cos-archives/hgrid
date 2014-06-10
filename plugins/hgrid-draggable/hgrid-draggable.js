@@ -68,6 +68,11 @@ this.Draggable = (function($, HGrid) {
     this._folderTarget = folder;
   };
 
+
+  Draggable.prototype.clearTarget = function() {
+    this._folderTarget = null;
+  };
+
   // Initialization function called by HGrid#registerPlugin
   Draggable.prototype.init = function(grid) {
     var self = this;
@@ -208,6 +213,7 @@ this.Draggable = (function($, HGrid) {
         // Check if folder can accep drop
         // NOTE: canAccept must return false to disallow dropping, not just a falsy value
         if (self.options.canAcceptDrop.call(self, movedItems, parent) === false) {
+          self.clearTarget();
           return false;
         }
         // set the folder target

@@ -2068,6 +2068,10 @@ this.HGrid = (function($) {
     return this;
   };
 
+  HGrid.prototype.refreshData = function() {
+    this.getDataView().refresh();
+  };
+
   HGrid.prototype.registerPlugin = function(plugin) {
     this.plugins.unshift(plugin);
     plugin.init(this);

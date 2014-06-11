@@ -1,5 +1,5 @@
 /*
- *  HGrid - v0.1.2
+ *  HGrid - v0.1.3-dev
  *  A Javascript-based hierarchical grid that can be used to manage and organize files and folders
  */
 (function (global, factory) {
@@ -1055,10 +1055,11 @@ this.HGrid = (function($) {
    * @constructor
    */
   HGrid.Error = function(message) {
+    Error.call(this, message);
     this.name = 'HGrid.Error';
     this.message = message || '';
   };
-  HGrid.Error.prototype = new Error();
+  HGrid.Error.prototype = Object.create(Error.prototype);
 
   /**
    * Construct an HGrid.

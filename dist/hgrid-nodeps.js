@@ -1041,10 +1041,11 @@ this.HGrid = (function($) {
    * @constructor
    */
   HGrid.Error = function(message) {
+    Error.call(this, message);
     this.name = 'HGrid.Error';
     this.message = message || '';
   };
-  HGrid.Error.prototype = new Error();
+  HGrid.Error.prototype = Object.create(Error.prototype);
 
   /**
    * Construct an HGrid.

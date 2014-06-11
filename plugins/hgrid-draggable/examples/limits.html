@@ -89,7 +89,7 @@ grid.registerPlugin(
       console.log('Not allowed: Can\'t  move ' + item.name + ' to ' + folder.name);
       alert(message);
     },
-    canAcceptDrop: function(folder) {
+    canAcceptDrop: function(items, folder) {
       return folder.name !== 'Verboten';
     }
   })

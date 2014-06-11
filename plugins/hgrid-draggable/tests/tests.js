@@ -114,7 +114,7 @@
     // folder target must be set before onMoveRows is triggered
     var folder = myGrid.getData()[0];
     draggable.setTarget(folder);
-    // trigger the rowmovemanageer's onMoveRows event
+    // trigger the rowmovemanager's onMoveRows event
     var item = myGrid.getData()[1];
     triggerSlick(draggable.rowMoveManager.onMoveRows, {
       rows: [1, 3],

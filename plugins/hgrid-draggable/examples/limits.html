@@ -85,7 +85,10 @@ grid.registerPlugin(
         done();
       }
     },
-
+    dropError: function(item, folder, message) {
+      console.log('Not allowed: Can\'t  move ' + item.name + ' to ' + folder.name);
+      alert(message);
+    },
     canAcceptDrop: function(folder) {
       return folder.name !== 'Verboten';
     }

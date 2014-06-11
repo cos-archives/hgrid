@@ -116,12 +116,18 @@ this.Draggable = (function($, HGrid) {
 
       var movedItems = args.items;
       var i, item;
-      for (i = 0, item = null; item = movedItems[i]; i++) {
-        var errorFunc = function(errorMessage) {
-          if (errorMessage) {
-            return self.options.dropError.call(self, item, self._folderTarget, errorMessage);
+
+      // This function factory is to avoid creating function outside of loop context
+      var makeErrorFunc = function(item, folder) {
+        return function(message) {
+          if (message) {
+            return self.options.dropError.call(self, item, self._folderTarget, message);
           }
         };
+      };
+
+      for (i = 0, item = null; item = movedItems[i]; i++) {
+        var errorFunc = makeErrorFunc(item, self._folderTarget);
         self.options.acceptDrop.call(self, item, self._folderTarget, errorFunc);
       }
 

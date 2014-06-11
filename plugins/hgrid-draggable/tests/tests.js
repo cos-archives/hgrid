@@ -3,22 +3,6 @@
 
 
   // Fixtures and factories
-  var counter = 0;
-
-  function getMockItem(args) {
-    var item = $.extend({}, {
-      id: 123,
-      name: 'test.txt',
-      kind: HGrid.FOLDER,
-      parentID: 'root',
-      depth: 1,
-      _node: new HGrid.Tree({
-        name: 'test.txt',
-        kind: HGrid.Folder
-      })
-    }, args);
-    return item;
-  }
   var testData = {
     data: [{
       name: 'Documents',
@@ -152,6 +136,28 @@
       items: itemsToMove
     });
     equal(acceptDropSpy.callCount, itemsToMove.length, 'acceptDrop called for every moved item');
+  });
+
+  module('Error handling', {});
+
+  test('droperror', function() {
+    var dropErrorSpy = this.spy();
+    var draggable = new HGrid.Draggable({
+      acceptDrop: function(item, folder, done) {
+        // always throw an error
+        done('Can\'t drag that');
+      },
+      dropError: dropErrorSpy
+    });
+    var grid = getMockGrid();
+    grid.registerPlugin(draggable);
+    var itemsToMove = grid.getData().slice(1, 3);
+    // Trigger event
+    triggerSlick(draggable.rowMoveManager.onMoveRows, {
+      rows: [1, 2],
+      items: itemsToMove
+    });
+    isTrue(dropErrorSpy.called, 'Drop error was called');
   });
 
 

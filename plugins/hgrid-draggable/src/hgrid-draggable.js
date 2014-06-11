@@ -24,6 +24,14 @@ this.Draggable = (function($, HGrid) {
     onBeforeDrag: function(event, items, insertBefore) {},
     onBeforeDrop: function(event, items, insertBefore) {},
     acceptDrop: function(item, folder, done) {},
+    /**
+     * Callback that is invoked if acceptDrop's done callback is called with
+     * a string message, indicating that a drop has failed. By default, just
+     * raises an HGrid.Error.
+     */
+    dropError: function(items, folder, message) {
+      throw new HGrid.Error(message);
+    },
     canDrag: function(item) {
       if (item.kind === HGrid.FOLDER) {
         return false;
@@ -107,14 +115,13 @@ this.Draggable = (function($, HGrid) {
       var insertBefore = args.insertBefore;
 
       var movedItems = args.items;
-      var errorFunc = function(error){
-        if (error) {
-          throw new HGrid.Error(error);
-        }
-      };
-
       var i, item;
       for (i = 0, item = null; item = movedItems[i]; i++) {
+        var errorFunc = function(errorMessage) {
+          if (errorMessage) {
+            return self.options.dropError.call(self, item, self._folderTarget, errorMessage);
+          }
+        };
         self.options.acceptDrop.call(self, item, self._folderTarget, errorFunc);
       }
 
@@ -125,18 +132,23 @@ this.Draggable = (function($, HGrid) {
         return false;
       }
 
+      var newItems;
       // ID of the folder to transfer the items to
-      var parentID = self._folderTarget.id;
-      // Copy the moved items, but change the parentID to the target folder's ID
-      var newItems = movedItems.map(function(item) {
-        var newItem = $.extend({}, item);
-        newItem.parentID = parentID;
-        // remove depth and _node properties
-        // these will be set upon adding the item to the grid
-        delete newItem.depth;
-        delete newItem._node;
-        return newItem;
-      });
+      if (self._folderTarget) {
+        var parentID = self._folderTarget.id;
+        // Copy the moved items, but change the parentID to the target folder's ID
+        newItems = movedItems.map(function(item) {
+          var newItem = $.extend({}, item);
+          newItem.parentID = parentID;
+          // remove depth and _node properties
+          // these will be set upon adding the item to the grid
+          delete newItem.depth;
+          delete newItem._node;
+          return newItem;
+        });
+      } else{
+        newItems = [];
+      }
 
       if (self.options.enableMove) {
         // Remove dragged items from grid

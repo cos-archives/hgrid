@@ -1521,9 +1521,9 @@
   test('resetLoadedState', function() {
     var grid = getMockGrid();
     var item = getMockItem();
-    item._node._loaded = true;
+    item._node._load_status = HGrid.LOADING_UNFINISHED;
     grid.resetLoadedState(item);
-    isFalse(item._node._loaded, 'node is no longer loaded');
+    equal(item._node._load_status, HGrid.LOADING_UNFINISHED, 'node is no longer loaded');
 
   });
 

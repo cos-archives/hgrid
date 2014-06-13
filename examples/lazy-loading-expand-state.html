@@ -9,19 +9,25 @@
 <body>
 
 <div class="box">
-<h1>HGrid: Lazy loading</h1>
+<h1>HGrid: Saving expand state</h1>
 <p>NOTE: This example uses a fake server to load data.</p>
 <div class="hgrid" id="myGrid"></div>
 </div>
 
 <script src="../lib/jquery-1.10.2.js"></script>
 <script src='./jquery.mockjax.js'></script>
-<script src='./mockserver-lazy.js'></script>
+<script src='./mockserver-lazy-expandstate.js'></script>
 <script src="../dist/hgrid.js"></script>
 
 <script>
 $('#myGrid').hgrid({
   data: '/grid/',
+  getExpandState: function(folder) {
+    return folder.expanded;
+  },
+  onExpand: function(event, folder) {
+    folder.expanded = false;
+  },
   fetchUrl: function(item) {
     if (item.slug) {
       return '/grid/' + item.slug;

@@ -112,6 +112,10 @@
     return equal($(fullSelector).length, 0, msg || '"' + text + '" found in element(s)');
   }
 
+  ///////////////
+  // The tests //
+  ///////////////
+
   module('Basic', {
     setup: function() {
       myGrid = getMockGrid();

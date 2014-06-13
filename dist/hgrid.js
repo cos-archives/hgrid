@@ -108,8 +108,6 @@ this.HGrid = (function($) {
     }
     // Assumes nodes have a `kind` property. If `kind` is "item", create a leaf,
     // else create a Tree.
-    // TODO: This logic might not be necessary. Could just create a tree node for
-    // every item.
     for (var i = 0, len = children.length; i < len; i++) {
       var child = children[i];
       if (child.kind === ITEM) {
@@ -1033,7 +1031,9 @@ this.HGrid = (function($) {
      * Called when a user tries to upload to a folder they don't have permission
      * to upload to. This is called before adding a file to the upload queue.
      */
-    uploadDenied: function(folder) {}
+    uploadDenied: function(folder) {},
+
+    getExpandState: null
   };
 
   HGrid._defaults = defaults;
@@ -1183,8 +1183,22 @@ this.HGrid = (function($) {
     if (this.isLazy()) {
       this.collapseAll();
     }
+    this.refreshExpandState();
     this.options.init.call(this);
     return this;
+  };
+
+
+  HGrid.prototype.refreshExpandState = function() {
+    var self = this;
+    if (self.options.getExpandState) {
+      var data = self.getData();
+      for (var i = 0, item; item= data[i]; i++) {
+        if (self.options.getExpandState.call(self, item)) {
+          self.expandItem(item);
+        }
+      }
+    }
   };
 
   HGrid.prototype.setHeight = function(height) {
@@ -1850,6 +1864,7 @@ this.HGrid = (function($) {
         if (!error) {
           self.addData(newData, item.id);
           self.setLoadingStatus(item, LOADING_FINISHED);
+          self.refreshExpandState();
           self.options.fetchSuccess.call(self, newData, item);
         } else {
           self.setLoadingStatus(item, LOADING_UNFINISHED);
@@ -2040,13 +2055,15 @@ this.HGrid = (function($) {
     for (var i = 0, datum; datum = toAdd[i]; i++) {
       var node;
       if (datum.kind === HGrid.FOLDER) {
-        var args = {collapse: self.isLazy()};
+        var collapse = self.isLazy();
+        var args = {collapse: collapse};
         node = Tree.fromObject(datum, tree, args);
       } else {
         node = Leaf.fromObject(datum, tree);
       }
       tree.add(node, true); // ensure dataview is updated
     }
+    // self.refreshExpandState();
     return this;
   };
 

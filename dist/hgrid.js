@@ -1,5 +1,5 @@
 /*
- *  HGrid - v0.1.3-dev
+ *  HGrid - v0.2.0
  *  A Javascript-based hierarchical grid that can be used to manage and organize files and folders
  */
 (function (global, factory) {

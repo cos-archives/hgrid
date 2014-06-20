@@ -1,3 +1,4 @@
+
 (function($) {
   'use strict';
 
@@ -100,7 +101,7 @@
   });
 
   test('onDrag callback is invoked upon dragging rows', function() {
-    var item = myGrid.getData()[0];
+    var item = myGrid.getData()[1];
     // trigger the rowmovemanger's onDragRows event
     triggerSlick(draggable.rowMoveManager.onDragRows, {
       items: [item],

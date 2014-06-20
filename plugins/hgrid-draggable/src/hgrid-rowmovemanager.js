@@ -97,6 +97,10 @@
       });
     }
 
+    var cancelDrag = function() {
+      _dragging = false;
+    };
+
     function handleDrag(e, dd) {
       if (!_dragging) {
         return;
@@ -145,16 +149,17 @@
     }
 
     function handleDragEnd(e, dd) {
+      e.stopImmediatePropagation();
+      dd.selectionProxy.remove();
       if (!_dragging) {
+        dd.selectionProxy.remove();
         return;
       }
       _dragging = false;
-      e.stopImmediatePropagation();
 
       if (options.enableReorder) {
         dd.guide.remove();
       }
-      dd.selectionProxy.remove();
 
       if (dd.canMove) {
         var eventData = {
@@ -175,7 +180,8 @@
       /*jshint unused:false */
       'canDrag': function(item) { return true; },
       'init': init,
-      'destroy': destroy
+      'destroy': destroy,
+      'cancelDrag': cancelDrag
     });
   }
 

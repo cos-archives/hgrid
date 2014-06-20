@@ -65,13 +65,13 @@ var draggablePlugin = new HGrid.Draggable({
     console.log('to:');
     console.log(folder);
   },
-  acceptDrop: function(item, folder, done) {
-    if (item.name ===  'foo.py') {
-      done('no no no');
-    } else {
-      done();
-    }
-  }
+  // acceptDrop: function(item, folder, done) {
+  //   if (item.name ===  'foo.py') {
+  //     done('no no no');
+  //   } else {
+  //     done();
+  //   }
+  // }
   // onDrag: function(event, items) {
   //   console.log('dragging :');
   //   console.log(items);
@@ -89,6 +89,7 @@ var grid = new HGrid('#myGrid', {
     HGrid.Col.ActionButtons
   ],
   width: 500,
+  height: 200,
   slickgridOptions: {
     editable: true,
     enableCellNavigation: true

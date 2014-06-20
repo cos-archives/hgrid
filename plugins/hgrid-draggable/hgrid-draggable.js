@@ -258,7 +258,6 @@ this.Draggable = (function($, HGrid) {
             for (var j=0; j < node.children.length; j++) {
               var child = node.children[j];
               if (parent.id === child.id) {
-                self.rowMoveManager.cancelDrag();
                 self.clearTarget();
                 return false;
               }

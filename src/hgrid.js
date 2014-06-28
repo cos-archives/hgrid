@@ -37,8 +37,8 @@ this.HGrid = (function($) {
    * @param {Object} data Data to attach to the tree
    */
   function Tree(data) {
-    if (data === undefined) { // No args passed, it's a root
-      this.data = {};
+    this.data = data || {};
+    if (this.data === {}) { // No args passed, it's a root
       this.id = ROOT_ID;
       /**
        * @attribute  depth
@@ -49,7 +49,6 @@ this.HGrid = (function($) {
         inlineFilters: true
       });
     } else {
-      this.data = data;
       this.id = data.id ? data.id : getUID();
       // Depth and dataView will be set by parent after being added as a subtree
       this.depth = null;

@@ -1111,7 +1111,7 @@ this.HGrid = (function($) {
   };
 
   /**
-   * Helper for retrieving JSON data usin AJAX.
+   * Helper for retrieving JSON data using AJAX.
    * @method  getFromServer
    * @param {String} url
    * @param {Function} done Callback that receives the JSON data and an
@@ -1312,6 +1312,10 @@ this.HGrid = (function($) {
       throw new HGrid.Error('Row element is not rendered in the DOM.');
     }
   };
+
+    Hgrid.prototype.getPathToRoot = function(id) {
+
+    };
 
   HGrid.prototype.addHighlight = function(item, highlightClass) {
     var cssClass = highlightClass || this.options.highlightClass;

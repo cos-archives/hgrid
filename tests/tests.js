@@ -92,7 +92,7 @@
     return strictEqual(expr, true, msg || 'is true');
   }
 
-  function isFalse(expr, msg) {
+ function isFalse(expr, msg) {
     return strictEqual(expr, false, msg || 'is false');
   }
 
@@ -492,6 +492,11 @@
   });
 
 
+/*  test('getPathToRoot', function() {*/
+
+  //});
+
+
   test('Added tree and leaf point to same dataview', function() {
     var root = new HGrid.Tree();
     var tree = new HGrid.Tree({
@@ -714,7 +719,7 @@
     tree.add(subtree, true);
     tree.add(leaf, true);
 
-    var toRemove = root.dataView.getItemById(0);
+    //var toRemove = root.dataView.getItemById(0);
     equal(root.children.length, 1);
     root.remove(0);
     var nullItem = root.dataView.getItemById(0);
@@ -1177,13 +1182,13 @@
         deepEqual(this.getData()[0], folder);
         return 'PUT';
       },
-      uploadHeaders: function(folder) {
+      uploadHeaders: function() {
         return headers;
       },
-      maxFilesize: function(folder) {
+      maxFilesize: function() {
         return 123;
       },
-      acceptedFiles: function (folder) {
+      acceptedFiles: function () {
         return ['images/*', '.py'];
       }
     });

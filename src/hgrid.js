@@ -426,6 +426,27 @@ this.HGrid = (function($) {
     return Boolean(this.getItem()._collapsed);
   };
 
+    /**
+     * @method getPathToRoot
+     * @param {Array} pathSoFar IDs of any path being passed in. Used by leafs.
+     * @return {Array} Node IDs from current to root
+     *
+     *
+     */
+    Tree.prototype.getPathToRoot = function(pathSoFar) {
+        var path = [];
+        if(typeof pathSoFar !== 'undefined' && pathSoFar instanceof Array){
+            path = pathSoFar;
+        }
+        var self = this;
+        var item = self.getItem();
+        do {
+            path.push(item.id);
+            item = self.dataView.getItemById(item.parentID);
+        } while (typeof item !== 'undefined' && item.parentID !== null);
+        return path;
+    };
+
   /**
    * Leaf representation
    * @class  HGrid.Leaf
@@ -461,7 +482,15 @@ this.HGrid = (function($) {
     }
     return leaf;
   };
+  /**
+   * @method getPathToRoot
+   * @return {Array} path of the leaf item to the root.
+   */
 
+    Leaf.prototype.getPathToRoot = function() {
+       var parent = this.dataView.getItemById(this.parentID)._node;
+       return parent.getPathToRoot([this.id]);
+    };
   /**
    * Get the leaf's corresponding item from the dataview.
    * @method  getItem
@@ -1313,9 +1342,10 @@ this.HGrid = (function($) {
     }
   };
 
-    Hgrid.prototype.getPathToRoot = function(id) {
-
-    };
+  HGrid.prototype.getPathToRoot = function(id) {
+      var node = this.getNodeByID(id);
+      return node.getPathToRoot();
+  };
 
   HGrid.prototype.addHighlight = function(item, highlightClass) {
     var cssClass = highlightClass || this.options.highlightClass;

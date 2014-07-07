@@ -491,11 +491,47 @@
     equal(leaf1.data.kind, HGrid.ITEM, 'sets the leaf kind');
   });
 
+    test('getPathToRoot from Trees and Leafs', function() {
+        var root = new HGrid.Tree();
+        var t1 = new HGrid.Tree({name: '1', kind: HGrid.FOLDER});
+        var t2 = new HGrid.Tree({name: '1-1', kind: HGrid.FOLDER});
+        var t3 = new HGrid.Tree({name: '1-1-1', kind: HGrid.FOLDER});
+        var t4 = new HGrid.Leaf({name: 'item', kind: HGrid.ITEM});
+        root.add(t1, true);
+        t1.add(t2, true);
+        t2.add(t3, true);
+        t3.add(t4, true);
+        var path = t3.getPathToRoot();
+        deepEqual(path,[2,1,0],'gets a path for a tree');
+        path = t4.getPathToRoot();
+        deepEqual(path,[3,2,1,0], 'gets a path for a leaf');
+    });
 
-/*  test('getPathToRoot', function() {*/
-
-  //});
-
+    test('getPathToRoot from Grid', function() {
+        var dat = {
+          data: [{
+            kind: HGrid.FOLDER,
+            name: '1',
+            children: [{
+              kind: HGrid.FOLDER,
+              name: '1-1',
+              children: [{
+                  kind: HGrid.FOLDER,
+                  name: '1-1-1',
+                  children: [{
+                      kind: HGrid.ITEM,
+                      name: 'item'
+                    }]
+                }]
+            }]
+          }]
+        };
+        var grid = new HGrid('#myGrid', {
+          data: dat
+        });
+        deepEqual(grid.getPathToRoot(2),[2,1,0], 'gets a Tree path from the HGrid');
+        deepEqual(grid.getPathToRoot(3),[3,2,1,0], 'gets a Leaf path from the HGrid');
+    });
 
   test('Added tree and leaf point to same dataview', function() {
     var root = new HGrid.Tree();
@@ -677,7 +713,7 @@
     var root = new HGrid.Tree();
     var tree = new HGrid.Tree({
       name: 'Docs',
-      kind: HGrid.FOLDER,
+      kind: HGrid.FOLDER
     });
     var subtree = new HGrid.Tree({
       name: 'Scripts',

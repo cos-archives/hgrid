@@ -497,14 +497,28 @@
         var t2 = new HGrid.Tree({name: '1-1', kind: HGrid.FOLDER});
         var t3 = new HGrid.Tree({name: '1-1-1', kind: HGrid.FOLDER});
         var t4 = new HGrid.Leaf({name: 'item', kind: HGrid.ITEM});
+        var t5 = new HGrid.Leaf({name: 'item in root', kind: HGrid.ITEM});
         root.add(t1, true);
+        root.add(t5, true);
         t1.add(t2, true);
         t2.add(t3, true);
         t3.add(t4, true);
+        equal(root.id, "root");
+        equal(t1.id, 0);
+        equal(t2.id, 1);
+        equal(t3.id, 2);
+        equal(t4.id, 3);
+        equal(t5.id, 4);
+
         var path = t3.getPathToRoot();
         deepEqual(path,[2,1,0],'gets a path for a tree');
         path = t4.getPathToRoot();
         deepEqual(path,[3,2,1,0], 'gets a path for a leaf');
+        path = t1.getPathToRoot();
+        deepEqual(path,[0], 'finds a tree just off the root');
+        path = t5.getPathToRoot();
+        deepEqual(path,[4], 'finds a leaf just off the root');
+
     });
 
     test('getPathToRoot from Grid', function() {
@@ -524,17 +538,22 @@
                     }]
                 }]
             }]
-          }]
+          },{
+              kind: HGrid.ITEM,
+              name: 'item off root'
+            }]
         };
         var grid = new HGrid('#myGrid', {
           data: dat
         });
         deepEqual(grid.getPathToRoot(2),[2,1,0], 'gets a Tree path from the HGrid');
         deepEqual(grid.getPathToRoot(3),[3,2,1,0], 'gets a Leaf path from the HGrid');
+        deepEqual(grid.getPathToRoot(0),[0], 'gets a Tree path just off the root from the HGrid');
+        deepEqual(grid.getPathToRoot(4),[4], 'gets an item path just off the root from the HGrid');
     });
 
-    test('whichIsContainer', function() {
-        var dat = {
+    test('Folder contains item', function() {
+               var dat = {
           data: [{
             kind: HGrid.FOLDER,
             name: '1',
@@ -564,14 +583,19 @@
         equal(data[2].name, '1-1-1');
         equal(data[3].name, 'item');
         equal(data[4].name, '1-2');
-        equal(grid.whichIsContainer(0,1), 0, 'parent is container');
-        equal(grid.whichIsContainer(1,0), 0, 'parent is container, reverse order of parameters');
-        equal(grid.whichIsContainer(1,1), 1, 'item contains itself');
-        equal(grid.whichIsContainer(0,2), 0, 'grandparent is container');
-        equal(grid.whichIsContainer(2,3), 2, 'folder contains leaf');
-        equal(grid.whichIsContainer(1,3), 1, 'grandparent contains leaf');
-        equal(grid.whichIsContainer(2,4), null, 'nobody contains cousins');
-        equal(grid.whichIsContainer(1,4), null, 'nobody contains siblings');
+        isTrue(grid.folderContains(0,1), 'parent is container');
+        isFalse(grid.folderContains(1,0), 'item does not contain parent');
+        isTrue(grid.folderContains(1,1), 'item contains itself');
+        isTrue(grid.folderContains(0,2), 'grandparent is container');
+        isFalse(grid.folderContains(2,0), 'grandchild is not container');
+        isTrue(grid.folderContains(2,3), 'folder contains leaf');
+        isFalse(grid.folderContains(3,2), 'leaf does not contain folder');
+        isTrue(grid.folderContains(1,3), 'grandparent contains leaf');
+        isFalse(grid.folderContains(3,1), 'leaf does not contain grandparent');
+        isFalse(grid.folderContains(2,4), 'nobody contains cousins');
+        isFalse(grid.folderContains(4,2), 'nobody contains cousins');
+        isFalse(grid.folderContains(1,4), 'nobody contains siblings');
+        isFalse(grid.folderContains(4,1), 'nobody contains siblings');
     });
 
   test('Added tree and leaf point to same dataview', function() {

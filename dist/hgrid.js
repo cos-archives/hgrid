@@ -502,8 +502,13 @@ this.HGrid = (function($) {
    */
 
     Leaf.prototype.getPathToRoot = function() {
-       var parent = this.dataView.getItemById(this.parentID)._node;
-       return parent.getPathToRoot([this.id]);
+       var parentID = this.parentID;
+        if(parentID === 'root'){
+            return [this.id];
+        }else {
+            var parent = this.dataView.getItemById(this.parentID)._node;
+            return parent.getPathToRoot([this.id]);
+        }
     };
   /**
    * Get the leaf's corresponding item from the dataview.
@@ -1361,26 +1366,6 @@ this.HGrid = (function($) {
       return node.getPathToRoot();
   };
 
-    /**
-     * Takes two element IDs and tries to determine if one contains the other. Returns the container or null if
-     * they are not directly related. Items contain themselves.
-     * @method whichIsContainer
-     * @param itemOneID {Number}
-     * @param itemTwoID {Number}
-     * @returns item ID or null
-     */
-    HGrid.prototype.whichIsContainer = function(itemOneID, itemTwoID){
-        var pathToOne = this.getPathToRoot(itemOneID);
-        var pathToTwo = this.getPathToRoot(itemTwoID);
-        if(pathToOne.indexOf(itemTwoID) > -1 ){
-            return itemTwoID;
-        } else if (pathToTwo.indexOf(itemOneID) > -1) {
-            return itemOneID;
-        } else {
-            return null;
-        }
-    };
-
   HGrid.prototype.addHighlight = function(item, highlightClass) {
     var cssClass = highlightClass || this.options.highlightClass;
     this.removeHighlight();
@@ -1400,6 +1385,10 @@ this.HGrid = (function($) {
       $rowElement.addClass(cssClass);
     }
     return this;
+  };
+
+  HGrid.prototype.folderContains = function(folderId, itemId) {
+      return this.getPathToRoot(itemId).indexOf(folderId) >= 0;
   };
 
   /**

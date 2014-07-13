@@ -617,7 +617,7 @@ this.HGrid = (function($) {
    */
   function withIndent(item, html, indentWidth) {
     indentWidth = indentWidth || DEFAULT_INDENT;
-    var indent = item.depth * indentWidth;
+    var indent = (item.depth - 1) * indentWidth;
     // indenting span
     var spacer = makeIndentElem(indent);
     return spacer + html;

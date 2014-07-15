@@ -108,8 +108,8 @@
 
       e.stopImmediatePropagation();
 
-      var top = e.pageY - $(_canvas).offset().top;
-      dd.selectionProxy.css('top', top - 5);
+      var top = e.pageY - $(_canvas).offset().top + (_grid.getOptions().rowHeight/2);
+      dd.selectionProxy.css('top', top - _grid.getOptions().rowHeight );
 
       var insertBefore = Math.max(0, Math.min(Math.round(top / _grid.getOptions().rowHeight), _grid.getDataLength()));
 

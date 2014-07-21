@@ -1053,7 +1053,12 @@ this.HGrid = (function($) {
      */
     uploadDenied: function(folder) {},
 
-    getExpandState: null
+    getExpandState: null,
+    /**
+     * Pre-preprocessing function for filenames that are added to the grid. A typical
+     * use case is to strip invalid HTML from filenames.
+     */
+    preprocessFilename: function(filename) { return filename; }
   };
 
   HGrid._defaults = defaults;
@@ -1581,7 +1586,7 @@ this.HGrid = (function($) {
       if (this.canUpload(currentTarget)){
         // Add a new row
         addedItem = this.addItem({
-          name: file.name,
+          name: this.options.preprocessFilename.call(this, file.name),
           kind: HGrid.ITEM,
           parentID: currentTarget.id
         });

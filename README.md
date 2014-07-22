@@ -250,6 +250,7 @@ var grid = new HGrid('#myGrid', {
 - `uploadComplete: function(file, item)`
 - `uploadSending: function(file, item, xhr, formData)`: Called just before an upload request is made.
 - `uploadAccept: function(file, folder, done)`: Validation function that is run before a file gets uploaded. `done` is a function that, if called with a string argument, raises the error message, passes it to `uploadError`, and terminates the upload. If called with no arguments, the upload is allowed. For filetype and filesize checking, use the `acceptedFiles` and `maxFilesize` options.
+- `preprocessFilename: function(filename)`: Pre-processing function for filenames added to the grid. Typically used for fielname sanitization (removing HTML tags, etc.).
 
   ```javascript
   uploadAccept: function(file, folder, done) {

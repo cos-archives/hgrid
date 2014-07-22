@@ -1053,7 +1053,12 @@ this.HGrid = (function($) {
      */
     uploadDenied: function(folder) {},
 
-    getExpandState: null
+    getExpandState: null,
+    /**
+     * Pre-preprocessing function for filenames that are added to the grid. A typical
+     * use case is to strip invalid HTML from filenames.
+     */
+    preprocessFilename: function(filename) { return filename; }
   };
 
   HGrid._defaults = defaults;
@@ -1581,7 +1586,7 @@ this.HGrid = (function($) {
       if (this.canUpload(currentTarget)){
         // Add a new row
         addedItem = this.addItem({
-          name: file.name,
+          name: this.options.preprocessFilename.call(this, file.name),
           kind: HGrid.ITEM,
           parentID: currentTarget.id
         });
@@ -1920,8 +1925,8 @@ this.HGrid = (function($) {
     dataview.setRefreshHints(hints);
     self.getDataView().updateItem(item.id, item);
     if (self.isLazy() &&
-        (node._load_status !== LOADING_FINISHED ||
-        node._load_status !== LOADING_STARTED)) {
+        (node._load_status === undefined ||
+        node._load_status === LOADING_UNFINISHED)) {
       this._lazyLoad(item);
     }
     self.options.onExpand.call(self, evt, item);

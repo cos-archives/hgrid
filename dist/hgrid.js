@@ -1939,8 +1939,8 @@ this.HGrid = (function($) {
     dataview.setRefreshHints(hints);
     self.getDataView().updateItem(item.id, item);
     if (self.isLazy() &&
-        (node._load_status !== LOADING_FINISHED ||
-        node._load_status !== LOADING_STARTED)) {
+        (typeof(node._load_status) === 'undefined' ||
+        node._load_status === LOADING_UNFINISHED)) {
       this._lazyLoad(item);
     }
     self.options.onExpand.call(self, evt, item);

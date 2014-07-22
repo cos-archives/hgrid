@@ -653,7 +653,6 @@ this.Draggable = (function($, HGrid) {
       function handleClick(e) {
         var cell = _grid.getCellFromEvent(e);
         if (!cell || !_grid.canCellBeActive(cell.row, cell.cell)) {
-            setSelectedRows([]);
           return false;
         }
 

@@ -1877,7 +1877,7 @@ this.HGrid = (function($) {
     dataview.setRefreshHints(hints);
     self.getDataView().updateItem(item.id, item);
     if (self.isLazy() &&
-        (typeof(node._load_status) === 'undefined' ||
+        (node._load_status === undefined ||
         node._load_status === LOADING_UNFINISHED)) {
       this._lazyLoad(item);
     }

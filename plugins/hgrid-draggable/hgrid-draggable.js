@@ -217,21 +217,21 @@ this.Draggable = (function($, HGrid) {
     };
 
 
-    /**
+ /**
      * Given an index, return the correct parent folder to insert an item into.
      * @param  {Number} index
      * @return {Object}     Parent folder object or null
      */
     var getParent = function(index) {
       // First check if the dragged over item is an empty folder
-      var prev = dataView.getItemByIdx(index - 1);
+      var prev = grid.grid.getDataItem(index - 1);
       var parent;
       if (prev.kind === HGrid.FOLDER) {
         parent = prev;
       } else{  // The item being dragged over is an item; get it's parent folder
-        var nItems = dataView.getItems().length;
+        var nItems = dataView.getLength();
         var idx = index > nItems - 1 ? nItems - 1 : index;
-        var insertItem = dataView.getItemByIdx(idx);
+        var insertItem = grid.grid.getDataItem(idx);
         parent = grid.getByID(insertItem.parentID);
       }
       return parent;

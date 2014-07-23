@@ -245,7 +245,7 @@ this.Draggable = (function($, HGrid) {
       var parent;
       if (args.insertBefore) {
         parent = getParent(args.insertBefore);
-
+        self.options.onDrag.call(self, event, args.items, parent, insertBefore);
         for (var i=0; i < movedItems.length; i++) {
           var node = movedItems[i]._node;
           // Can't drag folder into itself
@@ -280,8 +280,9 @@ this.Draggable = (function($, HGrid) {
           self.setTarget(parent);
           grid.addHighlight(self._folderTarget);
         }
+      } else {
+          self.options.onDrag.call(self, event, args.items, parent, insertBefore);
       }
-      self.options.onDrag.call(self, event, args.items, parent, insertBefore);
     };
 
     // TODO: test that this works

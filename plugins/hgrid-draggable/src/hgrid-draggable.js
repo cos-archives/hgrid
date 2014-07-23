@@ -240,6 +240,8 @@ this.Draggable = (function($, HGrid) {
           var node = movedItems[i]._node;
           // Can't drag folder into itself
           if (node.id === parent.id) {
+            self.clearTarget();
+            grid.removeHighlight();
             return false;
           }
 

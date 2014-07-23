@@ -301,7 +301,7 @@ this.Draggable = (function($, HGrid) {
 
     slickgrid.onDragInit.subscribe(function(event) {
       // prevent grid from cancelling drag'n'drop by default
-      event.stopImmediatePropagation;
+      event.stopImmediatePropagation();
     });
 
     slickgrid.onDragStart.subscribe(onDragStart);

@@ -217,21 +217,21 @@ this.Draggable = (function($, HGrid) {
     };
 
 
-    /**
+ /**
      * Given an index, return the correct parent folder to insert an item into.
      * @param  {Number} index
      * @return {Object}     Parent folder object or null
      */
     var getParent = function(index) {
       // First check if the dragged over item is an empty folder
-      var prev = dataView.getItemByIdx(index - 1);
+      var prev = grid.grid.getDataItem(index - 1);
       var parent;
       if (prev.kind === HGrid.FOLDER) {
         parent = prev;
       } else{  // The item being dragged over is an item; get it's parent folder
-        var nItems = dataView.getItems().length;
+        var nItems = dataView.getLength();
         var idx = index > nItems - 1 ? nItems - 1 : index;
-        var insertItem = dataView.getItemByIdx(idx);
+        var insertItem = grid.grid.getDataItem(idx);
         parent = grid.getByID(insertItem.parentID);
       }
       return parent;
@@ -245,11 +245,13 @@ this.Draggable = (function($, HGrid) {
       var parent;
       if (args.insertBefore) {
         parent = getParent(args.insertBefore);
-
+        self.options.onDrag.call(self, event, args.items, parent, insertBefore);
         for (var i=0; i < movedItems.length; i++) {
           var node = movedItems[i]._node;
           // Can't drag folder into itself
           if (node.id === parent.id) {
+            self.clearTarget();
+            grid.removeHighlight();
             return false;
           }
 
@@ -278,8 +280,9 @@ this.Draggable = (function($, HGrid) {
           self.setTarget(parent);
           grid.addHighlight(self._folderTarget);
         }
+      } else {
+          self.options.onDrag.call(self, event, args.items, parent, insertBefore);
       }
-      self.options.onDrag.call(self, event, args.items, parent, insertBefore);
     };
 
     // TODO: test that this works
@@ -298,7 +301,7 @@ this.Draggable = (function($, HGrid) {
 
     slickgrid.onDragInit.subscribe(function(event) {
       // prevent grid from cancelling drag'n'drop by default
-      event.stopImmediatePropagation;
+      event.stopImmediatePropagation();
     });
 
     slickgrid.onDragStart.subscribe(onDragStart);
@@ -431,7 +434,7 @@ this.Draggable = (function($, HGrid) {
 
       // The moved data items
       var movedItems = dd.selectedRows.map(function(rowIdx) {
-        return _grid.getData().getItemByIdx(rowIdx);
+        return _grid.getDataItem(rowIdx);
       });
       dd.movedItems = movedItems;
 

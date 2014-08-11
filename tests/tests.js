@@ -503,7 +503,7 @@
         t1.add(t2, true);
         t2.add(t3, true);
         t3.add(t4, true);
-        equal(root.id, "root");
+        equal(root.id, 'root');
         equal(t1.id, 0);
         equal(t2.id, 1);
         equal(t3.id, 2);
@@ -1564,6 +1564,25 @@
     equal(addedNode.children[0].data.name, 'mydoc.txt');
     containsText('.slick-cell', 'Docs', 'folder added to DOM');
     containsText('.slick-cell', 'mydoc.txt', 'fileadded to DOM');
+  });
+
+  test('addData inserts data in correct order', function() {
+    var grid = getMockGrid({
+      data: [{name: 'Computer', kind: 'folder', id: 0, children: []}]
+    });
+    var toAdd = {
+      data: [
+             {name: 'Abacus', kind: 'folder',
+              children: [{name: 'mydoc.txt', kind: 'folder'}]
+            },
+            {name: 'Babel', kind: HGrid.ITEM}
+      ]
+    };
+    grid.addData(toAdd, 0);
+    var children = grid.getByID(0)._node.children;
+    // addData loops in reverse, so children are reverse order
+    equal(children[1].data.name, 'Abacus');
+    equal(children[0].data.name, 'Babel');
   });
 
   // FIXME: This test fails every other time it is run in the browser. Not sure why.

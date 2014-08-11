@@ -115,7 +115,7 @@
 
       // The moved data items
       var movedItems = dd.selectedRows.map(function(rowIdx) {
-        return _grid.getData().getItemByIdx(rowIdx);
+        return _grid.getDataItem(rowIdx);
       });
       dd.movedItems = movedItems;
 

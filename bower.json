@@ -1,11 +1,12 @@
 {
   "name": "hgrid",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "homepage": "https://github.com/CenterForOpenScience/hgrid.git",
   "authors": [
     "Jake Rosenberg <jakerose27@gmail.com>",
     "Alex Ferguson",
-    "Steven Loria <sloria1@gmail.com>"
+    "Steven Loria <steve@cos.io>",
+    "Brian Geiger <bgeiger@pobox.com>"
   ],
   "description": "A Javascript-based hierarchical grid that can be used to manage and organize files and folders",
   "main": "dist/hgrid.js",

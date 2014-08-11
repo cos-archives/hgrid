@@ -2086,7 +2086,10 @@ this.HGrid = (function($) {
     } else { // Data is an object with a `data` property
       toAdd = data.data;
     }
-    for (var i = 0, datum; datum = toAdd[i]; i++) {
+    // Loop in reverse order, so that grid items are inserted into the DOM
+    // in the correct order.
+    for (var i = toAdd.length - 1; i >= 0; i--) {
+      var datum = toAdd[i];
       var node;
       if (datum.kind === HGrid.FOLDER) {
         var collapse = self.isLazy();

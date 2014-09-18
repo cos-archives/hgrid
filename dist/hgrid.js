@@ -2094,6 +2094,7 @@ this.HGrid = (function($) {
   HGrid.prototype.addData = function(data, parentID) {
     var self = this;
     var tree = this.getNodeByID(parentID);
+    var dataView = this.getDataView();
     var toAdd;
     if (Array.isArray(data)) {
       toAdd = data;
@@ -2102,6 +2103,7 @@ this.HGrid = (function($) {
     }
     // Loop in reverse order, so that grid items are inserted into the DOM
     // in the correct order.
+    dataView.beginUpdate();
     for (var i = toAdd.length - 1; i >= 0; i--) {
       var datum = toAdd[i];
       var node;
@@ -2114,6 +2116,7 @@ this.HGrid = (function($) {
       }
       tree.add(node, true); // ensure dataview is updated
     }
+    dataView.endUpdate();
     // self.refreshExpandState();
     return this;
   };

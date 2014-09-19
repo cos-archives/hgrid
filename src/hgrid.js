@@ -2080,6 +2080,7 @@ this.HGrid = (function($) {
   HGrid.prototype.addData = function(data, parentID) {
     var self = this;
     var tree = this.getNodeByID(parentID);
+    var dataView = this.getDataView();
     var toAdd;
     if (Array.isArray(data)) {
       toAdd = data;
@@ -2088,18 +2089,20 @@ this.HGrid = (function($) {
     }
     // Loop in reverse order, so that grid items are inserted into the DOM
     // in the correct order.
-    for (var i = toAdd.length - 1; i >= 0; i--) {
-      var datum = toAdd[i];
-      var node;
-      if (datum.kind === HGrid.FOLDER) {
-        var collapse = self.isLazy();
-        var args = {collapse: collapse};
-        node = Tree.fromObject(datum, tree, args);
-      } else {
-        node = Leaf.fromObject(datum, tree);
+    self.batchUpdate(function() {
+      for (var i = toAdd.length - 1; i >= 0; i--) {
+        var datum = toAdd[i];
+        var node;
+        if (datum.kind === HGrid.FOLDER) {
+          var collapse = self.isLazy();
+          var args = {collapse: collapse};
+          node = Tree.fromObject(datum, tree, args);
+        } else {
+          node = Leaf.fromObject(datum, tree);
+        }
+        tree.add(node, true); // ensure dataview is updated
       }
-      tree.add(node, true); // ensure dataview is updated
-    }
+    });
     // self.refreshExpandState();
     return this;
   };

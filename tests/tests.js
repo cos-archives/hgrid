@@ -1650,6 +1650,7 @@
   test('resetLoadedState', function() {
     var grid = getMockGrid();
     var item = getMockItem();
+    grid.addItem(item);
     item._node._load_status = HGrid.LOADING_UNFINISHED;
     grid.resetLoadedState(item);
     equal(item._node._load_status, HGrid.LOADING_UNFINISHED, 'node is no longer loaded');

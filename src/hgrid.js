@@ -669,6 +669,10 @@ this.HGrid = (function($) {
     return renderedButtons;
   }
 
+  function isLoading(item) {
+    return item._node._load_status === HGrid.LOADING_STARTED;
+  }
+
   /**
    * Microtemplating function. Adapted from Riot.js (MIT License).
    */
@@ -703,6 +707,20 @@ this.HGrid = (function($) {
     folderNameClass: 'hg-folder-name',
     itemNameClass: 'hg-item-name',
     toggleClass: 'hg-toggle'
+  };
+
+  HGrid.HtmlFactories = {
+    // Expand/collapse button
+    expandElem: function(item) {
+      return isLoading(item) ?
+        '<span class="hg-toggle hg-loading"></span>' :
+        '<span class="hg-toggle hg-expand"></span>';
+    },
+    collapseElem: function(item) {
+      return isLoading(item) ?
+        '<span class="hg-toggle hg-loading"></span>' :
+        '<span class="hg-toggle hg-collapse"></span>';
+    },
   };
 
   ///////////
@@ -1267,7 +1285,9 @@ this.HGrid = (function($) {
       if (showExpander) {
         var expander;
         if (typeof showExpander === 'function' && showExpander(item, rendererArgs)) {
-          expander = item._collapsed ? HGrid.Html.expandElem : HGrid.Html.collapseElem;
+          expander = item._collapsed ?
+            HGrid.HtmlFactories.expandElem(item) :
+            HGrid.HtmlFactories.collapseElem(item);
         } else {
           expander = '<span style="width:16px;height:1px;display:inline-block;"></span>';
         }
@@ -1884,6 +1904,7 @@ this.HGrid = (function($) {
 
   HGrid.prototype.setLoadingStatus = function(item, status) {
     item._node._load_status = status;
+    this.updateItem(item);
   };
 
 

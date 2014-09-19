@@ -26,6 +26,14 @@
     background: url('./images/expand.gif') no-repeat center center;
 }
 
+.hg-toggle.hg-collapse {
+    background: url('./images/collapse.gif') no-repeat center center;
+}
+
+.hg-toggle.hg-loading {
+    background: url('./images/loading.gif') no-repeat center center;
+}
+
 .hg-folder {
     background: url('./images/folder.png') no-repeat left top;
 
@@ -34,10 +42,6 @@
 .hg-file {
     background: url('./images/file.png') no-repeat left top;
     margin-left: 5px;
-}
-
-.hg-toggle.hg-collapse {
-    background: url('./images/collapse.gif') no-repeat center center;
 }
 
 .hg-toggle.spacer {

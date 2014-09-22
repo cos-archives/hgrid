@@ -87,7 +87,7 @@ if (typeof Slick === "undefined") {
       defaultFormatter: defaultFormatter,
       forceSyncScrolling: false,
 //    BJG: Modified from original Slickgrid for OSF
-      addExtraRowAtEnd: false
+      addExtraRowsAtEnd: 0
     };
 
     var columnDefaults = {
@@ -1593,7 +1593,7 @@ if (typeof Slick === "undefined") {
           (options.enableAddRow ? 1 : 0) +
           (options.leaveSpaceForNewRows ? numVisibleRows - 1 : 0) +
           //    BJG: Modified from original Slickgrid for OSF
-          (options.addExtraRowAtEnd ? 1 : 0);
+          (options.addExtraRowsAtEnd);
 
       var oldViewportHasVScroll = viewportHasVScroll;
       // with autoHeight, we do not need to accommodate the vertical scroll bar

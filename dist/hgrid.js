@@ -4527,7 +4527,9 @@ if (typeof Slick === "undefined") {
       fullWidthRows: false,
       multiColumnSort: false,
       defaultFormatter: defaultFormatter,
-      forceSyncScrolling: false
+      forceSyncScrolling: false,
+//    BJG: Modified from original Slickgrid for OSF
+      addExtraRowAtEnd: false
     };
 
     var columnDefaults = {
@@ -6031,7 +6033,9 @@ if (typeof Slick === "undefined") {
       if (!initialized) { return; }
       numberOfRows = getDataLength() +
           (options.enableAddRow ? 1 : 0) +
-          (options.leaveSpaceForNewRows ? numVisibleRows - 1 : 0);
+          (options.leaveSpaceForNewRows ? numVisibleRows - 1 : 0) +
+          //    BJG: Modified from original Slickgrid for OSF
+          (options.addExtraRowAtEnd ? 1 : 0);
 
       var oldViewportHasVScroll = viewportHasVScroll;
       // with autoHeight, we do not need to accommodate the vertical scroll bar

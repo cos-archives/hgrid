@@ -1071,7 +1071,7 @@ this.HGrid = (function($) {
      * @return {Boolean}      Whether or not to display an item.
      */
     searchFilter: function (item, searchText) {
-      return item.name.toLowerCase().indexOf(searchText.toLowerCase()) !== -1;
+      return item.name.toLowerCase().indexOf(searchText) !== -1;
     },
     /**
      * Function that determines whether a folder can be uploaded to.

@@ -1344,6 +1344,17 @@
     isTrue($btn.is('a'), 'is an anchor elem');
   });
 
+  // https://github.com/CenterForOpenScience/hgrid/issues/103
+  test('renderButton with additional attributes', function() {
+    var btnDef = {
+      text: 'Test btn',
+      attributes: 'data-toggle="tooltip" data-original-title="download"'
+    };
+    var $btn = $(HGrid.Fmt.button(btnDef));
+    equal($btn.attr('data-toggle'), 'tooltip', 'has data-toggle attribute');
+    equal($btn.attr('data-original-title'), 'download', 'has data-original-title attribute');
+  });
+
   test('withIndent', function() {
     var depth = 4;
     var item = getMockItem({

@@ -48,7 +48,7 @@ Example:
 
 ```javascript
 var files = [
-    {name: 'Documents', kind: 'folder', 
+    {name: 'Documents', kind: 'folder',
     children: [
       {name: 'mydoc.txt', kind: 'item'},
     ]},
@@ -88,7 +88,7 @@ var grid = new HGrid('#myGrid' {
 
 The `ajaxOptions` will be used for every request sent to the server.
 
-### Lazy-loading 
+### Lazy-loading
 
 You can lazily fetch folder contents from a server by specifying the `fetchUrl` option.
 
@@ -102,7 +102,7 @@ var grid = new HGrid('#myGrid', {
 ```
 
 
-## Rows and Columns 
+## Rows and Columns
 
 ### Using Predefined Column Schemas
 
@@ -121,7 +121,7 @@ var grid = new HGrid('#myGrid', {
 });
 ```
 
-### Modifying Predefined Column Schemas 
+### Modifying Predefined Column Schemas
 
 ```javascript
 // Customize the column header text
@@ -143,12 +143,12 @@ To make a column sortable, provide `sortable=true` and a `sortkey` on which to s
 
 NOTE: Column schemas can additionally take any [Slickgrid column options](https://github.com/mleibman/SlickGrid/wiki/Column-Options).
 
-Examples: 
+Examples:
 
 ```javascript
 // Custom column schemas
 var myCustomNameColumn = {
-  text: 'Name', 
+  text: 'Name',
   folderView: '<div class="folder {{cssClass}}">{{ name }}</div?>' // Using a microtemplate
   itemView: '<div class="file {{cssClass}}">{{ name }}</div?>'
   sortable: true,
@@ -166,10 +166,10 @@ var filesizeColumn = {text: 'Filesize',
 var grid = new HGrid('#myGrid', {
   columns: [myCustomNameColumn, filesizeColumn],
   ...
-}); 
+});
 ```
 
-#### Additional schema options 
+#### Additional schema options
 
 - `indent`: Either a boolean or number of pixels to indent each row. Number of indents will be calculated based on an item's depth.
 - `showExpander: function(row, args)`: Boolean or function that returns a boolean whether to show the expander button or not.
@@ -179,14 +179,16 @@ var grid = new HGrid('#myGrid', {
 
 - `HGrid.Fmt.withIndent(row, html, [indentWidth])`: Adds an indenting span based on the a row's `depth` property.
 - `HGrid.Fmt.asItem(row, html)`: Surrounds `html` with `<div class="hg-item" data-id=123>`
-- `HGrid.Fmt.button(row, buttonDef)`: Render a button.
-- `HGrid.Fmt.buttons(row, buttonDefs)`: Render a series of buttons.
+- `HGrid.Fmt.button(row, buttonDef)`: Render a button. A `buttonDef` is an Object that specifies how a button will be rendered. It may include the following properties: `text` (button's text), `cssClass` (a string, the CSS class to apply to the button), `action` (a registered HGrid action, e.g. `'download'`), and/or `attributes` (string of additional HTML attributes, e.g. `'data-id="some-id"'`).
+- `HGrid.Fmt.buttons(row, buttonDefs)`: Render a series of buttons. `buttonDefs` is an Array of button definition Objects.
 - `HGrid.Fmt.tpl(template, data)`: Microtemplating function.
 
 
-## Actions 
+## Actions
 
-TODO 
+TODO
+
+See `examples/custom-buttons.html` for an example with custom actions.
 
 ## File management
 
@@ -194,9 +196,9 @@ TODO
 
 ```javascript
 var grid = new HGrid('#myGrid', {
-  data: files, 
+  data: files,
   uploads: true,
-  columns: [HGrid.Col.Name, 
+  columns: [HGrid.Col.Name,
             HGrid.Col.ActionButtons]  // Provides file-related buttons
                                           // (Upload, Download, Delete)
   maxFilesize: 10,  // MB
@@ -214,7 +216,7 @@ var grid = new HGrid('#myGrid', {
   deleteUrl: function(row) {
     return 'files/' + row.id + '/remove';
   },
-  deleteMethod: 'delete', 
+  deleteMethod: 'delete',
   downloadUrl: function(row) {
     return 'download/' + row.name;
   }
@@ -240,7 +242,7 @@ var grid = new HGrid('#myGrid', {
 - `fetchSuccess: function(newData, item)`: With lazy-loading enabled, called when data are successfully loaded from a server.
 - `fetchError: function(error, item)`
 
-### Upload-related Callbacks 
+### Upload-related Callbacks
 
 - `uploadAdded: function(file, item, folder)`
 - `uploadProcessing function(file, item, folder)`: Called when a file in the upload queue begins processing.
@@ -324,7 +326,7 @@ var grid = new HGrid('#myGrid', {
 ## Accessing SlickGrid and DropZone objects directly
 
 ```
-myGrid.grid // => The Slick.Grid object 
+myGrid.grid // => The Slick.Grid object
 myGrid.dropzone  // => The Dropzone object
 ```
 
@@ -339,7 +341,7 @@ Certain modules of [SlickGrid](https://github.com/mleibman/SlickGrid/wiki) are b
 
 Hgrid depends on [NodeJS](http://nodejs.org/) for package management and [Grunt](http://gruntjs.com/) for automation.
 
-### Getting started 
+### Getting started
 
 To install all development dependencies needed for development, run
 

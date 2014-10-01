@@ -1,5 +1,5 @@
 /*
- *  HGrid - v0.2.4
+ *  HGrid - v0.2.5
  *  A Javascript-based hierarchical grid that can be used to manage and organize files and folders
  */
 (function (global, factory) {
@@ -669,9 +669,16 @@ this.HGrid = (function($) {
       cssClass = HGrid.Html.buttonClass;
     }
     var action = buttonDef.action || 'noop';
-    var data = {action: action, cssClass: cssClass, tag: tag, text: buttonDef.text};
-    var html = tpl('<{{tag}} data-hg-action="{{action}}" class="{{cssClass}}">{{text}}</{{tag}}>',
-      data);
+    var attributes = buttonDef.attributes || '';
+    var data = {
+        action: action,
+        cssClass: cssClass,
+        tag: tag,
+        text: buttonDef.text,
+        attributes: attributes
+    };
+    var html = tpl('<{{tag}} data-hg-action="{{action}}" ' +
+                   'class="{{cssClass}}" {{attributes}} >{{text}}</{{tag}}>', data);
     return html;
   }
 

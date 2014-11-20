@@ -1,5 +1,5 @@
 /*
- *  HGrid - v0.2.5
+ *  HGrid - v0.2.7
  *  A Javascript-based hierarchical grid that can be used to manage and organize files and folders
  */
 (function (global, factory) {
@@ -767,7 +767,8 @@ this.HGrid = (function($) {
         this.options.onClickDownload.call(this, evt, item);
       }
     },
-    delete: {
+    // Must quote this since "delete" is a reserved word
+    'delete': {
       on: 'click',
       callback: function(evt, item) {
         this.options.onClickDelete.call(this, evt, item);

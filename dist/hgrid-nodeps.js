@@ -753,7 +753,8 @@ this.HGrid = (function($) {
         this.options.onClickDownload.call(this, evt, item);
       }
     },
-    delete: {
+    // Must quote this since "delete" is a reserved word
+    'delete': {
       on: 'click',
       callback: function(evt, item) {
         this.options.onClickDelete.call(this, evt, item);

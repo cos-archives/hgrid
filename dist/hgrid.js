@@ -1230,6 +1230,8 @@ this.HGrid = (function($) {
     return self;
   };
 
+  var Dropzone;
+
   HGrid.prototype.init = function() {
     this.setHeight(this.options.height)
       .setWidth(this.options.width)

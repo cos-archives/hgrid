@@ -1223,6 +1223,11 @@ this.HGrid = (function($) {
       ._initDataView();
 
     if (this.options.uploads) {
+      if (typeof module === 'object') {
+        Dropzone = require('dropzone');
+      } else {
+        Dropzone = window.Dropzone;
+      }
       if (typeof Dropzone === 'undefined') {
         throw new HGrid.Error('uploads=true requires DropZone to be loaded');
       }

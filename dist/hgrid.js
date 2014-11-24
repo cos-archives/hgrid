@@ -1,5 +1,5 @@
 /*
- *  HGrid - v0.2.7
+ *  HGrid - v0.2.8
  *  A Javascript-based hierarchical grid that can be used to manage and organize files and folders
  */
 (function (global, factory) {
@@ -1237,6 +1237,11 @@ this.HGrid = (function($) {
       ._initDataView();
 
     if (this.options.uploads) {
+      if (typeof module === 'object') {
+        Dropzone = require('dropzone');
+      } else {
+        Dropzone = window.Dropzone;
+      }
       if (typeof Dropzone === 'undefined') {
         throw new HGrid.Error('uploads=true requires DropZone to be loaded');
       }

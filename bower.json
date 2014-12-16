@@ -35,7 +35,7 @@
     "amd-header.js"
   ],
   "dependencies": {
-    "jquery": "^1.9.0"
+    "jquery": ">=1.9.0"
   },
   "devDependencies": {
     "dropzone": "~3.10.2",
